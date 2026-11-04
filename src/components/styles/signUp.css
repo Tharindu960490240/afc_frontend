@@ -1,0 +1,171 @@
+/* ===============================
+   SIGN UP (invitation only)
+=============================== */
+
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: auto;
+  max-width: 700px;
+
+  margin: 30px auto;
+  padding: 30px;
+
+  background-color: var(--card-color);
+  color: var(--text-color);
+
+  border-radius: 15px;
+  box-shadow: 0 4px 12px var(--border-color);
+
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.signup-box {
+  width: 100%;
+  text-align: center;
+}
+
+.signup-box h2 {
+  margin: 0 0 6px;
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.signup-subtitle {
+  margin: 0 auto 20px;
+  max-width: 520px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted-color);
+}
+
+.signup-box .form-row {
+  text-align: left;
+}
+
+/* ===============================
+   ROLE CHIP
+=============================== */
+
+.role-chip {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--side-nav-active-bg);
+  color: var(--side-nav-active-text);
+}
+
+/* ===============================
+   STATUS ICONS (invalid, success)
+=============================== */
+
+.signup-icon {
+  font-size: 56px !important;
+  margin-bottom: 8px;
+}
+
+.signup-icon-success {
+  color: #2e7d32 !important;
+}
+
+.signup-icon-warn {
+  color: #ed1f24 !important;
+}
+
+.signup-box .MuiCircularProgress-root {
+  margin: 8px 0;
+}
+
+.signup-link-button {
+  display: block;
+  box-sizing: border-box;
+  text-align: center;
+  text-decoration: none;
+}
+
+/* ===============================
+   NOTE + CONSENT
+=============================== */
+
+.signup-note {
+  margin: -8px 0 18px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: left;
+  background: var(--side-nav-hover-bg);
+  color: var(--text-color);
+}
+
+.signup-consent {
+  margin: 0 0 6px;
+  text-align: left;
+}
+
+.signup-consent .MuiFormControlLabel-root {
+  align-items: flex-start;
+  margin: 0;
+}
+
+.signup-consent .MuiFormControlLabel-label {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-color);
+  padding-top: 9px;
+}
+
+.signup-consent .MuiCheckbox-root {
+  color: var(--muted-color) !important;
+}
+
+.signup-consent .MuiCheckbox-root.Mui-checked {
+  color: var(--link-color) !important;
+}
+
+/* ===============================
+   LINKS
+=============================== */
+
+.signin-link {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.signin-link a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+.signin-link a:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+
+.signup-box a:focus-visible,
+.signup-box button:focus-visible {
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+
+/* ===============================
+   RESPONSIVE
+=============================== */
+
+@media screen and (max-width: 768px) {
+  .signup-container {
+    margin: 15px auto;
+    padding: 20px;
+  }
+
+  .signup-box h2 {
+    font-size: 22px;
+  }
+}

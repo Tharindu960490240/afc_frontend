@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# production build
+build/
+dist/
+
+# secrets and local settings
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# tests
+coverage/
+
+# Vercel
+.vercel
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

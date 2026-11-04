@@ -1,0 +1,267 @@
+/* ===============================
+   COMS (Marketing & Sales) screens: agent register, agent record, calendar, audit.
+   Builds on adminPages.css; nothing there is changed.
+=============================== */
+
+/* text areas look like the other inputs */
+.admin-field textarea {
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid var(--dropdown-border, var(--border-color));
+  background: var(--card-color);
+  color: var(--text-color);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 84px;
+}
+.admin-field textarea:focus {
+  outline: 2px solid var(--link-color);
+  outline-offset: 1px;
+}
+.admin-field.has-error textarea {
+  border-color: var(--brand-red);
+}
+
+/* two columns inside a dialog or panel form */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+.field-grid .is-wide {
+  grid-column: 1 / -1;
+}
+.field-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.field-check input {
+  margin-top: 3px;
+}
+.dialog-section {
+  margin: 4px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted-color);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- agent status badges ---------- */
+.badge-st-prospect,
+.badge-st-applied {
+  background: rgba(40, 44, 125, 0.12);
+  color: #282c7d;
+}
+.badge-st-due_diligence {
+  background: rgba(124, 58, 237, 0.13);
+  color: #6d28d9;
+}
+.badge-st-approved,
+.badge-st-onboarding {
+  background: rgba(2, 132, 199, 0.14);
+  color: #0369a1;
+}
+.badge-st-active {
+  background: rgba(22, 163, 74, 0.14);
+  color: #15803d;
+}
+.badge-st-under_review,
+.badge-st-expired {
+  background: rgba(217, 119, 6, 0.16);
+  color: #b45309;
+}
+.badge-st-suspended,
+.badge-st-terminated,
+.badge-st-rejected {
+  background: rgba(237, 31, 36, 0.13);
+  color: #c4161b;
+}
+[data-theme="dark"] .badge-st-prospect,
+[data-theme="dark"] .badge-st-applied {
+  background: rgba(154, 160, 255, 0.18);
+  color: #9aa0ff;
+}
+[data-theme="dark"] .badge-st-due_diligence {
+  color: #c4b5fd;
+}
+[data-theme="dark"] .badge-st-approved,
+[data-theme="dark"] .badge-st-onboarding {
+  color: #7dd3fc;
+}
+[data-theme="dark"] .badge-st-active {
+  color: #4ade80;
+}
+[data-theme="dark"] .badge-st-under_review,
+[data-theme="dark"] .badge-st-expired {
+  color: #fbbf24;
+}
+[data-theme="dark"] .badge-st-suspended,
+[data-theme="dark"] .badge-st-terminated,
+[data-theme="dark"] .badge-st-rejected {
+  color: #f87171;
+}
+
+.badge-quiet {
+  background: var(--side-nav-hover-bg);
+  color: var(--text-color);
+}
+.badge-risk-low {
+  background: rgba(22, 163, 74, 0.14);
+  color: #15803d;
+}
+.badge-risk-medium {
+  background: rgba(217, 119, 6, 0.16);
+  color: #b45309;
+}
+.badge-risk-high {
+  background: rgba(237, 31, 36, 0.13);
+  color: #c4161b;
+}
+[data-theme="dark"] .badge-risk-low { color: #4ade80; }
+[data-theme="dark"] .badge-risk-medium { color: #fbbf24; }
+[data-theme="dark"] .badge-risk-high { color: #f87171; }
+
+/* ---------- timers (decision, acknowledgement) ---------- */
+.sla-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: rgba(22, 163, 74, 0.14);
+  color: #15803d;
+}
+.sla-chip.is-amber {
+  background: rgba(217, 119, 6, 0.18);
+  color: #b45309;
+}
+.sla-chip.is-red,
+.sla-chip.is-overdue {
+  background: rgba(237, 31, 36, 0.14);
+  color: #c4161b;
+}
+.sla-chip.is-done {
+  background: var(--side-nav-hover-bg);
+  color: var(--muted-color);
+}
+[data-theme="dark"] .sla-chip { color: #4ade80; }
+[data-theme="dark"] .sla-chip.is-amber { color: #fbbf24; }
+[data-theme="dark"] .sla-chip.is-red,
+[data-theme="dark"] .sla-chip.is-overdue { color: #f87171; }
+[data-theme="dark"] .sla-chip.is-done { color: var(--muted-color); }
+
+/* ---------- agent record ---------- */
+.record-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 6px;
+}
+.record-tabs {
+  margin-bottom: 16px;
+}
+.missing-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+.person-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+.person-card + .person-card {
+  margin-top: 10px;
+}
+.person-card small {
+  display: block;
+  color: var(--muted-color);
+  font-size: 12px;
+}
+.person-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+/* ---------- audit viewer ---------- */
+.audit-detail {
+  margin: 6px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--side-nav-hover-bg);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.audit-detail b {
+  font-weight: 700;
+}
+.audit-old {
+  color: #c4161b;
+  text-decoration: line-through;
+}
+[data-theme="dark"] .audit-old { color: #f87171; }
+.audit-new {
+  color: #15803d;
+}
+[data-theme="dark"] .audit-new { color: #4ade80; }
+
+@media (max-width: 640px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+  .person-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* sortable column headings */
+.th-sort {
+  all: unset;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  white-space: nowrap;
+}
+.th-sort:hover,
+.th-sort:focus-visible {
+  text-decoration: underline;
+}
+
+/* chips and badges inside the summary grid keep their own size and colours */
+.summary-item .sla-chip {
+  display: inline-block;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+.summary-item .sla-chip:not(.is-amber):not(.is-red):not(.is-overdue):not(.is-done) {
+  color: #15803d;
+}
+[data-theme="dark"] .summary-item .sla-chip:not(.is-amber):not(.is-red):not(.is-overdue):not(.is-done) {
+  color: #4ade80;
+}
+.summary-item .sla-chip.is-amber { color: #b45309; }
+.summary-item .sla-chip.is-red,
+.summary-item .sla-chip.is-overdue { color: #c4161b; }
+.summary-item .sla-chip.is-done { color: var(--muted-color); }
+[data-theme="dark"] .summary-item .sla-chip.is-amber { color: #fbbf24; }
+[data-theme="dark"] .summary-item .sla-chip.is-red,
+[data-theme="dark"] .summary-item .sla-chip.is-overdue { color: #f87171; }
+.sla-chip { white-space: normal; }
