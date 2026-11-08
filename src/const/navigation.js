@@ -80,7 +80,8 @@ export const NAV_ITEMS = {
   ],
   agent: [
     { icon: Dashboard, label: "Dashboard", path: "/agent", ready: true, home: true },
-    { icon: UploadFile, label: "My agreement", text: "Read and sign your agent agreement online.", path: "/agent/agreement", ready: true, group: "Getting started" },
+    { icon: Assignment, label: "My application", text: "Complete your business details, people and referees.", path: "/agent/application", ready: true, group: "Getting started" },
+    { icon: UploadFile, label: "My agreement", text: "Read and sign your agent agreement online.", path: "/agent/agreement", ready: true },
     { icon: Person, label: "My profile", text: "See and update your details and change your password.", path: "/account/profile", ready: true },
     { icon: PersonAdd, label: "Add a student", text: "Submit a new student application with documents.", path: "/agent/students/new", ready: false, group: "Students" },
     { icon: ListAlt, label: "My students", text: "Track the status of each application.", path: "/agent/students", ready: false },

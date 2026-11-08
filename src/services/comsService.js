@@ -26,10 +26,16 @@ export const removeAgentPerson = (id, pid, reason) =>
   apiRequest(E.AGENT_PERSON_DELETE(id, pid), { method: "POST", body: { reason } });
 
 export const exportAgentRecords = (params) =>
-  apiDownload(`${E.AGENTS_EXPORT}${toQuery(params)}`, `agent-register-${new Date().toISOString().slice(0, 10)}.csv`);
+  apiDownload(`${E.AGENTS_EXPORT}${toQuery(params)}`, `agent-register-${new Date().toLocaleDateString("en-CA")}.csv`);
 
 // ---------- calendar and audit ----------
 export const listHolidays = () => apiRequest(E.HOLIDAYS);
 export const addHoliday = (payload) => apiRequest(E.HOLIDAYS, { method: "POST", body: payload });
 export const removeHoliday = (id) => apiRequest(E.HOLIDAY(id), { method: "DELETE" });
+export const exportHolidays = () => apiDownload(E.HOLIDAYS_EXPORT, `public-holidays-${new Date().toLocaleDateString("en-CA")}.csv`);
+export const exportAudit = (params) => apiDownload(`${E.AUDIT_EXPORT}${toQuery(params)}`, `audit-log-${new Date().toLocaleDateString("en-CA")}.csv`);
 export const listAudit = (params) => apiRequest(`${E.AUDIT}${toQuery(params)}`);
+
+// ---------- the signed-in agent's own application ----------
+export const getMyApplication = () => apiRequest(API_ENDPOINTS.AGENT_APPLICATION);
+export const submitMyApplication = (payload) => apiRequest(API_ENDPOINTS.AGENT_APPLICATION, { method: "POST", body: payload });

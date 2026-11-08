@@ -50,3 +50,6 @@ export const downloadAgreementPdf = (id, fileName = "agreement.pdf") =>
 // body: { signed_name, signature_image?, accept: true }
 export const signAgreement = (id, body) =>
   apiRequest(A.SIGN(id), { method: "POST", body });
+
+export const exportAgreements = (params) =>
+  apiDownload(`${A.BASE}/export${toQuery(params)}`, `agreements-${new Date().toLocaleDateString("en-CA")}.csv`);

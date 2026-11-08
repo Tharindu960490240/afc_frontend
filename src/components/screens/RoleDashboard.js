@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import "../styles/dashboard.css";
 import { ROLE_LABELS, normalizeRole } from "../../const/roles";
 import { NAV_ITEMS } from "../../const/navigation";
+import { getMyApplication } from "../../services/comsService";
 
 // ===============================
 // Dashboard cards come from src/const/navigation.js, the same list the
@@ -38,6 +39,18 @@ const INTROS = {
 
 const RoleDashboard = ({ role, user }) => {
   const key = normalizeRole(role);
+  const [openApplication, setOpenApplication] = useState(false);
+
+  // an agent invited by the college still has the application to complete
+  useEffect(() => {
+    if (key !== "agent") return;
+    let alive = true;
+    getMyApplication().then((res) => {
+      if (alive && res.success && res.data.editable) setOpenApplication(true);
+    });
+    return () => { alive = false; };
+  }, [key]);
+
   const config = INTROS[key];
   if (!config) return null;
 
@@ -52,6 +65,14 @@ const RoleDashboard = ({ role, user }) => {
         </h1>
         <p>{config.intro}</p>
       </div>
+
+      {openApplication && (
+        <Link to="/agent/application" className="dashboard-notice">
+          <strong>Complete your application</strong>
+          <span>The college needs your business details, the people in your business and two referees before it can review you.</span>
+          <span className="dashboard-notice-go">Open the application</span>
+        </Link>
+      )}
 
       <div className="dashboard-grid">
         {cards.map(({ icon: Icon, label, text, path, ready }) => {

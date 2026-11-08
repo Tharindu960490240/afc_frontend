@@ -5,8 +5,8 @@ import { ArrowBack } from "@mui/icons-material";
 import "../../styles/adminPages.css";
 import LoadingSpinner from "../LoadingSpinner";
 import CustomSnackbar from "../CustomSnackbar";
-import { ConfirmDialog, Pager, formatDate, formatDateTime } from "./shared";
-import { listUsers, setUserStatus } from "../../../services/adminService";
+import { ConfirmDialog, ExportButton, Pager, formatDate, formatDateTime } from "./shared";
+import { exportUsers, listUsers, setUserStatus } from "../../../services/adminService";
 import { ROLES, ROLE_LABELS, getHomeRoute } from "../../../const/roles";
 
 const PAGE_SIZE = 10;
@@ -150,6 +150,10 @@ const Users = ({ role, user }) => {
               <option value="rejected">Rejected</option>
             </select>
           </div>
+          <ExportButton
+            run={() => exportUsers({ role: roleFilter, status: statusFilter, search })}
+            onError={(m) => showMessage(m, "error")}
+          />
         </div>
 
         <div className="admin-table-wrap">

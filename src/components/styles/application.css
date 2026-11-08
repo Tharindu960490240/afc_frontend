@@ -1,0 +1,76 @@
+/* ===============================
+   AGENT APPLICATION FORM (multi-step)
+=============================== */
+.signup-container.app-wide { max-width: 860px; align-items: flex-start; }
+.app-wide .signup-box { text-align: left; }
+.app-wide .signup-box h2, .app-wide .signup-box .role-chip { text-align: center; }
+.app-wide .signup-box h2 { display: block; }
+.app-wide .signup-subtitle { text-align: center; }
+
+.app-form { width: 100%; text-align: left; }
+
+.app-steps {
+  list-style: none; display: flex; gap: 6px; margin: 4px 0 18px; padding: 0;
+}
+.app-steps li {
+  flex: 1; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px;
+  background: var(--main-bg-color); color: var(--muted-color); font-size: 13px; font-weight: 600; min-width: 0;
+}
+.app-steps li.active { background: var(--side-nav-active-bg); color: var(--side-nav-active-text); }
+.app-steps li.done { color: var(--text-color); }
+.app-step-num {
+  flex: 0 0 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--border-color); font-size: 12px;
+}
+.app-steps li.active .app-step-num { background: var(--brand-navy); color: #fff; }
+.app-steps li.done .app-step-num { background: #16a34a; color: #fff; }
+.app-step-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-step-mobile { display: none; margin: 0 0 14px; color: var(--muted-color); font-size: 14px; }
+
+.app-lead { margin: 0 0 14px; color: var(--muted-color); font-size: 14px; line-height: 1.5; }
+.app-sub { margin: 18px 0 8px; font-size: 16px; color: var(--text-color); }
+.app-grid { display: grid; grid-template-columns: 1fr; gap: 4px 14px; margin-bottom: 6px; }
+.app-grid.two { grid-template-columns: 1fr 1fr; }
+.app-radio { display: block; margin: 4px 0 10px; }
+.app-radio .MuiFormLabel-root { color: var(--text-color); font-size: 14px; margin-bottom: 2px; }
+.app-check { margin: 4px 0 8px; }
+.app-empty { color: var(--muted-color); font-size: 14px; margin: 4px 0 10px; }
+
+.app-card {
+  border: 1px solid var(--border-color); background: var(--main-bg-color); border-radius: 12px;
+  padding: 14px 16px 8px; margin: 0 0 12px;
+}
+.app-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; min-height: 36px; }
+.app-row { display: flex; gap: 12px; padding: 4px 0; font-size: 14px; border-top: 1px dashed var(--border-color); }
+.app-row:first-of-type { border-top: 0; }
+.app-row span { flex: 0 0 190px; color: var(--muted-color); }
+.app-row strong { font-weight: 600; word-break: break-word; white-space: pre-line; }
+
+.app-alert {
+  margin: 0 0 14px; padding: 10px 14px; border-radius: 10px; font-size: 14px;
+  background: #fdeced; color: #b91c1c; border: 1px solid #f3b8bb;
+}
+.app-link { background: none; border: 0; padding: 0; color: var(--link-color); cursor: pointer; font: inherit; font-size: 14px; text-decoration: underline; }
+
+/* every action button has the same size */
+.app-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; }
+.app-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: 160px; height: 44px; padding: 0 20px; border-radius: 10px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+}
+.app-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.app-btn-primary { background: var(--brand-navy); color: #fff; border: 1px solid var(--brand-navy); }
+.app-btn-primary:hover:not(:disabled) { background: var(--link-hover-color); }
+.app-btn-outline { background: transparent; color: var(--brand-navy); border: 1px solid var(--brand-navy); }
+.app-btn-outline:hover:not(:disabled) { background: var(--side-nav-hover-bg); }
+:root[data-theme="dark"] .app-btn-outline, body.dark .app-btn-outline { color: var(--text-color); border-color: var(--text-color); }
+
+@media (max-width: 700px) {
+  .signup-container.app-wide { padding: 18px 14px; margin: 12px auto; }
+  .app-steps { display: none; }
+  .app-step-mobile { display: block; }
+  .app-grid.two { grid-template-columns: 1fr; }
+  .app-row { flex-direction: column; gap: 0; }
+  .app-row span { flex: none; }
+  .app-actions .app-btn { min-width: 0; flex: 1; }
+}

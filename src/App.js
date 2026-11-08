@@ -34,6 +34,7 @@ import Agreements from "./components/screens/admin/Agreements";
 import AgreementDetail from "./components/screens/admin/AgreementDetail";
 import AgreementTemplate from "./components/screens/admin/AgreementTemplate";
 import MyAgreement from "./components/screens/agent/MyAgreement";
+import MyApplication from "./components/screens/agent/MyApplication";
 import AgentRegisterList from "./components/screens/staff/AgentRegister";
 import AgentRecord from "./components/screens/staff/AgentRecord";
 import Holidays from "./components/screens/staff/Holidays";
@@ -382,6 +383,19 @@ const App = () => {
             }
           />
           {/* Agent pages */}
+          <Route
+            path="/agent/application"
+            element={
+              <ProtectedRoute
+                isSignedIn={isSignedIn}
+                token={token}
+                role={role}
+                allowedRoles={[ROLES.AGENT]}
+              >
+                <MyApplication role={role} />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/agent/agreement"
             element={

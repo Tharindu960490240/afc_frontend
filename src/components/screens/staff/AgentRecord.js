@@ -149,7 +149,7 @@ const AgentRecord = () => {
   const hasLogin = agent.persons.some((p) => p.portal_user_id);
   const left = daysUntil(agent.agreement_end);
   const openApplication = ["prospect", "applied", "due_diligence"].includes(agent.status);
-  const missing = agent.prisms_missing || [];
+  const missing = [...(agent.prisms_missing || []), ...(agent.application_missing || [])];
 
   // ---------- actions ----------
   const submitStatus = () => {
@@ -301,7 +301,7 @@ const AgentRecord = () => {
 
       {!deleted && openApplication && missing.length > 0 && (
         <div className="admin-notice is-warning">
-          <strong>PRISMS details still missing</strong>
+          <strong>Still missing from the application</strong>
           An agent cannot be approved until these are recorded:
           <ul className="missing-list">
             {missing.map((m) => (
@@ -459,6 +459,44 @@ const AgentRecord = () => {
               <Item label="Website">{agent.website}</Item>
               <Item label="MARN">{agent.marn}</Item>
             </div>
+          </section>
+
+          <section className="admin-panel">
+            <h2>Application declarations and referees</h2>
+            {!agent.application_submitted_at && (
+              <p className="admin-hint" style={{ marginTop: 0 }}>
+                The agent has not completed the application form yet. They can do this from the portal, or you can record the details with them.
+              </p>
+            )}
+            <div className="summary-grid">
+              <Item label="Application submitted">{agent.application_submitted_at ? formatDate(agent.application_submitted_at) : "Not yet"}</Item>
+              <Item label="Conflict of interest">
+                {agent.coi_declared === null || agent.coi_declared === undefined
+                  ? "Not declared"
+                  : agent.coi_declared ? `Yes: ${agent.coi_details || ""}` : "None declared"}
+              </Item>
+              <Item label="Code of ethics">{agent.code_of_ethics_ack_at ? `Accepted ${formatDate(agent.code_of_ethics_ack_at)}` : "Not accepted"}</Item>
+              <Item label="Information confirmed true">{agent.information_confirmed_at ? formatDate(agent.information_confirmed_at) : "Not confirmed"}</Item>
+            </div>
+            <h3 style={{ margin: "16px 0 6px", fontSize: 15 }}>Referees</h3>
+            {(agent.referees || []).length === 0 ? (
+              <div className="admin-empty" style={{ padding: 12 }}>No referees recorded. Two are needed before a decision.</div>
+            ) : (
+              <div className="admin-table-wrap">
+                <table className="admin-table">
+                  <thead>
+                    <tr><th>Name</th><th>Organisation</th><th>Email</th><th>Phone</th></tr>
+                  </thead>
+                  <tbody>
+                    {agent.referees.map((r) => (
+                      <tr key={r.id}>
+                        <td>{r.name}</td><td>{r.organisation}</td><td>{r.email}</td><td>{r.phone}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
         </>
       )}

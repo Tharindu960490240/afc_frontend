@@ -64,6 +64,8 @@ export const API_ENDPOINTS = {
     PREVIEW: `${API_BASE_URL}/agreement-template/preview`,
   },
 
+  AGENT_APPLICATION: `${API_BASE_URL}/agent-application`,
+
   COMS: {
     AGENTS: `${API_BASE_URL}/coms/agents`,
     AGENTS_META: `${API_BASE_URL}/coms/agents/meta`,
@@ -80,10 +82,13 @@ export const API_ENDPOINTS = {
     HOLIDAYS: `${API_BASE_URL}/coms/holidays`,
     HOLIDAY: (id) => `${API_BASE_URL}/coms/holidays/${id}`,
     AUDIT: `${API_BASE_URL}/coms/audit`,
+    AUDIT_EXPORT: `${API_BASE_URL}/coms/audit/export`,
+    HOLIDAYS_EXPORT: `${API_BASE_URL}/coms/holidays/export`,
   },
 
   USERS: {
     BASE: `${API_BASE_URL}/users`,
+    EXPORT: `${API_BASE_URL}/users/export`,
     UPDATE_STATUS: (id) => `${API_BASE_URL}/users/${id}/status`,
   },
 };

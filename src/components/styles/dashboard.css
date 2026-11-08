@@ -134,3 +134,11 @@ a.dashboard-card:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+
+.dashboard-notice {
+  display: flex; flex-direction: column; gap: 4px; margin: 0 0 18px; padding: 14px 18px; border-radius: 12px;
+  background: var(--side-nav-active-bg); border: 1px solid var(--brand-navy); color: var(--text-color); text-decoration: none;
+}
+.dashboard-notice strong { color: var(--brand-navy); font-size: 16px; }
+.dashboard-notice span { font-size: 14px; }
+.dashboard-notice-go { font-weight: 700; color: var(--link-color); text-decoration: underline; }

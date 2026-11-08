@@ -160,6 +160,11 @@ const Registrations = ({ role }) => {
                   <td data-label="">
                     {r.status === "pending_approval" && (
                       <div className="cell-actions">
+                        {r.agent_id && (
+                          <Link to={`/coms/agents/${r.agent_id}`} className="row-btn">
+                            View application
+                          </Link>
+                        )}
                         <button type="button" className="row-btn is-success" disabled={busy} onClick={() => approve(r)}>
                           Approve
                         </button>
@@ -174,6 +179,13 @@ const Registrations = ({ role }) => {
                         >
                           Reject
                         </button>
+                      </div>
+                    )}
+                    {r.status !== "pending_approval" && r.agent_id && (
+                      <div className="cell-actions">
+                        <Link to={`/coms/agents/${r.agent_id}`} className="row-btn">
+                          View application
+                        </Link>
                       </div>
                     )}
                   </td>

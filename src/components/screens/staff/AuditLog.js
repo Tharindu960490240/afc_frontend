@@ -5,10 +5,10 @@ import { ArrowBack } from "@mui/icons-material";
 import "../../styles/adminPages.css";
 import "../../styles/coms.css";
 import CustomSnackbar from "../CustomSnackbar";
-import { Pager, formatDateTime } from "../admin/shared";
+import { ExportButton, Pager, formatDateTime } from "../admin/shared";
 import { ChangeDetail, auditText } from "./comsShared";
 import { getHomeRoute } from "../../../const/roles";
-import { listAudit } from "../../../services/comsService";
+import { exportAudit, listAudit } from "../../../services/comsService";
 
 const PAGE_SIZE = 25;
 const ENTITIES = [
@@ -67,6 +67,10 @@ const AuditLog = ({ role }) => {
           </select>
           <input className="admin-input" type="date" aria-label="From date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} />
           <input className="admin-input" type="date" aria-label="To date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} />
+          <ExportButton
+            run={() => exportAudit({ entity_type: entity, from, to })}
+            onError={(m) => setSnackbar({ open: true, message: m, severity: "error" })}
+          />
         </div>
 
         <div className="admin-table-wrap">

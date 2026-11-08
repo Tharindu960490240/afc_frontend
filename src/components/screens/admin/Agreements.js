@@ -4,8 +4,8 @@ import { ArrowBack } from "@mui/icons-material";
 
 import "../../styles/adminPages.css";
 import CustomSnackbar from "../CustomSnackbar";
-import { Pager, StatusBadge, formatDate } from "./shared";
-import { listAgreements, downloadAgreementFile } from "../../../services/agreementService";
+import { ExportButton, Pager, StatusBadge, formatDate } from "./shared";
+import { exportAgreements, listAgreements, downloadAgreementFile } from "../../../services/agreementService";
 import { getHomeRoute } from "../../../const/roles";
 
 const PAGE_SIZE = 10;
@@ -81,6 +81,10 @@ const Agreements = ({ role }) => {
               </button>
             ))}
           </div>
+          <ExportButton
+            run={() => exportAgreements({ status })}
+            onError={(m) => setSnackbar({ open: true, message: m, severity: "error" })}
+          />
         </div>
 
         <div className="admin-table-wrap">

@@ -9,6 +9,22 @@ const toDate = (value) => {
   return m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(value);
 };
 
+// "Export CSV" button used on the list screens (NF-13). `run` starts the download and returns { success, message }.
+export const ExportButton = ({ run, onError, label = "Export CSV" }) => {
+  const [busy, setBusy] = useState(false);
+  const click = async () => {
+    setBusy(true);
+    const res = await run();
+    setBusy(false);
+    if (!res.success && onError) onError(res.message || "Could not export.");
+  };
+  return (
+    <button type="button" className="row-btn" onClick={click} disabled={busy}>
+      {busy ? "Preparing..." : label}
+    </button>
+  );
+};
+
 export const formatDate = (value) => {
   if (!value) return "-";
   const d = toDate(value);

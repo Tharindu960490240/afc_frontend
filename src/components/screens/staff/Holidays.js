@@ -6,9 +6,9 @@ import "../../styles/adminPages.css";
 import "../../styles/coms.css";
 import LoadingSpinner from "../LoadingSpinner";
 import CustomSnackbar from "../CustomSnackbar";
-import { ConfirmDialog, formatDate } from "../admin/shared";
+import { ConfirmDialog, ExportButton, formatDate } from "../admin/shared";
 import { getHomeRoute, ROLES } from "../../../const/roles";
-import { addHoliday, listHolidays, removeHoliday } from "../../../services/comsService";
+import { addHoliday, exportHolidays, listHolidays, removeHoliday } from "../../../services/comsService";
 
 const STATE = { TAS: "Tasmania", VIC: "Victoria" };
 const EMPTY = { date: "", name: "", jurisdiction: "TAS" };
@@ -95,6 +95,10 @@ const Holidays = ({ role }) => {
         <p>
           Deadlines such as the 3 and 10 working-day application timers skip weekends and these Tasmanian and Victorian public holidays.
         </p>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+        <ExportButton run={exportHolidays} onError={(m) => showMessage(m, "error")} />
       </div>
 
       {missingYears.length > 0 && !loading && (

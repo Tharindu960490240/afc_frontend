@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "../const/const";
-import { apiRequest, toQuery } from "./apiClient";
+import { apiRequest, apiDownload, toQuery } from "./apiClient";
 
 // ---------- invitations ----------
 // params: { status?: "pending"|"accepted"|"expired"|"revoked", page, limit }
@@ -27,3 +27,6 @@ export const setUserStatus = (id, status) =>
     method: "PATCH",
     body: { status },
   });
+
+export const exportUsers = (params) =>
+  apiDownload(`${API_ENDPOINTS.USERS.EXPORT}${toQuery(params)}`, `users-${new Date().toLocaleDateString("en-CA")}.csv`);

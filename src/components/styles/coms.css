@@ -265,3 +265,7 @@
 [data-theme="dark"] .summary-item .sla-chip.is-red,
 [data-theme="dark"] .summary-item .sla-chip.is-overdue { color: #f87171; }
 .sla-chip { white-space: normal; }
+
+@media (max-width: 600px) {
+  .sla-chip { white-space: normal; }
+}
