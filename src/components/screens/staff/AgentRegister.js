@@ -1,3 +1,4 @@
+import TableSortLabel from "@mui/material/TableSortLabel";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowBack } from "@mui/icons-material";
@@ -23,6 +24,7 @@ import {
   getAgentMeta,
   listAgentRecords,
 } from "../../../services/comsService";
+import { CheckField, Field, FilterField, TabBar, Btn, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
 const PAGE_SIZE = 15;
 const EMPTY = { legal_name: "", contact_name: "", email: "", phone: "", country: "", send_link: true };
@@ -127,14 +129,12 @@ const AgentRegister = ({ role }) => {
 
   const sortBy = (key) =>
     setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: key === "legal_name" ? "asc" : "desc" }));
-  const arrow = (key) => (sort.key === key ? (sort.dir === "asc" ? " ▲" : " ▼") : "");
   const sortable = (key, label) => (
-    <th aria-sort={sort.key === key ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}>
-      <button type="button" className="th-sort" onClick={() => sortBy(key)}>
+    <TableCell sortDirection={sort.key === key ? sort.dir : false}>
+      <TableSortLabel active={sort.key === key} direction={sort.key === key ? sort.dir : "asc"} onClick={() => sortBy(key)}>
         {label}
-        {arrow(key)}
-      </button>
-    </th>
+      </TableSortLabel>
+    </TableCell>
   );
 
   return (
@@ -148,33 +148,23 @@ const AgentRegister = ({ role }) => {
         <p>Every education agent, from first interest to renewal, in one place.</p>
       </div>
 
-      <section className="admin-panel">
+      <Panel>
         <div className="admin-toolbar">
-          <div className="filter-tabs" role="tablist">
-            {STATUS_TABS.map((t) => (
-              <button
-                key={t.key || "all"}
-                type="button"
-                role="tab"
-                aria-selected={tab === t.key}
-                className={`filter-tab${tab === t.key ? " is-active" : ""}`}
-                onClick={() => {
-                  setTab(t.key);
-                  setPage(1);
-                }}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <TabBar
+            label="Agent status"
+            value={tab || "all"}
+            onChange={(v) => {
+              setTab(v === "all" ? "" : v);
+              setPage(1);
+            }}
+            tabs={STATUS_TABS.map((t) => ({ value: t.key || "all", label: t.label }))}
+          />
           <div className="action-row" style={{ marginTop: 0 }}>
-            <button type="button" className="row-btn" onClick={doExport} disabled={busy}>
+            <Btn onClick={doExport} disabled={busy}>
               Export CSV
-            </button>
+            </Btn>
             {meta.permissions.create && (
-              <button
-                type="button"
-                className="admin-btn"
+              <Btn kind="primary" size="medium"
                 onClick={() => {
                   setForm(EMPTY);
                   setErrors({});
@@ -182,62 +172,69 @@ const AgentRegister = ({ role }) => {
                 }}
               >
                 Add agent
-              </button>
+              </Btn>
             )}
           </div>
         </div>
 
         <div className="filter-controls" style={{ marginBottom: 14 }}>
-          <input
-            className="admin-input is-search"
+          <FilterField
             type="search"
-            placeholder="Search name, email or ABN"
-            aria-label="Search agents"
+            label="Search"
+            placeholder="Name, email or ABN"
+            sx={{ minWidth: 240 }}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
-          <select className="admin-input" aria-label="Account manager" value={manager} onChange={(e) => { setManager(e.target.value); setPage(1); }}>
-            <option value="">Any manager</option>
-            <option value="unassigned">No manager yet</option>
-            {meta.staff.map((s) => (
-              <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
-            ))}
-          </select>
-          <select className="admin-input" aria-label="Risk rating" value={risk} onChange={(e) => { setRisk(e.target.value); setPage(1); }}>
-            <option value="">Any risk</option>
-            {Object.entries(RISK_LABELS).map(([k, v]) => <option key={k} value={k}>{v} risk</option>)}
-          </select>
-          <select className="admin-input" aria-label="Tier" value={tier} onChange={(e) => { setTier(e.target.value); setPage(1); }}>
-            <option value="">Any tier</option>
-            {Object.entries(TIER_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
+          <FilterField
+            label="Account manager"
+            value={manager}
+            onChange={(e) => { setManager(e.target.value); setPage(1); }}
+            options={[
+              { value: "", label: "Any manager" },
+              { value: "unassigned", label: "No manager yet" },
+              ...meta.staff.map((m) => ({ value: m.id, label: `${m.first_name} ${m.last_name}` })),
+            ]}
+          />
+          <FilterField
+            label="Risk rating"
+            value={risk}
+            onChange={(e) => { setRisk(e.target.value); setPage(1); }}
+            options={[{ value: "", label: "Any risk" }, ...Object.entries(RISK_LABELS).map(([k, v]) => ({ value: k, label: `${v} risk` }))]}
+          />
+          <FilterField
+            label="Tier"
+            value={tier}
+            onChange={(e) => { setTier(e.target.value); setPage(1); }}
+            options={[{ value: "", label: "Any tier" }, ...Object.entries(TIER_LABELS).map(([k, v]) => ({ value: k, label: v }))]}
+          />
         </div>
 
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
+        <TableContainer className="admin-table-wrap">
+          <Table className="admin-table">
+            <TableHead>
+              <TableRow>
                 {sortable("legal_name", "Agent")}
                 {sortable("country", "Country")}
                 {sortable("status", "Status")}
-                <th>Manager</th>
+                <TableCell>Manager</TableCell>
                 {sortable("agreement_end", "Agreement ends")}
-                <th aria-label="Actions" />
-              </tr>
-            </thead>
-            <tbody>
+                <TableCell aria-label="Actions" />
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {rows.map((a) => {
                 const left = daysUntil(a.agreement_end);
                 return (
-                  <tr key={a.id}>
-                    <td data-label="Agent">
+                  <TableRow key={a.id}>
+                    <TableCell data-label="Agent">
                       <Link className="cell-main cell-link" to={`/coms/agents/${a.id}`}>
                         {a.legal_name}
                       </Link>
                       <div className="cell-sub">{a.email}</div>
-                    </td>
-                    <td data-label="Country">{a.country}</td>
-                    <td data-label="Status">
+                    </TableCell>
+                    <TableCell data-label="Country">{a.country}</TableCell>
+                    <TableCell data-label="Status">
                       <AgentStatusBadge status={a.status} />
                       {a.decision_state && (
                         <div style={{ marginTop: 6 }}>
@@ -247,12 +244,12 @@ const AgentRegister = ({ role }) => {
                       {a.prisms_missing.length > 0 && ["prospect", "applied", "due_diligence"].includes(a.status) && (
                         <div className="cell-sub">{a.prisms_missing.length} PRISMS detail{a.prisms_missing.length === 1 ? "" : "s"} missing</div>
                       )}
-                    </td>
-                    <td data-label="Manager">
+                    </TableCell>
+                    <TableCell data-label="Manager">
                       {a.account_manager_name || "-"}
                       {a.tier && <div className="cell-sub">{TIER_LABELS[a.tier]}</div>}
-                    </td>
-                    <td data-label="Agreement ends">
+                    </TableCell>
+                    <TableCell data-label="Agreement ends">
                       {a.agreement_end ? (
                         <>
                           {formatDate(a.agreement_end)}
@@ -263,28 +260,28 @@ const AgentRegister = ({ role }) => {
                       ) : (
                         "-"
                       )}
-                    </td>
-                    <td data-label="">
+                    </TableCell>
+                    <TableCell data-label="">
                       <div className="cell-actions">
-                        <Link className="row-btn" to={`/coms/agents/${a.id}`}>
+                        <Btn component={Link}  to={`/coms/agents/${a.id}`}>
                           Open
-                        </Link>
+                        </Btn>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
           {!rows.length && (
             <div className="admin-empty">
               {loadingList ? "Loading agents..." : "No agents match this view."}
             </div>
           )}
-        </div>
+        </TableContainer>
 
         <Pager page={page} limit={PAGE_SIZE} total={total} disabled={loadingList} onChange={setPage} />
-      </section>
+      </Panel>
 
       <FormDialog
         open={adding}
@@ -294,39 +291,38 @@ const AgentRegister = ({ role }) => {
         onSubmit={submit}
         onCancel={() => setAdding(false)}
       >
-        <div className={`admin-field${errors.legal_name ? " has-error" : ""}`}>
-          <label htmlFor="eoi-name">Agent / company legal name</label>
-          <input id="eoi-name" value={form.legal_name} maxLength={200} onChange={setField("legal_name")} />
-          {errors.legal_name && <span className="admin-error">{errors.legal_name}</span>}
-        </div>
+        <Field
+          id="eoi-name"
+          label="Agent / company legal name"
+          value={form.legal_name}
+          inputProps={{ maxLength: 200 }}
+          onChange={setField("legal_name")}
+          error={errors.legal_name}
+        />
         <div className="field-grid">
-          <div className="admin-field">
-            <label htmlFor="eoi-contact">Contact person (optional)</label>
-            <input id="eoi-contact" value={form.contact_name} maxLength={50} onChange={setField("contact_name")} />
-          </div>
-          <div className={`admin-field${errors.email ? " has-error" : ""}`}>
-            <label htmlFor="eoi-email">Email</label>
-            <input id="eoi-email" type="email" value={form.email} onChange={setField("email")} />
-            {errors.email && <span className="admin-error">{errors.email}</span>}
-          </div>
-          <div className={`admin-field${errors.country ? " has-error" : ""}`}>
-            <label htmlFor="eoi-country">Country</label>
-            <select id="eoi-country" value={form.country} onChange={setField("country")}>
-              <option value="">Choose a country</option>
-              {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            {errors.country && <span className="admin-error">{errors.country}</span>}
-          </div>
-          <div className={`admin-field${errors.phone ? " has-error" : ""}`}>
-            <label htmlFor="eoi-phone">Phone (optional)</label>
-            <input id="eoi-phone" value={form.phone} onChange={setField("phone")} />
-            {errors.phone && <span className="admin-error">{errors.phone}</span>}
-          </div>
+          <Field
+            id="eoi-contact"
+            label="Contact person (optional)"
+            value={form.contact_name}
+            inputProps={{ maxLength: 50 }}
+            onChange={setField("contact_name")}
+          />
+          <Field id="eoi-email" label="Email" type="email" value={form.email} onChange={setField("email")} error={errors.email} />
+          <Field
+            id="eoi-country"
+            label="Country"
+            value={form.country}
+            onChange={setField("country")}
+            error={errors.country}
+            options={[{ value: "", label: "Choose a country" }, ...COUNTRIES.map((c) => ({ value: c, label: c }))]}
+          />
+          <Field id="eoi-phone" label="Phone (optional)" value={form.phone} onChange={setField("phone")} error={errors.phone} />
         </div>
-        <label className="field-check">
-          <input type="checkbox" checked={form.send_link} onChange={(e) => setForm({ ...form, send_link: e.target.checked })} />
-          <span>Email the application link now</span>
-        </label>
+        <CheckField
+          checked={form.send_link}
+          onChange={(send_link) => setForm({ ...form, send_link })}
+          label="Email the application link now"
+        />
       </FormDialog>
 
       <CustomSnackbar {...snackbar} onClose={handleClose} />

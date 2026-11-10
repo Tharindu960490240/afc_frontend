@@ -141,14 +141,13 @@ const TopHeader = ({ onSignOut, isSignedIn }) => {
         {/* LEFT: menu button (phones) + logo */}
         <div className="header-left">
           {isSignedIn && (
-            <button
-              type="button"
+            <IconButton
               className="mobile-menu-icon"
               aria-label="Open menu"
               onClick={() => window.dispatchEvent(new Event(TOGGLE_SIDE_NAV))}
             >
               <Menu />
-            </button>
+            </IconButton>
           )}
           <img
             src={

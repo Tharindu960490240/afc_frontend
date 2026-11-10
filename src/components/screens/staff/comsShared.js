@@ -1,4 +1,5 @@
 import React from "react";
+import { Badge, TONE_BY_STATUS } from "../../ui";
 
 export const STATUS_LABELS = {
   prospect: "Prospect",
@@ -36,7 +37,7 @@ export const SOURCE_LABELS = {
 export const PERSON_ROLE_LABELS = { director: "Director", staff: "Staff", sub_agent: "Sub-agent / branch" };
 
 export const AgentStatusBadge = ({ status }) => (
-  <span className={`badge badge-st-${status}`}>{STATUS_LABELS[status] || status}</span>
+  <Badge tone={TONE_BY_STATUS[status] || "neutral"} label={STATUS_LABELS[status] || status} />
 );
 
 // "5 working days left", "Due today", "2 working days overdue"
@@ -51,8 +52,8 @@ export const decisionText = (state, daysLeft) => {
 
 export const SlaChip = ({ state, daysLeft }) => {
   if (!state) return null;
-  const cls = state === "red" ? "is-red" : state === "amber" ? "is-amber" : state === "done" ? "is-done" : "";
-  return <span className={`sla-chip ${cls}`}>{decisionText(state, daysLeft)}</span>;
+  const tone = state === "red" ? "danger" : state === "amber" ? "warning" : state === "done" ? "quiet" : "success";
+  return <Badge tone={tone} label={decisionText(state, daysLeft)} sx={{ height: "auto", minHeight: 24, "& .MuiChip-label": { whiteSpace: "normal", py: 0.25 } }} />;
 };
 
 // "Days left" for an agreement end date (YYYY-MM-DD)

@@ -35,6 +35,7 @@ import { getInvitation, acceptInvitation } from "../../services/invitationServic
 import { ROLES, ROLE_LABELS, normalizeRole } from "../../const/roles";
 import { COUNTRIES } from "../../const/countries";
 import { getAge, validateSignUp } from "../../utils/validation";
+import { Btn } from "../ui";
 
 // ===============================
 // Wording per role
@@ -282,12 +283,9 @@ const SignUp = () => {
           <p className="signup-subtitle">
             {copy?.next || "Sign in to continue."}
           </p>
-          <button
-            className="button-success"
-            onClick={() => navigate("/signin", { replace: true })}
-          >
+          <Btn kind="primary" size="medium" fullWidth onClick={() => navigate("/signin", { replace: true })}>
             Go to sign in
-          </button>
+          </Btn>
         </div>
       </div>
     );
@@ -475,9 +473,9 @@ const SignUp = () => {
         </div>
 
         <div className="button-group">
-          <button type="submit" className="button-success">
+          <Btn kind="primary" size="medium" type="submit" fullWidth>
             Create account
-          </button>
+          </Btn>
         </div>
 
         <p className="signin-link">

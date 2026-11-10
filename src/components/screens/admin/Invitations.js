@@ -6,6 +6,7 @@ import "../../styles/adminPages.css";
 import LoadingSpinner from "../LoadingSpinner";
 import CustomSnackbar from "../CustomSnackbar";
 import { ConfirmDialog, Pager, formatDate } from "./shared";
+import { Badge, Btn, DataTable, Field, Panel, TONE_BY_STATUS, TabBar, TableCell, TableRow } from "../../ui";
 import {
   listInvitations,
   createInvitation,
@@ -168,150 +169,108 @@ const Invitations = ({ role }) => {
       </div>
 
       {/* ---------- send ---------- */}
-      <form className="admin-panel" onSubmit={handleSubmit} noValidate>
+      <Panel component="form" onSubmit={handleSubmit} noValidate>
         <h2>Invite someone</h2>
         <div className="invite-form">
-          <div className={`admin-field${errors.email ? " has-error" : ""}`}>
-            <label htmlFor="inv-email">Email address</label>
-            <input
-              id="inv-email"
-              type="email"
-              autoComplete="off"
-              placeholder="name@example.com"
-              value={form.email}
-              onChange={setField("email")}
-            />
-            {errors.email && <span className="admin-error">{errors.email}</span>}
-          </div>
+          <Field
+            id="inv-email"
+            label="Email address"
+            type="email"
+            autoComplete="off"
+            placeholder="name@example.com"
+            value={form.email}
+            onChange={setField("email")}
+            error={errors.email}
+          />
 
-          <div className={`admin-field${errors.first_name ? " has-error" : ""}`}>
-            <label htmlFor="inv-name">First name (optional)</label>
-            <input
-              id="inv-name"
-              type="text"
-              autoComplete="off"
-              value={form.first_name}
-              onChange={setField("first_name")}
-            />
-            {errors.first_name && (
-              <span className="admin-error">{errors.first_name}</span>
-            )}
-          </div>
+          <Field
+            id="inv-name"
+            label="First name (optional)"
+            autoComplete="off"
+            value={form.first_name}
+            onChange={setField("first_name")}
+            error={errors.first_name}
+          />
 
-          <div className={`admin-field${errors.role ? " has-error" : ""}`}>
-            <label htmlFor="inv-role">Role</label>
-            <select id="inv-role" value={form.role} onChange={setField("role")}>
-              {roles.map((r) => (
-                <option key={r} value={r}>
-                  {ROLE_LABELS[r]}
-                </option>
-              ))}
-            </select>
-            {errors.role && <span className="admin-error">{errors.role}</span>}
-          </div>
+          <Field
+            id="inv-role"
+            label="Role"
+            value={form.role}
+            onChange={setField("role")}
+            error={errors.role}
+            options={roles.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
+          />
 
-          <button type="submit" className="admin-btn" disabled={sending}>
+          <Btn type="submit" kind="primary" size="medium" disabled={sending}>
             Send invitation
-          </button>
+          </Btn>
         </div>
-      </form>
+      </Panel>
 
       {/* ---------- list ---------- */}
-      <section className="admin-panel">
+      <Panel>
         <div className="admin-toolbar">
           <h2 style={{ margin: 0 }}>Sent invitations</h2>
-          <div className="filter-tabs" role="tablist">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key || "all"}
-                type="button"
-                role="tab"
-                aria-selected={status === tab.key}
-                className={`filter-tab${status === tab.key ? " is-active" : ""}`}
-                onClick={() => {
-                  setStatus(tab.key);
-                  setPage(1);
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <TabBar
+            label="Invitation status"
+            value={status || "all"}
+            onChange={(v) => {
+              setStatus(v === "all" ? "" : v);
+              setPage(1);
+            }}
+            tabs={TABS.map((t) => ({ value: t.key || "all", label: t.label }))}
+          />
         </div>
 
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Sent</th>
-                <th>Expires</th>
-                <th aria-label="Actions" />
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((item) => {
-                const open = item.status === "pending";
-                const canResend = item.status !== "accepted";
-                const busy = busyId === item.id;
-                return (
-                  <tr key={item.id}>
-                    <td data-label="Email">
-                      <div className="cell-main">{item.email}</div>
-                      {item.first_name && (
-                        <div className="cell-sub">{item.first_name}</div>
-                      )}
-                    </td>
-                    <td data-label="Role">{ROLE_LABELS[item.role] || item.role}</td>
-                    <td data-label="Status">
-                      <span className={`badge badge-${item.status}`}>
-                        {item.status.charAt(0).toUpperCase() +
-                          item.status.slice(1)}
-                      </span>
-                    </td>
-                    <td data-label="Sent">{formatDate(item.created_at)}</td>
-                    <td data-label="Expires">{item.status === "accepted" ? "-" : formatDate(item.expires_at)}</td>
-                    <td data-label="">
-                      <div className="cell-actions">
-                        {canResend && (
-                          <button
-                            type="button"
-                            className="row-btn"
-                            disabled={busy}
-                            onClick={() => handleResend(item)}
-                          >
-                            Resend
-                          </button>
-                        )}
-                        {open && (
-                          <button
-                            type="button"
-                            className="row-btn is-danger"
-                            disabled={busy}
-                            onClick={() => setConfirm(item)}
-                          >
-                            Revoke
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {!rows.length && (
-            <div className="admin-empty">
-              {loadingList
-                ? "Loading invitations..."
-                : status
-                  ? "No invitations with this status."
-                  : "No invitations yet. Send the first one above."}
-            </div>
-          )}
-        </div>
+        <DataTable
+          label="Invitations"
+          head={["Email", "Role", "Status", "Sent", "Expires", { label: "Actions" }]}
+          isEmpty={!rows.length}
+          emptyText={
+            loadingList
+              ? "Loading invitations..."
+              : status
+                ? "No invitations with this status."
+                : "No invitations yet. Send the first one above."
+          }
+        >
+          {rows.map((item) => {
+            const open = item.status === "pending";
+            const canResend = item.status !== "accepted";
+            const busy = busyId === item.id;
+            return (
+              <TableRow key={item.id}>
+                <TableCell data-label="Email">
+                  <div className="cell-main">{item.email}</div>
+                  {item.first_name && <div className="cell-sub">{item.first_name}</div>}
+                </TableCell>
+                <TableCell data-label="Role">{ROLE_LABELS[item.role] || item.role}</TableCell>
+                <TableCell data-label="Status">
+                  <Badge
+                    tone={TONE_BY_STATUS[item.status] || "neutral"}
+                    label={item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                  />
+                </TableCell>
+                <TableCell data-label="Sent">{formatDate(item.created_at)}</TableCell>
+                <TableCell data-label="Expires">{item.status === "accepted" ? "-" : formatDate(item.expires_at)}</TableCell>
+                <TableCell data-label="">
+                  <div className="cell-actions">
+                    {canResend && (
+                      <Btn disabled={busy} onClick={() => handleResend(item)}>
+                        Resend
+                      </Btn>
+                    )}
+                    {open && (
+                      <Btn kind="danger" disabled={busy} onClick={() => setConfirm(item)}>
+                        Revoke
+                      </Btn>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </DataTable>
 
         <Pager
           page={page}
@@ -320,7 +279,7 @@ const Invitations = ({ role }) => {
           disabled={loadingList}
           onChange={setPage}
         />
-      </section>
+      </Panel>
 
       <ConfirmDialog
         open={Boolean(confirm)}

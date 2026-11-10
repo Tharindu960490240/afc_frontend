@@ -27,6 +27,7 @@ import {
   downloadAgreementPdf,
 } from "../../../services/agreementService";
 import { getHomeRoute } from "../../../const/roles";
+import { Btn, Notice, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
 const OPEN = ["sent", "submitted", "rejected"];
 
@@ -145,30 +146,30 @@ const MyAgreement = ({ role }) => {
       )}
 
       {!loading && shown && (
-        <section className="admin-panel">
+        <Panel>
           <AgreementSteps status={stepStatus} />
           <h2>{shown.title}</h2>
 
           {open?.status === "rejected" && (
-            <div className="admin-notice is-danger">
+            <Notice severity="error" sx={{ mb: 2 }}>
               <strong>The college asked for changes</strong>
               {open.rejection_reason}
               <br />
               Please read the agreement again and sign it again.
-            </div>
+            </Notice>
           )}
           {open?.note && open.status === "sent" && (
-            <div className="admin-notice">
+            <Notice severity="info" sx={{ mb: 2 }}>
               <strong>Message from the college</strong>
               {open.note}
-            </div>
+            </Notice>
           )}
           {open?.status === "submitted" && (
-            <div className="admin-notice is-warning">
+            <Notice severity="warning" sx={{ mb: 2 }}>
               <strong>Waiting for the college to countersign</strong>
               You signed on {formatDateTime(open.agent_signed_at)}. You will get
               an email when it is finished.
-            </div>
+            </Notice>
           )}
           {!open && current?.status === "active" && (
             <div
@@ -185,23 +186,21 @@ const MyAgreement = ({ role }) => {
             </div>
           )}
           {!open && current?.status === "expired" && (
-            <div className="admin-notice is-danger">
+            <Notice severity="error" sx={{ mb: 2 }}>
               <strong>Your agreement has expired</strong>
               It ended on {formatDate(current.expires_at)}. You cannot submit
               new students until a renewal is signed. Please contact the
               college.
-            </div>
+            </Notice>
           )}
 
           {finished && !open && (
             <div className="action-row" style={{ margin: "4px 0 16px" }}>
-              <button
-                type="button"
-                className="row-btn"
+              <Btn
                 onClick={() => downloadFinal(current)}
               >
                 Download signed agreement (PDF)
-              </button>
+              </Btn>
             </div>
           )}
 
@@ -232,17 +231,13 @@ const MyAgreement = ({ role }) => {
                 }. I understand a typed or drawn signature has the same effect as a handwritten one.`}
               />
               <div className="action-row" style={{ marginTop: 14 }}>
-                <button
-                  type="button"
-                  className="admin-btn"
+                <Btn kind="primary" size="medium"
                   onClick={handleSign}
                   disabled={busy}
                 >
                   Sign agreement
-                </button>
-                <button
-                  type="button"
-                  className="row-btn"
+                </Btn>
+                <Btn
                   onClick={async () => {
                     const r = await downloadAgreementPdf(
                       open.id,
@@ -253,7 +248,7 @@ const MyAgreement = ({ role }) => {
                   }}
                 >
                   Download a copy to read (PDF)
-                </button>
+                </Btn>
               </div>
             </div>
           )}
@@ -265,12 +260,12 @@ const MyAgreement = ({ role }) => {
               {formatDate(current.expires_at)} while this one is processed.
             </p>
           )}
-        </section>
+        </Panel>
       )}
 
       {/* ---------- finished documents ---------- */}
       {!loading && current?.files.length > 0 && (
-        <section className="admin-panel">
+        <Panel>
           <h2>Signed documents</h2>
           <ul className="file-list">
             {current.files.map((f) => (
@@ -282,9 +277,7 @@ const MyAgreement = ({ role }) => {
                     {formatDateTime(f.created_at)}
                   </span>
                 </div>
-                <button
-                  type="button"
-                  className="row-btn"
+                <Btn
                   onClick={async () => {
                     const r = await downloadAgreementFile(current.id, f);
                     if (!r.success && r.message)
@@ -292,45 +285,43 @@ const MyAgreement = ({ role }) => {
                   }}
                 >
                   Download
-                </button>
+                </Btn>
               </li>
             ))}
           </ul>
-        </section>
+        </Panel>
       )}
 
       {/* ---------- history ---------- */}
       {!loading && all.length > 0 && (
-        <section className="admin-panel">
+        <Panel>
           <h2>All agreements</h2>
-          <div className="admin-table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Agreement</th>
-                  <th>Status</th>
-                  <th>Sent</th>
-                  <th>Expires</th>
-                  <th aria-label="Download" />
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer className="admin-table-wrap">
+            <Table className="admin-table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Agreement</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Sent</TableCell>
+                  <TableCell>Expires</TableCell>
+                  <TableCell aria-label="Download" />
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {all.map((a) => (
-                  <tr key={a.id}>
-                    <td data-label="Agreement">{a.title}</td>
-                    <td data-label="Status">
+                  <TableRow key={a.id}>
+                    <TableCell data-label="Agreement">{a.title}</TableCell>
+                    <TableCell data-label="Status">
                       <StatusBadge status={a.status} view="agent" />
-                    </td>
-                    <td data-label="Sent">{formatDate(a.sent_at)}</td>
-                    <td data-label="Expires">
+                    </TableCell>
+                    <TableCell data-label="Sent">{formatDate(a.sent_at)}</TableCell>
+                    <TableCell data-label="Expires">
                       {a.expires_at ? formatDate(a.expires_at) : "-"}
-                    </td>
-                    <td data-label="">
+                    </TableCell>
+                    <TableCell data-label="">
                       <div className="cell-actions">
                         {a.final_file_id && (
-                          <button
-                            type="button"
-                            className="row-btn"
+                          <Btn
                             onClick={async () => {
                               const r = await downloadAgreementFile(a.id, {
                                 id: a.final_file_id,
@@ -341,20 +332,20 @@ const MyAgreement = ({ role }) => {
                             }}
                           >
                             Download PDF
-                          </button>
+                          </Btn>
                         )}
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Panel>
       )}
 
       {open && open.events.length > 0 && (
-        <section className="admin-panel">
+        <Panel>
           <h2>Progress</h2>
           <ul className="timeline">
             {open.events.map((e) => (
@@ -365,7 +356,7 @@ const MyAgreement = ({ role }) => {
               </li>
             ))}
           </ul>
-        </section>
+        </Panel>
       )}
 
       <CustomSnackbar {...snackbar} onClose={handleClose} />

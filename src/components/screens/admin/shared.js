@@ -2,6 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Pagination from "@mui/material/Pagination";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import Typography from "@mui/material/Typography";
+import { Badge, Btn, CheckField, Field, TONE_BY_STATUS } from "../../ui";
 
 // 12 Nov 2026
 const toDate = (value) => {
@@ -19,9 +26,9 @@ export const ExportButton = ({ run, onError, label = "Export CSV" }) => {
     if (!res.success && onError) onError(res.message || "Could not export.");
   };
   return (
-    <button type="button" className="row-btn" onClick={click} disabled={busy}>
+    <Btn onClick={click} disabled={busy}>
       {busy ? "Preparing..." : label}
-    </button>
+    </Btn>
   );
 };
 
@@ -59,39 +66,21 @@ export const ConfirmDialog = ({
   onConfirm,
   onCancel,
 }) => (
-  <Dialog
-    open={open}
-    onClose={onCancel}
-    maxWidth="xs"
-    fullWidth
-    slotProps={{
-      paper: {
-        style: {
-          background: "var(--card-color)",
-          borderRadius: 14,
-        },
-      },
-    }}
-  >
-    <DialogTitle className="admin-dialog-title">{title}</DialogTitle>
+  <Dialog open={open} onClose={onCancel} maxWidth="xs" fullWidth>
+    <DialogTitle>{title}</DialogTitle>
     <DialogContent>
-      <p className="admin-dialog-text">{text}</p>
+      <Typography sx={{ fontSize: 14, lineHeight: 1.6 }}>{text}</Typography>
     </DialogContent>
-    <div className="admin-dialog-actions">
-      <button type="button" className="row-btn" onClick={onCancel}>
-        Cancel
-      </button>
-      <button
-        type="button"
-        className={`admin-btn${danger ? " is-danger" : ""}`}
-        onClick={onConfirm}
-      >
+    <DialogActions>
+      <Btn onClick={onCancel}>Cancel</Btn>
+      <Btn kind={danger ? "dangerSolid" : "primary"} onClick={onConfirm}>
         {confirmLabel}
-      </button>
-    </div>
+      </Btn>
+    </DialogActions>
   </Dialog>
 );
 
+// "1-20 of 134" with page numbers.
 export const Pager = ({ page, limit, total, onChange, disabled }) => {
   if (!total) return null;
   const pages = Math.max(1, Math.ceil(total / limit));
@@ -103,24 +92,19 @@ export const Pager = ({ page, limit, total, onChange, disabled }) => {
       <span>
         {from}-{to} of {total}
       </span>
-      <div className="admin-pager-buttons">
-        <button
-          type="button"
-          className="row-btn"
-          disabled={disabled || page <= 1}
-          onClick={() => onChange(page - 1)}
-        >
-          Previous
-        </button>
-        <button
-          type="button"
-          className="row-btn"
-          disabled={disabled || page >= pages}
-          onClick={() => onChange(page + 1)}
-        >
-          Next
-        </button>
-      </div>
+      {pages > 1 && (
+        <Pagination
+          count={pages}
+          page={page}
+          disabled={disabled}
+          onChange={(e, p) => onChange(p)}
+          color="primary"
+          shape="rounded"
+          size="small"
+          showFirstButton
+          showLastButton
+        />
+      )}
     </div>
   );
 };
@@ -153,11 +137,7 @@ const STATUS_LABELS = {
 
 export const StatusBadge = ({ status, view = "admin" }) => {
   const key = status || "none";
-  return (
-    <span className={`badge badge-${key}`}>
-      {STATUS_LABELS[view][key] || key}
-    </span>
-  );
+  return <Badge tone={TONE_BY_STATUS[key] || "neutral"} label={STATUS_LABELS[view][key] || key} />;
 };
 
 export const FILE_KIND_LABELS = {
@@ -267,9 +247,9 @@ export const SignaturePad = ({ onChange, disabled = false }) => {
       />
       <div className="sig-pad-bar">
         <span>{hasInk ? "Looks good" : "Draw with your mouse, finger or pen (optional)"}</span>
-        <button type="button" className="row-btn" onClick={clear} disabled={!hasInk}>
+        <Btn onClick={clear} disabled={!hasInk}>
           Clear
-        </button>
+        </Btn>
       </div>
     </div>
   );
@@ -279,31 +259,29 @@ export const SignaturePad = ({ onChange, disabled = false }) => {
 // value: { name, position, image, accepted }. errors: { signed_name, accept, position }
 export const SignatureFields = ({ value, onChange, errors = {}, withPosition = false, statement }) => (
   <div className="sig-fields">
-    <div className={`admin-field${errors.signed_name ? " has-error" : ""}`}>
-      <label htmlFor="sig-name">Type your full name</label>
-      <input
+    <div>
+      <Field
         id="sig-name"
+        label="Type your full name"
         autoComplete="name"
         value={value.name}
-        maxLength={120}
+        inputProps={{ maxLength: 120 }}
         onChange={(e) => onChange({ ...value, name: e.target.value })}
+        error={errors.signed_name}
       />
       {value.name.trim() && <div className="sig-preview" aria-hidden="true">{value.name}</div>}
-      {errors.signed_name && <span className="admin-error">{errors.signed_name}</span>}
     </div>
 
     {withPosition && (
-      <div className={`admin-field${errors.position ? " has-error" : ""}`}>
-        <label htmlFor="sig-position">Your position</label>
-        <input
-          id="sig-position"
-          placeholder="For example: Director"
-          value={value.position}
-          maxLength={120}
-          onChange={(e) => onChange({ ...value, position: e.target.value })}
-        />
-        {errors.position && <span className="admin-error">{errors.position}</span>}
-      </div>
+      <Field
+        id="sig-position"
+        label="Your position"
+        placeholder="For example: Director"
+        value={value.position}
+        inputProps={{ maxLength: 120 }}
+        onChange={(e) => onChange({ ...value, position: e.target.value })}
+        error={errors.position}
+      />
     )}
 
     <div className="admin-field">
@@ -312,17 +290,12 @@ export const SignatureFields = ({ value, onChange, errors = {}, withPosition = f
       {errors.signature_image && <span className="admin-error">{errors.signature_image}</span>}
     </div>
 
-    <div className={`admin-field${errors.accept ? " has-error" : ""}`}>
-      <label className="sig-accept">
-        <input
-          type="checkbox"
-          checked={value.accepted}
-          onChange={(e) => onChange({ ...value, accepted: e.target.checked })}
-        />
-        <span>{statement}</span>
-      </label>
-      {errors.accept && <span className="admin-error">{errors.accept}</span>}
-    </div>
+    <CheckField
+      checked={value.accepted}
+      onChange={(accepted) => onChange({ ...value, accepted })}
+      label={statement}
+      error={errors.accept}
+    />
   </div>
 );
 
@@ -371,13 +344,7 @@ export const FormDialog = ({
   onSubmit,
   onCancel,
 }) => (
-  <Dialog
-    open={open}
-    onClose={onCancel}
-    maxWidth="sm"
-    fullWidth
-    slotProps={{ paper: { style: { background: "var(--card-color)", borderRadius: 14 } } }}
-  >
+  <Dialog open={open} onClose={onCancel} maxWidth="sm" fullWidth>
     <form
       noValidate
       onSubmit={(e) => {
@@ -385,19 +352,17 @@ export const FormDialog = ({
         onSubmit();
       }}
     >
-      <DialogTitle className="admin-dialog-title">{title}</DialogTitle>
+      <DialogTitle>{title}</DialogTitle>
       <DialogContent>
-        {intro && <p className="admin-dialog-text" style={{ marginBottom: 14 }}>{intro}</p>}
-        <div className="dialog-form">{children}</div>
+        {intro && <Typography sx={{ fontSize: 14, lineHeight: 1.6, mb: 2 }}>{intro}</Typography>}
+        <div className="dialog-form" style={{ paddingTop: 6 }}>{children}</div>
       </DialogContent>
-      <div className="admin-dialog-actions">
-        <button type="button" className="row-btn" onClick={onCancel}>
-          Cancel
-        </button>
-        <button type="submit" className={`admin-btn${danger ? " is-danger" : ""}`}>
+      <DialogActions>
+        <Btn onClick={onCancel}>Cancel</Btn>
+        <Btn type="submit" kind={danger ? "dangerSolid" : "primary"}>
           {submitLabel}
-        </button>
-      </div>
+        </Btn>
+      </DialogActions>
     </form>
   </Dialog>
 );
@@ -410,17 +375,12 @@ export const AgreementSteps = ({ status }) => {
   const current = STEP_INDEX[status] ?? 0;
   const finished = status === "active";
   return (
-    <ol className="steps" aria-label="Agreement progress">
-      {STEPS.map((label, i) => {
-        const done = i < current || (finished && i === 3);
-        const now = i === current && !finished;
-        return (
-          <li key={label} className={`step${done ? " is-done" : ""}${now ? " is-current" : ""}`}>
-            <span className="step-dot">{done ? "\u2713" : i + 1}</span>
-            <span className="step-label">{label}</span>
-          </li>
-        );
-      })}
-    </ol>
+    <Stepper activeStep={finished ? STEPS.length : current} alternativeLabel aria-label="Agreement progress" sx={{ mb: 2 }}>
+      {STEPS.map((label) => (
+        <Step key={label}>
+          <StepLabel>{label}</StepLabel>
+        </Step>
+      ))}
+    </Stepper>
   );
 };

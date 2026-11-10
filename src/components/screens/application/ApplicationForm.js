@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import {
   Autocomplete, Checkbox, FormControlLabel, FormControl, FormHelperText, FormLabel,
-  InputAdornment, IconButton, MenuItem, Radio, RadioGroup, TextField,
+  InputAdornment, IconButton, MenuItem, Radio, RadioGroup, Step, StepLabel, Stepper, TextField,
 } from "@mui/material";
 import { Add, Delete, Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -11,6 +11,7 @@ import {
   blankPerson, blankReferee, businessNumberLabel, initialValues, isAustralia,
   stepOfError, stepsFor, toPayload, validateAll, validateStep,
 } from "./applicationModel";
+import { Btn, Notice } from "../../ui";
 
 const CONSENT_TEXT =
   "I agree to Australian Federation College collecting and handling my personal information to manage my registration and our work together, in line with the Australian Privacy Principles.";
@@ -163,9 +164,9 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
           hint: values.is_body_corporate === "yes" ? "Required for a company" : "Only if different from the principal place of business",
         })}
         {values.is_body_corporate === "yes" && !values.registered_office_address && values.principal_address && (
-          <button type="button" className="app-link" onClick={() => setField("registered_office_address", values.principal_address)}>
+          <Btn kind="ghost" onClick={() => setField("registered_office_address", values.principal_address)}>
             Same as the principal place of business
-          </button>
+          </Btn>
         )}
         {text("postal_address", "Postal address", { required: false, multiline: true, minRows: 2, hint: "Leave blank if the same" })}
       </div>
@@ -201,7 +202,7 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
       </div>
 
       <h3 className="app-sub">Directors, staff and sub-agents</h3>
-      {errors.people && (attempted[current] || serverErrors.people) && <div className="app-alert">{errors.people}</div>}
+      {errors.people && (attempted[current] || serverErrors.people) && <Notice severity="error" sx={{ mb: 1.5 }}>{errors.people}</Notice>}
       {values.people.length === 0 && <p className="app-empty">No one added yet.</p>}
       {values.people.map((p, i) => (
         <div className="app-card" key={i}>
@@ -231,10 +232,10 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
           />
         </div>
       ))}
-      <button type="button" className="app-btn app-btn-outline" disabled={values.people.length >= 30}
+      <Btn startIcon={<Add fontSize="small" />} disabled={values.people.length >= 30}
         onClick={() => setValues((s) => ({ ...s, people: [...s.people, blankPerson()] }))}>
-        <Add fontSize="small" /> Add a person
-      </button>
+        Add a person
+      </Btn>
     </>
   );
 
@@ -264,9 +265,9 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
         </div>
       ))}
       {values.referees.length < 3 && (
-        <button type="button" className="app-btn app-btn-outline" onClick={() => setValues((s) => ({ ...s, referees: [...s.referees, blankReferee()] }))}>
-          <Add fontSize="small" /> Add a third referee (optional)
-        </button>
+        <Btn startIcon={<Add fontSize="small" />} onClick={() => setValues((s) => ({ ...s, referees: [...s.referees, blankReferee()] }))}>
+          Add a third referee (optional)
+        </Btn>
       )}
     </>
   );
@@ -301,7 +302,7 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
     <div className="app-card">
       <div className="app-card-head">
         <strong>{title}</strong>
-        <button type="button" className="app-link" onClick={() => setStep(steps.findIndex((s) => s.key === stepKey))}>Edit</button>
+        <Btn kind="ghost" onClick={() => setStep(steps.findIndex((s) => s.key === stepKey))}>Edit</Btn>
       </div>
       {rows}
     </div>
@@ -331,27 +332,26 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
 
   return (
     <div className="app-form" ref={top}>
-      <ol className="app-steps" aria-label="Progress">
-        {steps.map((s, i) => (
-          <li key={s.key} className={i === step ? "active" : i < step ? "done" : ""} aria-current={i === step ? "step" : undefined}>
-            <span className="app-step-num">{i + 1}</span>
-            <span className="app-step-title">{s.title}</span>
-          </li>
+      <Stepper activeStep={step} alternativeLabel className="app-steps" aria-label="Progress" sx={{ mb: 2.5 }}>
+        {steps.map((s) => (
+          <Step key={s.key}>
+            <StepLabel>{s.title}</StepLabel>
+          </Step>
         ))}
-      </ol>
+      </Stepper>
       <p className="app-step-mobile">Step {step + 1} of {steps.length}: <strong>{steps[step].title}</strong></p>
 
-      {banner && <div className="app-alert" role="alert">{banner}</div>}
+      {banner && <Notice severity="error" role="alert" sx={{ mb: 2 }}>{banner}</Notice>}
       <div className="app-body">{body}</div>
 
       <div className="app-actions">
-        <button type="button" className="app-btn app-btn-outline" onClick={back} disabled={step === 0 || busy}>Back</button>
+        <Btn size="medium" onClick={back} disabled={step === 0 || busy}>Back</Btn>
         {current === "review" ? (
-          <button type="button" className="app-btn app-btn-primary" onClick={submit} disabled={busy}>
+          <Btn kind="primary" size="medium" onClick={submit} disabled={busy}>
             {busy ? "Sending..." : "Submit application"}
-          </button>
+          </Btn>
         ) : (
-          <button type="button" className="app-btn app-btn-primary" onClick={next}>Next</button>
+          <Btn kind="primary" size="medium" onClick={next}>Next</Btn>
         )}
       </div>
     </div>

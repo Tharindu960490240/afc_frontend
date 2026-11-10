@@ -9,6 +9,7 @@ import { StatusBadge, formatDate, formatDateTime } from "./admin/shared";
 import { getHomeRoute, ROLE_LABELS, normalizeRole } from "../../const/roles";
 import { getMyProfile, updateMyProfile } from "../../services/authService";
 import { listAgreements } from "../../services/agreementService";
+import { Field, Btn, Panel } from "../ui";
 
 const PHONE_OK = (v) => /^\+?[\d\s()-]+$/.test(v) && v.replace(/\D/g, "").length >= 8 && v.replace(/\D/g, "").length <= 15;
 
@@ -95,17 +96,17 @@ const MyProfile = ({ role }) => {
         <div className="admin-panel admin-empty">{loading ? "Loading your details..." : "Your details could not be loaded."}</div>
       ) : (
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <section className="admin-panel">
+          <Panel>
             <h2>Account</h2>
             <div className="summary-grid">
               <Item label="Email">{u.email}</Item>
               <Item label="Member since">{formatDate(u.created_at)}</Item>
               <Item label="Last sign-in">{formatDateTime(u.last_login_at)}</Item>
             </div>
-          </section>
+          </Panel>
 
           {agent && (
-            <section className="admin-panel">
+            <Panel>
               <h2>Agency</h2>
               <div className="summary-grid">
                 <Item label="Agency">{agent.agency_name}</Item>
@@ -120,42 +121,33 @@ const MyProfile = ({ role }) => {
                 To change your agency details, please contact the college.
               </p>
               <div className="action-row" style={{ marginTop: 14 }}>
-                <Link className="row-btn" to="/agent/agreement">My agreement</Link>
+                <Btn component={Link}  to="/agent/agreement">My agreement</Btn>
               </div>
-            </section>
+            </Panel>
           )}
 
-          <section className="admin-panel">
+          <Panel>
             <h2>Your details</h2>
             <form noValidate onSubmit={save} className="dialog-form">
-              <div className={`admin-field${errors.first_name ? " has-error" : ""}`}>
-                <label htmlFor="pf-first">First name</label>
-                <input id="pf-first" autoComplete="given-name" value={form.first_name} maxLength={50} onChange={set("first_name")} />
-                {errors.first_name && <span className="admin-error">{errors.first_name}</span>}
-              </div>
-              <div className={`admin-field${errors.last_name ? " has-error" : ""}`}>
-                <label htmlFor="pf-last">Last name</label>
-                <input id="pf-last" autoComplete="family-name" value={form.last_name} maxLength={50} onChange={set("last_name")} />
-                {errors.last_name && <span className="admin-error">{errors.last_name}</span>}
-              </div>
-              <div className={`admin-field${errors.phone ? " has-error" : ""}`}>
-                <label htmlFor="pf-phone">Phone</label>
-                <input id="pf-phone" type="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} />
-                {errors.phone && <span className="admin-error">{errors.phone}</span>}
-              </div>
+              <Field id="pf-first" label="First name" autoComplete="given-name" value={form.first_name}
+                inputProps={{ maxLength: 50 }} onChange={set("first_name")} error={errors.first_name} />
+              <Field id="pf-last" label="Last name" autoComplete="family-name" value={form.last_name}
+                inputProps={{ maxLength: 50 }} onChange={set("last_name")} error={errors.last_name} />
+              <Field id="pf-phone" label="Phone" type="tel" autoComplete="tel" value={form.phone}
+                onChange={set("phone")} error={errors.phone} />
               <div className="action-row" style={{ justifyContent: "center" }}>
-                <button type="submit" className="admin-btn" disabled={busy || !changed}>Save changes</button>
+                <Btn kind="primary" size="medium" type="submit"  disabled={busy || !changed}>Save changes</Btn>
               </div>
             </form>
-          </section>
+          </Panel>
 
-          <section className="admin-panel">
+          <Panel>
             <h2>Password</h2>
             <p className="admin-hint">Change your password at any time. You will stay signed in on this device.</p>
             <div className="action-row" style={{ marginTop: 14 }}>
-              <Link className="row-btn" to="/account/password">Change password</Link>
+              <Btn component={Link}  to="/account/password">Change password</Btn>
             </div>
-          </section>
+          </Panel>
         </div>
       )}
 

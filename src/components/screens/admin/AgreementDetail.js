@@ -27,6 +27,7 @@ import {
   downloadAgreementFile,
   downloadAgreementPdf,
 } from "../../../services/agreementService";
+import { Btn, Field, Notice, Panel } from "../../ui";
 
 const todayText = () => new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
 
@@ -145,31 +146,31 @@ const AgreementDetail = () => {
 
       {/* ---------- what needs doing ---------- */}
       {canReview && (
-        <div className="admin-notice is-warning">
+        <Notice severity="warning" sx={{ mb: 2 }}>
           <strong>Waiting for your review</strong>
           Read the agreement below. Countersign it to finish, or send it back with a reason.
-        </div>
+        </Notice>
       )}
       {status === "sent" && (
-        <div className="admin-notice">
+        <Notice severity="info" sx={{ mb: 2 }}>
           <strong>Waiting for the agent to sign</strong>
           The agent has been emailed. We remind them every 3 days.
-        </div>
+        </Notice>
       )}
       {status === "rejected" && (
-        <div className="admin-notice is-danger">
+        <Notice severity="error" sx={{ mb: 2 }}>
           <strong>Sent back to the agent</strong>
           {data.rejection_reason} The agent has to read and sign again.
-        </div>
+        </Notice>
       )}
       {status === "expired" && (
-        <div className="admin-notice is-danger">
+        <Notice severity="error" sx={{ mb: 2 }}>
           <strong>This agreement has expired</strong>
           Send a renewal from the Agents page.
-        </div>
+        </Notice>
       )}
 
-      <section className="admin-panel">
+      <Panel>
         <div className="summary-grid">
           <div className="summary-item">
             <span>Status</span>
@@ -204,38 +205,38 @@ const AgreementDetail = () => {
           <div className="action-row" style={{ marginTop: 20 }}>
             {canReview && (
               <>
-                <button type="button" className="admin-btn" onClick={() => openDialog("approve")}>
+                <Btn kind="primary" size="medium"  onClick={() => openDialog("approve")}>
                   Countersign
-                </button>
-                <button type="button" className="row-btn is-danger" onClick={() => openDialog("reject")}>
+                </Btn>
+                <Btn kind="danger"  onClick={() => openDialog("reject")}>
                   Reject
-                </button>
+                </Btn>
               </>
             )}
             {data.in_portal && (
-              <button type="button" className="row-btn" onClick={handlePdf}>
+              <Btn onClick={handlePdf}>
                 {data.final_file_id ? "Download final PDF" : "Download PDF"}
-              </button>
+              </Btn>
             )}
             {canCancel && (
-              <button type="button" className="row-btn is-danger" onClick={() => openDialog("cancel")}>
+              <Btn kind="danger"  onClick={() => openDialog("cancel")}>
                 {data.stored_status === "active" ? "Terminate" : "Cancel agreement"}
-              </button>
+              </Btn>
             )}
           </div>
         )}
-      </section>
+      </Panel>
 
       {data.in_portal && (
-        <section className="admin-panel">
+        <Panel>
           <h2>Agreement</h2>
           <AgreementDocument blocks={data.document} />
           <SignatureSummary data={data} />
-        </section>
+        </Panel>
       )}
 
       {data.files.length > 0 && (
-      <section className="admin-panel">
+      <Panel>
         <h2>Documents</h2>
         <ul className="file-list">
           {data.files.map((f) => (
@@ -246,16 +247,16 @@ const AgreementDetail = () => {
                   {f.original_name} · {formatBytes(f.size_bytes)} · {formatDateTime(f.created_at)}
                 </span>
               </div>
-              <button type="button" className="row-btn" onClick={() => handleDownload(f)}>
+              <Btn onClick={() => handleDownload(f)}>
                 Download
-              </button>
+              </Btn>
             </li>
           ))}
         </ul>
-      </section>
+      </Panel>
       )}
 
-      <section className="admin-panel">
+      <Panel>
         <h2>History</h2>
         <ul className="timeline">
           {data.events.map((e) => (
@@ -269,7 +270,7 @@ const AgreementDetail = () => {
             </li>
           ))}
         </ul>
-      </section>
+      </Panel>
 
       {/* ---------- dialogs ---------- */}
       <FormDialog
@@ -290,19 +291,22 @@ const AgreementDetail = () => {
           withPosition
           statement="I have read this agreement and I sign it for Australian Federation College. I understand a typed or drawn signature has the same effect as a handwritten one."
         />
-        <div className={`admin-field${errors.effective_date ? " has-error" : ""}`}>
-          <label htmlFor="appr-date">Start date</label>
-          <input id="appr-date" type="date" value={effective} onChange={(e) => setEffective(e.target.value)} />
-          {errors.effective_date && <span className="admin-error">{errors.effective_date}</span>}
-        </div>
-        <div className="admin-field">
-          <label htmlFor="appr-months">Valid for</label>
-          <select id="appr-months" value={months} onChange={(e) => setMonths(e.target.value)}>
-            {[6, 12, 24, 36].map((m) => (
-              <option key={m} value={m}>{m} months</option>
-            ))}
-          </select>
-        </div>
+        <Field
+          id="appr-date"
+          label="Start date"
+          type="date"
+          InputLabelProps={{ shrink: true }}
+          value={effective}
+          onChange={(e) => setEffective(e.target.value)}
+          error={errors.effective_date}
+        />
+        <Field
+          id="appr-months"
+          label="Valid for"
+          value={months}
+          onChange={(e) => setMonths(e.target.value)}
+          options={[6, 12, 24, 36].map((m) => ({ value: m, label: `${m} months` }))}
+        />
       </FormDialog>
 
       <FormDialog
@@ -314,11 +318,15 @@ const AgreementDetail = () => {
         onSubmit={handleReject}
         onCancel={() => setDialog(null)}
       >
-        <div className={`admin-field${errors.reason ? " has-error" : ""}`}>
-          <label htmlFor="rej-reason">Reason</label>
-          <textarea id="rej-reason" value={reason} maxLength={1000} onChange={(e) => setReason(e.target.value)} />
-          {errors.reason && <span className="admin-error">{errors.reason}</span>}
-        </div>
+        <Field
+          id="rej-reason"
+          label="Reason"
+          multiline
+          value={reason}
+          inputProps={{ maxLength: 1000 }}
+          onChange={(e) => setReason(e.target.value)}
+          error={errors.reason}
+        />
       </FormDialog>
 
       <FormDialog
@@ -330,10 +338,14 @@ const AgreementDetail = () => {
         onSubmit={() => run(() => cancelAgreement(id, reason.trim()), "Agreement cancelled.")}
         onCancel={() => setDialog(null)}
       >
-        <div className="admin-field">
-          <label htmlFor="can-reason">Note to the agent (optional)</label>
-          <textarea id="can-reason" value={reason} maxLength={1000} onChange={(e) => setReason(e.target.value)} />
-        </div>
+        <Field
+          id="can-reason"
+          label="Note to the agent (optional)"
+          multiline
+          value={reason}
+          inputProps={{ maxLength: 1000 }}
+          onChange={(e) => setReason(e.target.value)}
+        />
       </FormDialog>
 
       <CustomSnackbar {...snackbar} onClose={handleClose} />

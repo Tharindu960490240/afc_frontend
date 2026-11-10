@@ -8,6 +8,7 @@ import CustomSnackbar from "../CustomSnackbar";
 import { ConfirmDialog, StatusBadge, formatDate, formatDateTime } from "./shared";
 import { getAgent, downloadAgreementFile } from "../../../services/agreementService";
 import { setUserStatus } from "../../../services/adminService";
+import { Badge, Btn, Panel, TONE_BY_STATUS, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
 const ACCOUNT_STATUS = {
   active: "Active",
@@ -126,11 +127,11 @@ const AgentDetail = () => {
       </div>
 
       {/* ---------- account ---------- */}
-      <section className="admin-panel">
+      <Panel>
         <h2>Account</h2>
         <div className="summary-grid">
           <Item label="Status">
-            <span className={`badge badge-${agent.status}`}>{ACCOUNT_STATUS[agent.status] || agent.status}</span>
+            <Badge tone={TONE_BY_STATUS[agent.status] || "neutral"} label={ACCOUNT_STATUS[agent.status] || agent.status} />
             {locked && <span className="badge-days is-soon">locked after failed sign-ins</span>}
           </Item>
           <Item label="Joined">{formatDate(agent.created_at)}</Item>
@@ -161,30 +162,29 @@ const AgentDetail = () => {
 
         <div className="action-row" style={{ marginTop: 18 }}>
           {openAgreement && (
-            <Link className="row-btn" to={`/admin/agreements/${openAgreement.id}`}>
+            <Btn component={Link}  to={`/admin/agreements/${openAgreement.id}`}>
               Open agreement
-            </Link>
+            </Btn>
           )}
           {agent.status === "pending_approval" && (
-            <Link className="row-btn" to="/admin/registrations">
+            <Btn component={Link}  to="/admin/registrations">
               Registrations
-            </Link>
+            </Btn>
           )}
           {canToggle && (
-            <button
-              type="button"
-              className={`row-btn${isActive ? " is-danger" : ""}`}
+            <Btn
+              kind={isActive ? "danger" : "outline"}
               disabled={busy}
               onClick={() => setConfirm(isActive ? "suspended" : "active")}
             >
               {isActive ? "Suspend" : "Reactivate"}
-            </button>
+            </Btn>
           )}
         </div>
-      </section>
+      </Panel>
 
       {/* ---------- contact and business ---------- */}
-      <section className="admin-panel">
+      <Panel>
         <h2>Contact and business</h2>
         <div className="summary-grid">
           <Item label="Email">{agent.email}</Item>
@@ -194,58 +194,58 @@ const AgentDetail = () => {
           <Item label="Country">{agent.country}</Item>
           <Item label="Students submitted">{String(agent.students)}</Item>
         </div>
-      </section>
+      </Panel>
 
       {/* ---------- agreements ---------- */}
-      <section className="admin-panel">
+      <Panel>
         <h2>Agreements</h2>
         {agent.agreements.length === 0 ? (
           <div className="admin-empty">
             No agreement yet. Send one from the <Link className="admin-link" to="/admin/agents">Agents page</Link>.
           </div>
         ) : (
-          <div className="admin-table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Agreement</th>
-                  <th>Status</th>
-                  <th>Sent</th>
-                  <th>Expires</th>
-                  <th aria-label="Actions" />
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer className="admin-table-wrap">
+            <Table className="admin-table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Agreement</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Sent</TableCell>
+                  <TableCell>Expires</TableCell>
+                  <TableCell aria-label="Actions" />
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {agent.agreements.map((a) => (
-                  <tr key={a.id}>
-                    <td data-label="Agreement">{a.title}</td>
-                    <td data-label="Status">
+                  <TableRow key={a.id}>
+                    <TableCell data-label="Agreement">{a.title}</TableCell>
+                    <TableCell data-label="Status">
                       <StatusBadge status={a.status} />
-                    </td>
-                    <td data-label="Sent">{formatDate(a.sent_at)}</td>
-                    <td data-label="Expires">{a.expires_at ? formatDate(a.expires_at) : "-"}</td>
-                    <td data-label="">
+                    </TableCell>
+                    <TableCell data-label="Sent">{formatDate(a.sent_at)}</TableCell>
+                    <TableCell data-label="Expires">{a.expires_at ? formatDate(a.expires_at) : "-"}</TableCell>
+                    <TableCell data-label="">
                       <div className="cell-actions">
                         {a.final_file_id && (
-                          <button type="button" className="row-btn" onClick={() => download(a)}>
+                          <Btn onClick={() => download(a)}>
                             Download PDF
-                          </button>
+                          </Btn>
                         )}
-                        <Link className="row-btn" to={`/admin/agreements/${a.id}`}>
+                        <Btn component={Link}  to={`/admin/agreements/${a.id}`}>
                           View
-                        </Link>
+                        </Btn>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
-      </section>
+      </Panel>
 
       {/* ---------- activity ---------- */}
-      <section className="admin-panel">
+      <Panel>
         <h2>Recent activity</h2>
         {agent.activity.length === 0 ? (
           <div className="admin-empty">Nothing recorded yet.</div>
@@ -265,7 +265,7 @@ const AgentDetail = () => {
             ))}
           </ul>
         )}
-      </section>
+      </Panel>
 
       <ConfirmDialog
         open={Boolean(confirm)}

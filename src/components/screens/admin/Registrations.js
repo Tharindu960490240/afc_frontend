@@ -6,6 +6,7 @@ import "../../styles/adminPages.css";
 import LoadingSpinner from "../LoadingSpinner";
 import CustomSnackbar from "../CustomSnackbar";
 import { FormDialog, Pager, formatDate, formatDateTime } from "./shared";
+import { Btn, DataTable, Field, Panel, TabBar, TableCell, TableRow } from "../../ui";
 import {
   listRegistrations,
   getRegistrationCounts,
@@ -100,114 +101,99 @@ const Registrations = ({ role }) => {
         </p>
       </div>
 
-      <section className="admin-panel">
+      <Panel>
         <div className="admin-toolbar">
-          <div className="filter-tabs" role="tablist">
-            {TABS.map((t) => (
-              <button
-                key={t.key}
-                type="button"
-                role="tab"
-                aria-selected={tab === t.key}
-                className={`filter-tab${tab === t.key ? " is-active" : ""}`}
-                onClick={() => {
-                  setTab(t.key);
-                  setPage(1);
-                }}
-              >
-                {t.label}
-                {counts[t.key] ? ` (${counts[t.key]})` : ""}
-              </button>
-            ))}
-          </div>
+          <TabBar
+            label="Registration status"
+            value={tab}
+            onChange={(v) => {
+              setTab(v);
+              setPage(1);
+            }}
+            tabs={TABS.map((t) => ({ value: t.key, label: `${t.label}${counts[t.key] ? ` (${counts[t.key]})` : ""}` }))}
+          />
         </div>
 
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Agent</th>
-                <th>Agency</th>
-                <th>Country</th>
-                <th>Registered</th>
-                {tab === "rejected" && <th>Reason</th>}
-                <th aria-label="Actions" />
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id}>
-                  <td data-label="Agent">
-                    <div className="cell-main">
-                      {r.first_name} {r.last_name}
-                    </div>
-                    <div className="cell-sub">
-                      {r.email} · {r.phone}
-                    </div>
-                  </td>
-                  <td data-label="Agency">
-                    <div className="cell-main">{r.agency_name}</div>
-                    <div className="cell-sub">{r.business_number || "No business number"}</div>
-                  </td>
-                  <td data-label="Country">{r.country}</td>
-                  <td data-label="Registered">
-                    <div>{formatDate(r.created_at)}</div>
-                    <div className="cell-sub">
-                      {r.email_verified_at ? `Email confirmed ${formatDateTime(r.email_verified_at)}` : "Email not confirmed"}
-                    </div>
-                  </td>
-                  {tab === "rejected" && <td data-label="Reason">{r.rejection_reason || "-"}</td>}
-                  <td data-label="">
-                    {r.status === "pending_approval" && (
-                      <div className="cell-actions">
-                        {r.agent_id && (
-                          <Link to={`/coms/agents/${r.agent_id}`} className="row-btn">
-                            View application
-                          </Link>
-                        )}
-                        <button type="button" className="row-btn is-success" disabled={busy} onClick={() => approve(r)}>
-                          Approve
-                        </button>
-                        <button
-                          type="button"
-                          className="row-btn is-danger"
-                          disabled={busy}
-                          onClick={() => {
-                            setRejecting(r);
-                            setReason("");
-                          }}
-                        >
-                          Reject
-                        </button>
-                      </div>
+        <DataTable
+          label="Registrations"
+          head={[
+            "Agent",
+            "Agency",
+            "Country",
+            "Registered",
+            ...(tab === "rejected" ? ["Reason"] : []),
+            { label: "Actions" },
+          ]}
+          isEmpty={!rows.length}
+          emptyText={
+            loadingList
+              ? "Loading registrations..."
+              : tab === "pending_approval"
+                ? "Nobody is waiting for approval."
+                : tab === "unverified"
+                  ? "No registrations are waiting for an email confirmation."
+                  : "No rejected registrations."
+          }
+        >
+          {rows.map((r) => (
+            <TableRow key={r.id}>
+              <TableCell data-label="Agent">
+                <div className="cell-main">
+                  {r.first_name} {r.last_name}
+                </div>
+                <div className="cell-sub">
+                  {r.email} · {r.phone}
+                </div>
+              </TableCell>
+              <TableCell data-label="Agency">
+                <div className="cell-main">{r.agency_name}</div>
+                <div className="cell-sub">{r.business_number || "No business number"}</div>
+              </TableCell>
+              <TableCell data-label="Country">{r.country}</TableCell>
+              <TableCell data-label="Registered">
+                <div>{formatDate(r.created_at)}</div>
+                <div className="cell-sub">
+                  {r.email_verified_at ? `Email confirmed ${formatDateTime(r.email_verified_at)}` : "Email not confirmed"}
+                </div>
+              </TableCell>
+              {tab === "rejected" && <TableCell data-label="Reason">{r.rejection_reason || "-"}</TableCell>}
+              <TableCell data-label="">
+                {r.status === "pending_approval" && (
+                  <div className="cell-actions">
+                    {r.agent_id && (
+                      <Btn component={Link} to={`/coms/agents/${r.agent_id}`}>
+                        View application
+                      </Btn>
                     )}
-                    {r.status !== "pending_approval" && r.agent_id && (
-                      <div className="cell-actions">
-                        <Link to={`/coms/agents/${r.agent_id}`} className="row-btn">
-                          View application
-                        </Link>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!rows.length && (
-            <div className="admin-empty">
-              {loadingList
-                ? "Loading registrations..."
-                : tab === "pending_approval"
-                  ? "Nobody is waiting for approval."
-                  : tab === "unverified"
-                    ? "No registrations are waiting for an email confirmation."
-                    : "No rejected registrations."}
-            </div>
-          )}
-        </div>
+                    <Btn kind="success" disabled={busy} onClick={() => approve(r)}>
+                      Approve
+                    </Btn>
+                    <Btn
+                      kind="danger"
+                      disabled={busy}
+                      onClick={() => {
+                        setRejecting(r);
+                        setReason("");
+                      }}
+                    >
+                      Reject
+                    </Btn>
+                  </div>
+                )}
+                {r.status !== "pending_approval" && r.agent_id && (
+                  <div className="cell-actions">
+                    <Btn component={Link} to={`/coms/agents/${r.agent_id}`}>
+                      View application
+                    </Btn>
+                  </div>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </DataTable>
 
         <Pager page={page} limit={PAGE_SIZE} total={total} disabled={loadingList} onChange={setPage} />
-      </section>
+      </Panel>
 
       <FormDialog
         open={Boolean(rejecting)}
@@ -218,10 +204,14 @@ const Registrations = ({ role }) => {
         onSubmit={confirmReject}
         onCancel={() => setRejecting(null)}
       >
-        <div className="admin-field">
-          <label htmlFor="reg-reason">Note to the agent (optional)</label>
-          <textarea id="reg-reason" value={reason} maxLength={1000} onChange={(e) => setReason(e.target.value)} />
-        </div>
+        <Field
+          id="reg-reason"
+          label="Note to the agent (optional)"
+          multiline
+          value={reason}
+          inputProps={{ maxLength: 1000 }}
+          onChange={(e) => setReason(e.target.value)}
+        />
       </FormDialog>
 
       <CustomSnackbar {...snackbar} onClose={handleClose} />

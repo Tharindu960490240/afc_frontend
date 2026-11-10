@@ -12,6 +12,7 @@ import CustomSnackbar from "./CustomSnackbar";
 import { resetPassword, validateResetToken } from "../../services/authService";
 
 import { useTranslation } from "react-i18next";
+import { Btn } from "../ui";
 
 const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -296,9 +297,9 @@ const ResetPassword = ({ onSignOut }) => {
         </div>
 
         <div className="button-group">
-          <button type="submit" className="button-success">
+          <Btn kind="primary" size="medium" type="submit" fullWidth>
             {t("reset_password_page.resetPassword")}
-          </button>
+          </Btn>
         </div>
 
         <p className="signin-link">

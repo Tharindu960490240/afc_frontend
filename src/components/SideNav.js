@@ -1,3 +1,5 @@
+import ButtonBase from "@mui/material/ButtonBase";
+import IconButton from "@mui/material/IconButton";
 import React, { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -86,14 +88,13 @@ const SideNav = ({ role, user, onSignOut }) => {
             </strong>
             <span>{ROLE_LABELS[key]}</span>
           </div>
-          <button
-            type="button"
+          <IconButton
             className="sidenav-close"
             aria-label="Close menu"
             onClick={() => setMobileOpen(false)}
           >
             <Close />
-          </button>
+          </IconButton>
         </div>
 
         <nav className="sidenav-list">
@@ -129,17 +130,15 @@ const SideNav = ({ role, user, onSignOut }) => {
         </nav>
 
         <div className="sidenav-footer">
-          <button
-            type="button"
+          <ButtonBase
             className="sidenav-item sidenav-signout"
             onClick={handleSignOut}
           >
             <Logout />
             <span className="sidenav-label">Sign out</span>
-          </button>
+          </ButtonBase>
 
-          <button
-            type="button"
+          <ButtonBase
             className="sidenav-item sidenav-collapse"
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Expand menu" : "Collapse menu"}
@@ -147,7 +146,7 @@ const SideNav = ({ role, user, onSignOut }) => {
           >
             {collapsed ? <ChevronRight /> : <ChevronLeft />}
             <span className="sidenav-label">Collapse</span>
-          </button>
+          </ButtonBase>
         </div>
       </aside>
 

@@ -264,3 +264,49 @@
     background: rgba(0, 0, 0, 0.45);
   }
 }
+
+/* ---------- MUI buttons inside the side menu ----------
+   ButtonBase and IconButton bring their own display and alignment, so these lines
+   (one class more specific) keep the menu looking the same as before. */
+.sidenav-item.MuiButtonBase-root {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+.sidenav-item.MuiButtonBase-root.sidenav-signout {
+  display: none;
+}
+.sidenav.is-collapsed .sidenav-item.MuiButtonBase-root {
+  justify-content: center;
+}
+@media (max-width: 800px) {
+  .sidenav-item.MuiButtonBase-root.sidenav-signout {
+    display: flex;
+  }
+  .sidenav-item.MuiButtonBase-root.sidenav-collapse {
+    display: none;
+  }
+  .sidenav.is-collapsed .sidenav-item.MuiButtonBase-root {
+    justify-content: flex-start;
+  }
+  .sidenav-close.MuiIconButton-root {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    color: var(--text-color);
+  }
+}
+.sidenav-close.MuiIconButton-root {
+  display: none;
+}
+@media (max-width: 800px) {
+  .sidenav-close.MuiIconButton-root {
+    display: grid;
+  }
+}

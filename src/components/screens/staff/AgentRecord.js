@@ -33,6 +33,7 @@ import {
   updateAgentPerson,
   updateAgentRecord,
 } from "../../../services/comsService";
+import { Badge, Btn, CheckField, Field, Notice, Panel, TONE_BY_STATUS, TabBar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
 const TABS = [
   { key: "overview", label: "Overview" },
@@ -48,14 +49,6 @@ const Item = ({ label, children }) => (
   <div className="summary-item">
     <span>{label}</span>
     <strong>{children || "-"}</strong>
-  </div>
-);
-
-const Field = ({ id, label, error, children, wide }) => (
-  <div className={`admin-field${error ? " has-error" : ""}${wide ? " is-wide" : ""}`}>
-    <label htmlFor={id}>{label}</label>
-    {children}
-    {error && <span className="admin-error">{error}</span>}
   </div>
 );
 
@@ -113,7 +106,6 @@ const AgentRecord = () => {
   };
   const close = () => setDialog(null);
   const setField = (name) => (e) => setForm({ ...form, [name]: e.target.value });
-  const setCheck = (name) => (e) => setForm({ ...form, [name]: e.target.checked });
 
   // runs an API call, then closes the dialog and reloads on success
   const run = async (call, okMessage) => {
@@ -284,8 +276,8 @@ const AgentRecord = () => {
         <h1>{agent.legal_name}</h1>
         <div className="record-head">
           <AgentStatusBadge status={agent.status} />
-          {agent.tier && <span className="badge badge-quiet">{TIER_LABELS[agent.tier]}</span>}
-          {agent.risk_rating && <span className={`badge badge-risk-${agent.risk_rating}`}>{RISK_LABELS[agent.risk_rating]} risk</span>}
+          {agent.tier && <Badge tone="quiet" label={TIER_LABELS[agent.tier]} />}
+          {agent.risk_rating && <Badge tone={TONE_BY_STATUS[agent.risk_rating]} label={`${RISK_LABELS[agent.risk_rating]} risk`} />}
           <span className="cell-sub">
             {agent.country} · {agent.email}
           </span>
@@ -293,14 +285,14 @@ const AgentRecord = () => {
       </div>
 
       {deleted && (
-        <div className="admin-notice is-danger">
+        <Notice severity="error" sx={{ mb: 2 }}>
           <strong>This agent was deleted on {formatDate(agent.deleted_at)}</strong>
           Reason: {agent.delete_reason || "-"}. It is hidden from the register but nothing is lost.
-        </div>
+        </Notice>
       )}
 
       {!deleted && openApplication && missing.length > 0 && (
-        <div className="admin-notice is-warning">
+        <Notice severity="warning" sx={{ mb: 2 }}>
           <strong>Still missing from the application</strong>
           An agent cannot be approved until these are recorded:
           <ul className="missing-list">
@@ -308,22 +300,20 @@ const AgentRecord = () => {
               <li key={m.key}>{m.label}</li>
             ))}
           </ul>
-        </div>
+        </Notice>
       )}
 
       {/* ---------- actions ---------- */}
-      <section className="admin-panel">
+      <Panel>
         <h2>Actions</h2>
         <div className="action-row">
           {!deleted && perms.edit && (
-            <button type="button" className="row-btn" onClick={() => open("details", detailForm(agent))}>
+            <Btn onClick={() => open("details", detailForm(agent))}>
               Edit details
-            </button>
+            </Btn>
           )}
           {!deleted && perms.portfolio && (
-            <button
-              type="button"
-              className="row-btn"
+            <Btn
               onClick={() =>
                 open("portfolio", {
                   account_manager_id: agent.account_manager_id ? String(agent.account_manager_id) : "",
@@ -335,60 +325,49 @@ const AgentRecord = () => {
               }
             >
               Manager, tier and risk
-            </button>
+            </Btn>
           )}
           {!deleted && moves.length > 0 && (
-            <button type="button" className="row-btn" onClick={() => open("status", { status: moves[0].to, reason: "" })}>
+            <Btn onClick={() => open("status", { status: moves[0].to, reason: "" })}>
               Change status
-            </button>
+            </Btn>
           )}
           {!deleted && perms.create && ["prospect", "applied"].includes(agent.status) && !hasLogin && (
-            <button type="button" className="row-btn" onClick={sendLink} disabled={busy}>
+            <Btn onClick={sendLink} disabled={busy}>
               Send application link
-            </button>
+            </Btn>
           )}
           {!deleted && perms.recordPrisms && ["approved", "onboarding", "active", "under_review"].includes(agent.status) && (
-            <button type="button" className="row-btn" onClick={() => open("milestone", { type: "prisms", date: today() })}>
+            <Btn onClick={() => open("milestone", { type: "prisms", date: today() })}>
               Record PRISMS entry
-            </button>
+            </Btn>
           )}
           {!deleted && perms.recordInduction && ["approved", "onboarding", "active", "under_review"].includes(agent.status) && (
-            <button type="button" className="row-btn" onClick={() => open("milestone", { type: "induction", date: today() })}>
+            <Btn onClick={() => open("milestone", { type: "induction", date: today() })}>
               Record induction
-            </button>
+            </Btn>
           )}
           {!deleted && perms.remove && (
-            <button type="button" className="row-btn is-danger" onClick={() => open("delete", { reason: "" })}>
+            <Btn kind="danger"  onClick={() => open("delete", { reason: "" })}>
               Delete
-            </button>
+            </Btn>
           )}
           {deleted && perms.restore && (
-            <button type="button" className="row-btn is-success" onClick={restore} disabled={busy}>
+            <Btn kind="success"  onClick={restore} disabled={busy}>
               Restore
-            </button>
+            </Btn>
           )}
         </div>
-      </section>
+      </Panel>
 
       {/* ---------- tabs ---------- */}
-      <div className="filter-tabs record-tabs" role="tablist">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            role="tab"
-            aria-selected={tab === t.key}
-            className={`filter-tab${tab === t.key ? " is-active" : ""}`}
-            onClick={() => setTab(t.key)}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="record-tabs">
+        <TabBar label="Agent record sections" value={tab} onChange={setTab} tabs={TABS.map((t) => ({ value: t.key, label: t.label }))} />
       </div>
 
       {tab === "overview" && (
         <>
-          <section className="admin-panel">
+          <Panel>
             <h2>At a glance</h2>
             <div className="summary-grid">
               <Item label="Status">{STATUS_LABELS[agent.status]}</Item>
@@ -414,10 +393,10 @@ const AgentRecord = () => {
             </div>
             {agent.risk_override_reason && <p className="admin-hint" style={{ marginTop: 12 }}>Risk note: {agent.risk_override_reason}</p>}
             {agent.rejection_reason && <p className="admin-hint" style={{ marginTop: 12 }}>Reason for rejection: {agent.rejection_reason}</p>}
-          </section>
+          </Panel>
 
           {sla && (
-            <section className="admin-panel">
+            <Panel>
               <h2>Application timer</h2>
               <div className="summary-grid">
                 <Item label="Received">{formatDate(sla.received_on)}</Item>
@@ -441,10 +420,10 @@ const AgentRecord = () => {
               <p className="admin-hint" style={{ marginTop: 12 }}>
                 Working days skip weekends and Tasmanian and Victorian public holidays. The timer turns amber on working day 7 and red on day 10.
               </p>
-            </section>
+            </Panel>
           )}
 
-          <section className="admin-panel">
+          <Panel>
             <h2>Business details (PRISMS)</h2>
             <div className="summary-grid">
               <Item label="Legal name">{agent.legal_name}</Item>
@@ -459,9 +438,9 @@ const AgentRecord = () => {
               <Item label="Website">{agent.website}</Item>
               <Item label="MARN">{agent.marn}</Item>
             </div>
-          </section>
+          </Panel>
 
-          <section className="admin-panel">
+          <Panel>
             <h2>Application declarations and referees</h2>
             {!agent.application_submitted_at && (
               <p className="admin-hint" style={{ marginTop: 0 }}>
@@ -482,37 +461,37 @@ const AgentRecord = () => {
             {(agent.referees || []).length === 0 ? (
               <div className="admin-empty" style={{ padding: 12 }}>No referees recorded. Two are needed before a decision.</div>
             ) : (
-              <div className="admin-table-wrap">
-                <table className="admin-table">
-                  <thead>
-                    <tr><th>Name</th><th>Organisation</th><th>Email</th><th>Phone</th></tr>
-                  </thead>
-                  <tbody>
+              <TableContainer className="admin-table-wrap">
+                <Table className="admin-table">
+                  <TableHead>
+                    <TableRow><TableCell>Name</TableCell><TableCell>Organisation</TableCell><TableCell>Email</TableCell><TableCell>Phone</TableCell></TableRow>
+                  </TableHead>
+                  <TableBody>
                     {agent.referees.map((r) => (
-                      <tr key={r.id}>
-                        <td>{r.name}</td><td>{r.organisation}</td><td>{r.email}</td><td>{r.phone}</td>
-                      </tr>
+                      <TableRow key={r.id}>
+                        <TableCell>{r.name}</TableCell><TableCell>{r.organisation}</TableCell><TableCell>{r.email}</TableCell><TableCell>{r.phone}</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              </TableContainer>
             )}
-          </section>
+          </Panel>
         </>
       )}
 
       {tab === "people" && (
-        <section className="admin-panel">
+        <Panel>
           <div className="admin-toolbar">
             <h2 style={{ margin: 0 }}>People</h2>
             {!deleted && perms.edit && (
-              <button type="button" className="admin-btn" onClick={() => open("person", EMPTY_PERSON)}>
+              <Btn kind="primary" size="medium"  onClick={() => open("person", EMPTY_PERSON)}>
                 Add person
-              </button>
+              </Btn>
             )}
           </div>
           {agent.is_body_corporate && !agent.persons.some((p) => p.role === "director" && p.active) && (
-            <div className="admin-notice is-warning">At least one director is needed for a body corporate.</div>
+            <Notice severity="warning" sx={{ mb: 2 }}>At least one director is needed for a body corporate.</Notice>
           )}
           {agent.persons.length === 0 ? (
             <div className="admin-empty">No one is recorded yet. Add the directors and the staff who deal with student enrolments.</div>
@@ -526,18 +505,16 @@ const AgentRecord = () => {
                     {p.location ? ` · ${p.location}` : ""}
                   </small>
                   <div className="person-tags">
-                    <span className="badge badge-quiet">{PERSON_ROLE_LABELS[p.role]}</span>
-                    {p.is_primary_contact && <span className="badge badge-quiet">Main contact</span>}
-                    {p.involved_in_enrolments && <span className="badge badge-quiet">Handles enrolments</span>}
-                    {p.marn && <span className="badge badge-quiet">MARN {p.marn}</span>}
-                    {p.portal_user_id && <span className="badge badge-st-active">Has a portal login</span>}
+                    <Badge tone="quiet" label={PERSON_ROLE_LABELS[p.role]} />
+                    {p.is_primary_contact && <Badge tone="quiet" label="Main contact" />}
+                    {p.involved_in_enrolments && <Badge tone="quiet" label="Handles enrolments" />}
+                    {p.marn && <Badge tone="quiet" label={`MARN ${p.marn}`} />}
+                    {p.portal_user_id && <Badge tone="success" label="Has a portal login" />}
                   </div>
                 </div>
                 {!deleted && perms.edit && (
                   <div className="cell-actions">
-                    <button
-                      type="button"
-                      className="row-btn"
+                    <Btn
                       onClick={() =>
                         open(
                           "person",
@@ -551,63 +528,63 @@ const AgentRecord = () => {
                       }
                     >
                       Edit
-                    </button>
+                    </Btn>
                     {!p.portal_user_id && (
-                      <button type="button" className="row-btn is-danger" onClick={() => open("removePerson", { reason: "" }, p)}>
+                      <Btn kind="danger"  onClick={() => open("removePerson", { reason: "" }, p)}>
                         Remove
-                      </button>
+                      </Btn>
                     )}
                   </div>
                 )}
               </div>
             ))
           )}
-        </section>
+        </Panel>
       )}
 
       {tab === "agreements" && (
-        <section className="admin-panel">
+        <Panel>
           <h2>Agreements</h2>
           {agent.agreements.length === 0 ? (
             <div className="admin-empty">
               No agreement yet. Agreements are sent from the <Link className="admin-link" to="/admin/agents">Agents page</Link> once the agent has an account.
             </div>
           ) : (
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Agreement</th>
-                    <th>Status</th>
-                    <th>Sent</th>
-                    <th>Starts</th>
-                    <th>Ends</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <TableContainer className="admin-table-wrap">
+              <Table className="admin-table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Agreement</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Sent</TableCell>
+                    <TableCell>Starts</TableCell>
+                    <TableCell>Ends</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
                   {agent.agreements.map((a) => (
-                    <tr key={a.id}>
-                      <td data-label="Agreement">{a.title}</td>
-                      <td data-label="Status"><StatusBadge status={a.display_status} /></td>
-                      <td data-label="Sent">{formatDate(a.sent_at)}</td>
-                      <td data-label="Starts">{formatDate(a.effective_date)}</td>
-                      <td data-label="Ends">{formatDate(a.expires_at)}</td>
-                    </tr>
+                    <TableRow key={a.id}>
+                      <TableCell data-label="Agreement">{a.title}</TableCell>
+                      <TableCell data-label="Status"><StatusBadge status={a.display_status} /></TableCell>
+                      <TableCell data-label="Sent">{formatDate(a.sent_at)}</TableCell>
+                      <TableCell data-label="Starts">{formatDate(a.effective_date)}</TableCell>
+                      <TableCell data-label="Ends">{formatDate(a.expires_at)}</TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
           )}
           <p className="admin-hint" style={{ marginTop: 12 }}>
             {agent.has_signed_agreement
               ? "A fully signed agreement is in force."
               : "No fully signed agreement is in force. The agent cannot become Active until one is."}
           </p>
-        </section>
+        </Panel>
       )}
 
       {tab === "history" && (
-        <section className="admin-panel">
+        <Panel>
           <h2>Status history</h2>
           <ul className="timeline">
             {agent.history.map((h) => (
@@ -623,11 +600,11 @@ const AgentRecord = () => {
               </li>
             ))}
           </ul>
-        </section>
+        </Panel>
       )}
 
       {tab === "activity" && (
-        <section className="admin-panel">
+        <Panel>
           <h2>Activity</h2>
           {agent.activity.length === 0 ? (
             <div className="admin-empty">Nothing recorded yet.</div>
@@ -645,7 +622,7 @@ const AgentRecord = () => {
               ))}
             </ul>
           )}
-        </section>
+        </Panel>
       )}
 
       {/* ---------- dialogs ---------- */}
@@ -657,16 +634,15 @@ const AgentRecord = () => {
         onSubmit={submitStatus}
         onCancel={close}
       >
-        <Field id="st-status" label="New status" error={errors.status}>
-          <select id="st-status" value={form.status || ""} onChange={setField("status")}>
-            {moves.map((m) => (
-              <option key={m.to} value={m.to}>{STATUS_LABELS[m.to]}</option>
-            ))}
-          </select>
-        </Field>
-        <Field id="st-reason" label={moves.find((m) => m.to === form.status)?.reason ? "Reason (required)" : "Note (optional)"} error={errors.reason}>
-          <textarea id="st-reason" value={form.reason || ""} maxLength={1000} onChange={setField("reason")} />
-        </Field>
+        <Field
+          id="st-status"
+          label="New status"
+          error={errors.status}
+          value={form.status || ""}
+          onChange={setField("status")}
+          options={moves.map((m) => ({ value: m.to, label: STATUS_LABELS[m.to] }))}
+        />
+        <Field id="st-reason" label={moves.find((m) => m.to === form.status)?.reason ? "Reason (required)" : "Note (optional)"} error={errors.reason} multiline value={form.reason || ""} onChange={setField("reason")} inputProps={{ maxLength: 1000 }} />
       </FormDialog>
 
       <FormDialog
@@ -678,48 +654,27 @@ const AgentRecord = () => {
         onCancel={close}
       >
         <div className="field-grid">
-          <Field id="d-name" label="Legal name" error={errors.legal_name} wide>
-            <input id="d-name" value={form.legal_name || ""} maxLength={200} onChange={setField("legal_name")} />
-          </Field>
-          <Field id="d-trading" label="Trading names (separate with commas)" wide>
-            <input id="d-trading" value={form.trading_names || ""} onChange={setField("trading_names")} />
-          </Field>
-          <Field id="d-abn" label="ABN / ACN or business registration no." error={errors.abn_acn}>
-            <input id="d-abn" value={form.abn_acn || ""} maxLength={40} onChange={setField("abn_acn")} />
-          </Field>
-          <Field id="d-country" label="Country" error={errors.country}>
-            <select id="d-country" value={form.country || ""} onChange={setField("country")}>
-              <option value="">Choose a country</option>
-              {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </Field>
-          <label className="field-check is-wide">
-            <input type="checkbox" checked={!!form.is_body_corporate} onChange={setCheck("is_body_corporate")} />
-            <span>This agent is a body corporate (company). A registered office and directors are then required.</span>
-          </label>
-          <Field id="d-principal" label="Principal place of business" error={errors.principal_address} wide>
-            <textarea id="d-principal" value={form.principal_address || ""} maxLength={500} onChange={setField("principal_address")} />
-          </Field>
+          <Field id="d-name" label="Legal name" error={errors.legal_name} wide value={form.legal_name || ""} onChange={setField("legal_name")} inputProps={{ maxLength: 200 }} />
+          <Field id="d-trading" label="Trading names (separate with commas)" wide value={form.trading_names || ""} onChange={setField("trading_names")} />
+          <Field id="d-abn" label="ABN / ACN or business registration no." error={errors.abn_acn} value={form.abn_acn || ""} onChange={setField("abn_acn")} inputProps={{ maxLength: 40 }} />
+          <Field
+            id="d-country"
+            label="Country"
+            error={errors.country}
+            value={form.country || ""}
+            onChange={setField("country")}
+            options={[{ value: "", label: "Choose a country" }, ...COUNTRIES.map((c) => ({ value: c, label: c }))]}
+          />
+          <CheckField wide checked={!!form.is_body_corporate} onChange={(v) => setForm((f) => ({ ...f, is_body_corporate: v }))} label="This agent is a body corporate (company). A registered office and directors are then required." />
+          <Field id="d-principal" label="Principal place of business" error={errors.principal_address} wide multiline value={form.principal_address || ""} onChange={setField("principal_address")} inputProps={{ maxLength: 500 }} />
           {form.is_body_corporate && (
-            <Field id="d-office" label="Registered office address" error={errors.registered_office_address} wide>
-              <textarea id="d-office" value={form.registered_office_address || ""} maxLength={500} onChange={setField("registered_office_address")} />
-            </Field>
+            <Field id="d-office" label="Registered office address" error={errors.registered_office_address} wide multiline value={form.registered_office_address || ""} onChange={setField("registered_office_address")} inputProps={{ maxLength: 500 }} />
           )}
-          <Field id="d-postal" label="Postal address (if different)" error={errors.postal_address} wide>
-            <textarea id="d-postal" value={form.postal_address || ""} maxLength={500} onChange={setField("postal_address")} />
-          </Field>
-          <Field id="d-phone" label="Phone" error={errors.phone}>
-            <input id="d-phone" value={form.phone || ""} onChange={setField("phone")} />
-          </Field>
-          <Field id="d-email" label="Email" error={errors.email}>
-            <input id="d-email" type="email" value={form.email || ""} onChange={setField("email")} />
-          </Field>
-          <Field id="d-web" label="Website" error={errors.website}>
-            <input id="d-web" placeholder="https://" value={form.website || ""} onChange={setField("website")} />
-          </Field>
-          <Field id="d-marn" label="MARN (migration agents only)" error={errors.marn}>
-            <input id="d-marn" value={form.marn || ""} maxLength={20} onChange={setField("marn")} />
-          </Field>
+          <Field id="d-postal" label="Postal address (if different)" error={errors.postal_address} wide multiline value={form.postal_address || ""} onChange={setField("postal_address")} inputProps={{ maxLength: 500 }} />
+          <Field id="d-phone" label="Phone" error={errors.phone} value={form.phone || ""} onChange={setField("phone")} />
+          <Field id="d-email" label="Email" error={errors.email} type="email" value={form.email || ""} onChange={setField("email")} />
+          <Field id="d-web" label="Website" error={errors.website} placeholder="https://" value={form.website || ""} onChange={setField("website")} />
+          <Field id="d-marn" label="MARN (migration agents only)" error={errors.marn} value={form.marn || ""} onChange={setField("marn")} inputProps={{ maxLength: 20 }} />
         </div>
       </FormDialog>
 
@@ -731,31 +686,33 @@ const AgentRecord = () => {
         onCancel={close}
       >
         <div className="field-grid">
-          <Field id="p-mgr" label="Account manager" error={errors.account_manager_id}>
-            <select id="p-mgr" value={form.account_manager_id || ""} onChange={setField("account_manager_id")}>
-              <option value="">No manager yet</option>
-              {meta.staff.map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-            </select>
-          </Field>
-          <Field id="p-tier" label="Tier" error={errors.tier}>
-            <select id="p-tier" value={form.tier || ""} onChange={setField("tier")}>
-              <option value="">Not set</option>
-              {Object.entries(TIER_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
-          </Field>
-          <Field id="p-risk" label="Risk rating" error={errors.risk_rating}>
-            <select id="p-risk" value={form.risk_rating || ""} onChange={setField("risk_rating")}>
-              <option value="">Not set</option>
-              {Object.entries(RISK_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
-          </Field>
-          <Field id="p-days" label="Contact at least every (days)" error={errors.contact_cadence_days}>
-            <input id="p-days" inputMode="numeric" value={form.contact_cadence_days || ""} onChange={setField("contact_cadence_days")} />
-          </Field>
+          <Field
+            id="p-mgr"
+            label="Account manager"
+            error={errors.account_manager_id}
+            value={form.account_manager_id || ""}
+            onChange={setField("account_manager_id")}
+            options={[{ value: "", label: "No manager yet" }, ...meta.staff.map((m) => ({ value: m.id, label: `${m.first_name} ${m.last_name}` }))]}
+          />
+          <Field
+            id="p-tier"
+            label="Tier"
+            error={errors.tier}
+            value={form.tier || ""}
+            onChange={setField("tier")}
+            options={[{ value: "", label: "Not set" }, ...Object.entries(TIER_LABELS).map(([k, v]) => ({ value: k, label: v }))]}
+          />
+          <Field
+            id="p-risk"
+            label="Risk rating"
+            error={errors.risk_rating}
+            value={form.risk_rating || ""}
+            onChange={setField("risk_rating")}
+            options={[{ value: "", label: "Not set" }, ...Object.entries(RISK_LABELS).map(([k, v]) => ({ value: k, label: v }))]}
+          />
+          <Field id="p-days" label="Contact at least every (days)" error={errors.contact_cadence_days} value={form.contact_cadence_days || ""} onChange={setField("contact_cadence_days")} inputProps={{ inputMode: "numeric" }} />
           {form.risk_rating !== (agent.risk_rating || "") && form.risk_rating && (
-            <Field id="p-why" label="Why this risk rating?" error={errors.risk_override_reason} wide>
-              <textarea id="p-why" value={form.risk_override_reason || ""} maxLength={1000} onChange={setField("risk_override_reason")} />
-            </Field>
+            <Field id="p-why" label="Why this risk rating?" error={errors.risk_override_reason} wide multiline value={form.risk_override_reason || ""} onChange={setField("risk_override_reason")} inputProps={{ maxLength: 1000 }} />
           )}
         </div>
       </FormDialog>
@@ -768,33 +725,22 @@ const AgentRecord = () => {
         onCancel={close}
       >
         <div className="field-grid">
-          <Field id="pe-name" label="Name" error={errors.name}>
-            <input id="pe-name" value={form.name || ""} maxLength={120} onChange={setField("name")} />
-          </Field>
-          <Field id="pe-email" label="Email" error={errors.email}>
-            <input id="pe-email" type="email" value={form.email || ""} onChange={setField("email")} />
-          </Field>
-          <Field id="pe-role" label="Role" error={errors.role}>
-            <select id="pe-role" value={form.role || "staff"} onChange={setField("role")}>
-              {Object.entries(PERSON_ROLE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
-          </Field>
-          <Field id="pe-marn" label="MARN (if any)" error={errors.marn}>
-            <input id="pe-marn" value={form.marn || ""} maxLength={20} onChange={setField("marn")} />
-          </Field>
+          <Field id="pe-name" label="Name" error={errors.name} value={form.name || ""} onChange={setField("name")} inputProps={{ maxLength: 120 }} />
+          <Field id="pe-email" label="Email" error={errors.email} type="email" value={form.email || ""} onChange={setField("email")} />
+          <Field
+            id="pe-role"
+            label="Role"
+            error={errors.role}
+            value={form.role || "staff"}
+            onChange={setField("role")}
+            options={Object.entries(PERSON_ROLE_LABELS).map(([k, v]) => ({ value: k, label: v }))}
+          />
+          <Field id="pe-marn" label="MARN (if any)" error={errors.marn} value={form.marn || ""} onChange={setField("marn")} inputProps={{ maxLength: 20 }} />
           {form.role === "sub_agent" && (
-            <Field id="pe-loc" label="Location" error={errors.location} wide>
-              <input id="pe-loc" value={form.location || ""} maxLength={160} onChange={setField("location")} />
-            </Field>
+            <Field id="pe-loc" label="Location" error={errors.location} wide value={form.location || ""} onChange={setField("location")} inputProps={{ maxLength: 160 }} />
           )}
-          <label className="field-check is-wide">
-            <input type="checkbox" checked={!!form.involved_in_enrolments} onChange={setCheck("involved_in_enrolments")} />
-            <span>Involved in student enrolments (the college must record this person in PRISMS)</span>
-          </label>
-          <label className="field-check is-wide">
-            <input type="checkbox" checked={!!form.is_primary_contact} onChange={setCheck("is_primary_contact")} />
-            <span>Main contact for the college</span>
-          </label>
+          <CheckField wide checked={!!form.involved_in_enrolments} onChange={(v) => setForm((f) => ({ ...f, involved_in_enrolments: v }))} label="Involved in student enrolments (the college must record this person in PRISMS)" />
+          <CheckField wide checked={!!form.is_primary_contact} onChange={(v) => setForm((f) => ({ ...f, is_primary_contact: v }))} label="Main contact for the college" />
         </div>
       </FormDialog>
 
@@ -811,9 +757,7 @@ const AgentRecord = () => {
         onSubmit={submitDelete}
         onCancel={close}
       >
-        <Field id="del-reason" label="Reason (required)" error={errors.reason}>
-          <textarea id="del-reason" value={form.reason || ""} maxLength={1000} onChange={setField("reason")} />
-        </Field>
+        <Field id="del-reason" label="Reason (required)" error={errors.reason} multiline value={form.reason || ""} onChange={setField("reason")} inputProps={{ maxLength: 1000 }} />
       </FormDialog>
 
       <FormDialog
@@ -828,9 +772,7 @@ const AgentRecord = () => {
         onSubmit={submitMilestone}
         onCancel={close}
       >
-        <Field id="ms-date" label="Date completed" error={errors.date}>
-          <input id="ms-date" type="date" max={today()} value={form.date || ""} onChange={setField("date")} />
-        </Field>
+        <Field id="ms-date" label="Date completed" error={errors.date} type="date" InputLabelProps={{ shrink: true }} value={form.date || ""} onChange={setField("date")} inputProps={{ max: today() }} />
       </FormDialog>
 
       <CustomSnackbar {...snackbar} onClose={handleClose} />

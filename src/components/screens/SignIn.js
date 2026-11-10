@@ -13,6 +13,7 @@ import { loginUser } from "../../services/authService";
 import { getHomeRoute } from "../../const/roles";
 
 import { useTranslation } from "react-i18next";
+import { Btn } from "../ui";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -218,9 +219,9 @@ const SignIn = ({ onSignIn }) => {
         </div>
 
         <div className="button-group">
-          <button type="submit" className="button-success">
+          <Btn kind="primary" size="medium" type="submit" fullWidth>
             {t("signin_page.signIn")}
-          </button>
+          </Btn>
         </div>
 
         <p className="forgot-password-link">

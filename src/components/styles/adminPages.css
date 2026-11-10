@@ -561,7 +561,7 @@
   flex-direction: column;
   gap: 14px;
 }
-.dialog-form textarea {
+.dialog-form textarea:not(.MuiInputBase-input) {
   min-height: 80px;
   padding: 10px 12px;
   box-sizing: border-box;
@@ -574,7 +574,7 @@
   font-size: 14px;
   width: 100%;
 }
-.dialog-form textarea:focus {
+.dialog-form textarea:not(.MuiInputBase-input):focus {
   outline: 2px solid var(--link-color);
   outline-offset: 1px;
 }

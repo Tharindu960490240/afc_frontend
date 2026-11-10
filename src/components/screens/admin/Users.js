@@ -6,6 +6,7 @@ import "../../styles/adminPages.css";
 import LoadingSpinner from "../LoadingSpinner";
 import CustomSnackbar from "../CustomSnackbar";
 import { ConfirmDialog, ExportButton, Pager, formatDate, formatDateTime } from "./shared";
+import { Badge, Btn, DataTable, FilterField, Panel, TONE_BY_STATUS, TableCell, TableRow } from "../../ui";
 import { exportUsers, listUsers, setUserStatus } from "../../../services/adminService";
 import { ROLES, ROLE_LABELS, getHomeRoute } from "../../../const/roles";
 
@@ -106,49 +107,45 @@ const Users = ({ role, user }) => {
         <p>Everyone who has an account. Suspended people cannot sign in.</p>
       </div>
 
-      <section className="admin-panel">
+      <Panel>
         <div className="admin-toolbar">
           <div className="filter-controls">
-            <input
-              className="admin-input is-search"
+            <FilterField
               type="search"
-              placeholder="Search name or email"
-              aria-label="Search users"
+              label="Search"
+              placeholder="Name or email"
+              sx={{ minWidth: 220 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />
-            <select
-              className="admin-input"
-              aria-label="Filter by role"
+            <FilterField
+              label="Role"
               value={roleFilter}
               onChange={(e) => {
                 setRoleFilter(e.target.value);
                 setPage(1);
               }}
-            >
-              <option value="">All roles</option>
-              {Object.values(ROLES).map((r) => (
-                <option key={r} value={r}>
-                  {ROLE_LABELS[r]}
-                </option>
-              ))}
-            </select>
-            <select
-              className="admin-input"
-              aria-label="Filter by status"
+              options={[
+                { value: "", label: "All roles" },
+                ...Object.values(ROLES).map((r) => ({ value: r, label: ROLE_LABELS[r] })),
+              ]}
+            />
+            <FilterField
+              label="Status"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-            >
-              <option value="">All statuses</option>
-              <option value="active">Active</option>
-              <option value="suspended">Suspended</option>
-              <option value="pending_approval">Waiting for approval</option>
-              <option value="unverified">Email not confirmed</option>
-              <option value="rejected">Rejected</option>
-            </select>
+              options={[
+                { value: "", label: "All statuses" },
+                { value: "active", label: "Active" },
+                { value: "suspended", label: "Suspended" },
+                { value: "pending_approval", label: "Waiting for approval" },
+                { value: "unverified", label: "Email not confirmed" },
+                { value: "rejected", label: "Rejected" },
+              ]}
+            />
           </div>
           <ExportButton
             run={() => exportUsers({ role: roleFilter, status: statusFilter, search })}
@@ -156,74 +153,57 @@ const Users = ({ role, user }) => {
           />
         </div>
 
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Last sign-in</th>
-                <th>Joined</th>
-                <th aria-label="Actions" />
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((u) => {
-                const isSelf = user && u.id === user.id;
-                const isActive = u.status === "active";
-                return (
-                  <tr key={u.id}>
-                    <td data-label="Name">
-                      <div className="cell-main">
-                        {u.first_name} {u.last_name}
-                        {isSelf ? " (you)" : ""}
-                      </div>
-                      <div className="cell-sub">{u.email}</div>
-                    </td>
-                    <td data-label="Role">{ROLE_LABELS[u.role] || u.role}</td>
-                    <td data-label="Status">
-                      <span className={`badge badge-${u.status}`}>
-                        {STATUS_TEXT[u.status] || u.status}
-                      </span>
-                    </td>
-                    <td data-label="Last sign-in">{formatDateTime(u.last_login_at)}</td>
-                    <td data-label="Joined">{formatDate(u.created_at)}</td>
-                    <td data-label="">
-                      <div className="cell-actions">
-                        {["pending_approval", "unverified", "rejected"].includes(u.status) ? (
-                          <Link className="row-btn" to="/admin/registrations">
-                            Registrations
-                          </Link>
-                        ) : (
-                        <button
-                          type="button"
-                          className={`row-btn${isActive ? " is-danger" : ""}`}
-                          disabled={isSelf || working}
-                          title={isSelf ? "You cannot change your own status" : ""}
-                          onClick={() =>
-                            setConfirm({
-                              user: u,
-                              status: isActive ? "suspended" : "active",
-                            })
-                          }
-                        >
-                          {isActive ? "Suspend" : "Reactivate"}
-                        </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {!rows.length && (
-            <div className="admin-empty">
-              {loadingList ? "Loading users..." : "No users match these filters."}
-            </div>
-          )}
-        </div>
+        <DataTable
+          label="Users"
+          head={["Name", "Role", "Status", "Last sign-in", "Joined", { label: "Actions" }]}
+          isEmpty={!rows.length}
+          emptyText={loadingList ? "Loading users..." : "No users match these filters."}
+        >
+          {rows.map((u) => {
+            const isSelf = user && u.id === user.id;
+            const isActive = u.status === "active";
+            return (
+              <TableRow key={u.id}>
+                <TableCell data-label="Name">
+                  <div className="cell-main">
+                    {u.first_name} {u.last_name}
+                    {isSelf ? " (you)" : ""}
+                  </div>
+                  <div className="cell-sub">{u.email}</div>
+                </TableCell>
+                <TableCell data-label="Role">{ROLE_LABELS[u.role] || u.role}</TableCell>
+                <TableCell data-label="Status">
+                  <Badge tone={TONE_BY_STATUS[u.status] || "neutral"} label={STATUS_TEXT[u.status] || u.status} />
+                </TableCell>
+                <TableCell data-label="Last sign-in">{formatDateTime(u.last_login_at)}</TableCell>
+                <TableCell data-label="Joined">{formatDate(u.created_at)}</TableCell>
+                <TableCell data-label="">
+                  <div className="cell-actions">
+                    {["pending_approval", "unverified", "rejected"].includes(u.status) ? (
+                      <Btn component={Link} to="/admin/registrations">
+                        Registrations
+                      </Btn>
+                    ) : (
+                      <Btn
+                        kind={isActive ? "danger" : "outline"}
+                        disabled={isSelf || working}
+                        title={isSelf ? "You cannot change your own status" : ""}
+                        onClick={() =>
+                          setConfirm({
+                            user: u,
+                            status: isActive ? "suspended" : "active",
+                          })
+                        }
+                      >
+                        {isActive ? "Suspend" : "Reactivate"}
+                      </Btn>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </DataTable>
 
         <Pager
           page={page}
@@ -232,7 +212,7 @@ const Users = ({ role, user }) => {
           disabled={loadingList}
           onChange={setPage}
         />
-      </section>
+      </Panel>
 
       <ConfirmDialog
         open={Boolean(confirm)}

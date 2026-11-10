@@ -41,6 +41,7 @@ import Holidays from "./components/screens/staff/Holidays";
 import AuditLog from "./components/screens/staff/AuditLog";
 
 import LoadingSpinner from "./components/screens/LoadingSpinner";
+import { AppTheme } from "./components/ui";
 
 import { get_token, getProfile } from "./services/authService";
 
@@ -197,6 +198,7 @@ const App = () => {
     return <LoadingSpinner open={isLoading} />;
 
   return (
+    <AppTheme>
     <Router>
       <TopHeader onSignOut={handleSignOut} isSignedIn={isSignedIn} />
 
@@ -454,6 +456,7 @@ const App = () => {
 
       <Footer />
     </Router>
+    </AppTheme>
   );
 };
 

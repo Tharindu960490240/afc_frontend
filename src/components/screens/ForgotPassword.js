@@ -12,6 +12,7 @@ import CustomSnackbar from "./CustomSnackbar";
 import { sendPasswordResetLink } from "../../services/authService";
 
 import { useTranslation } from "react-i18next";
+import { Btn } from "../ui";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -144,9 +145,9 @@ const ForgotPassword = () => {
         </div>
 
         <div className="button-group">
-          <button type="submit" className="button-success">
+          <Btn kind="primary" size="medium" type="submit" fullWidth>
             {t("frorgotPassword_page.sendResetLink")}
-          </button>
+          </Btn>
         </div>
 
         <p className="signin-link">

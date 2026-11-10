@@ -9,6 +9,7 @@ import CustomSnackbar from "../CustomSnackbar";
 import { ConfirmDialog, ExportButton, formatDate } from "../admin/shared";
 import { getHomeRoute, ROLES } from "../../../const/roles";
 import { addHoliday, exportHolidays, listHolidays, removeHoliday } from "../../../services/comsService";
+import { Btn, Field, Notice, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
 const STATE = { TAS: "Tasmania", VIC: "Victoria" };
 const EMPTY = { date: "", name: "", jurisdiction: "TAS" };
@@ -102,14 +103,14 @@ const Holidays = ({ role }) => {
       </div>
 
       {missingYears.length > 0 && !loading && (
-        <div className="admin-notice is-warning">
+        <Notice severity="warning" sx={{ mb: 2 }}>
           <strong>Holidays missing for {missingYears.join(" and ")}</strong>
           Until they are added, only weekends are skipped for those years.
-        </div>
+        </Notice>
       )}
 
       {canEdit && (
-        <section className="admin-panel">
+        <Panel>
           <h2>Add a holiday</h2>
           <p className="admin-hint" style={{ marginTop: 0 }}>
             Add local days too, for example Launceston Show Day, or the Friday before the AFL Grand Final when it is announced.
@@ -122,67 +123,74 @@ const Holidays = ({ role }) => {
               add();
             }}
           >
-            <div className={`admin-field${errors.date ? " has-error" : ""}`}>
-              <label htmlFor="h-date">Date</label>
-              <input id="h-date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-              {errors.date && <span className="admin-error">{errors.date}</span>}
-            </div>
-            <div className={`admin-field${errors.name ? " has-error" : ""}`}>
-              <label htmlFor="h-name">Name</label>
-              <input id="h-name" value={form.name} maxLength={120} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              {errors.name && <span className="admin-error">{errors.name}</span>}
-            </div>
-            <div className="admin-field">
-              <label htmlFor="h-state">State</label>
-              <select id="h-state" value={form.jurisdiction} onChange={(e) => setForm({ ...form, jurisdiction: e.target.value })}>
-                {Object.entries(STATE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select>
-            </div>
-            <div className="admin-field">
-              <label aria-hidden="true">&nbsp;</label>
-              <button type="submit" className="admin-btn" disabled={busy}>Add holiday</button>
+            <Field
+              id="h-date"
+              label="Date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              error={errors.date}
+            />
+            <Field
+              id="h-name"
+              label="Name"
+              value={form.name}
+              inputProps={{ maxLength: 120 }}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              error={errors.name}
+            />
+            <Field
+              id="h-state"
+              label="State"
+              value={form.jurisdiction}
+              onChange={(e) => setForm({ ...form, jurisdiction: e.target.value })}
+              options={Object.entries(STATE).map(([k, v]) => ({ value: k, label: v }))}
+            />
+            <div>
+              <Btn kind="primary" size="medium" type="submit" disabled={busy}>Add holiday</Btn>
             </div>
           </form>
-        </section>
+        </Panel>
       )}
 
       {Object.keys(byYear).sort().map((year) => (
-        <section className="admin-panel" key={year}>
+        <Panel key={year}>
           <h2>{year}</h2>
-          <div className="admin-table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Holiday</th>
-                  <th>State</th>
-                  {canEdit && <th aria-label="Actions" />}
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer className="admin-table-wrap">
+            <Table className="admin-table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Holiday</TableCell>
+                  <TableCell>State</TableCell>
+                  {canEdit && <TableCell aria-label="Actions" />}
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {byYear[year].map((h) => (
-                  <tr key={h.id}>
-                    <td data-label="Date">
+                  <TableRow key={h.id}>
+                    <TableCell data-label="Date">
                       {formatDate(h.holiday_date)}
                       <div className="cell-sub">{dayName(h.holiday_date)}</div>
-                    </td>
-                    <td data-label="Holiday">{h.name}</td>
-                    <td data-label="State">{STATE[h.jurisdiction]}</td>
+                    </TableCell>
+                    <TableCell data-label="Holiday">{h.name}</TableCell>
+                    <TableCell data-label="State">{STATE[h.jurisdiction]}</TableCell>
                     {canEdit && (
-                      <td data-label="">
+                      <TableCell data-label="">
                         <div className="cell-actions">
-                          <button type="button" className="row-btn is-danger" onClick={() => setToRemove(h)}>
+                          <Btn kind="danger"  onClick={() => setToRemove(h)}>
                             Remove
-                          </button>
+                          </Btn>
                         </div>
-                      </td>
+                      </TableCell>
                     )}
-                  </tr>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Panel>
       ))}
       {!rows.length && <div className="admin-panel admin-empty">{loading ? "Loading..." : "No holidays yet."}</div>}
 

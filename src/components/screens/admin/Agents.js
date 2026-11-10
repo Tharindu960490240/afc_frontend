@@ -11,6 +11,7 @@ import {
   StatusBadge,
   formatDate,
 } from "./shared";
+import { Btn, DataTable, Field, FilterField, Panel, TabBar, TableCell, TableRow } from "../../ui";
 import { listAgents, sendAgreement } from "../../../services/agreementService";
 import { getHomeRoute } from "../../../const/roles";
 
@@ -120,109 +121,90 @@ const Agents = ({ role }) => {
         <p>Send agreements to agents and see where each one is up to.</p>
       </div>
 
-      <section className="admin-panel">
+      <Panel>
         <div className="admin-toolbar">
-          <div className="filter-tabs" role="tablist">
-            {TABS.map((t) => (
-              <button
-                key={t.key || "all"}
-                type="button"
-                role="tab"
-                aria-selected={tab === t.key}
-                className={`filter-tab${tab === t.key ? " is-active" : ""}`}
-                onClick={() => {
-                  setTab(t.key);
-                  setPage(1);
-                }}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <TabBar
+            label="Agreement status"
+            value={tab || "all"}
+            onChange={(v) => {
+              setTab(v === "all" ? "" : v);
+              setPage(1);
+            }}
+            tabs={TABS.map((t) => ({ value: t.key || "all", label: t.label }))}
+          />
           <div className="filter-controls">
-            <input
-              className="admin-input is-search"
+            <FilterField
               type="search"
-              placeholder="Search name, email or agency"
-              aria-label="Search agents"
+              label="Search"
+              placeholder="Name, email or agency"
+              sx={{ minWidth: 240 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />
           </div>
         </div>
 
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Agent</th>
-                <th>Country</th>
-                <th>Agreement</th>
-                <th>Expires</th>
-                <th aria-label="Actions" />
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((a) => {
-                const inProgress = ["sent", "submitted", "rejected"].includes(a.agreement_status);
-                const soon = a.agreement_status === "active" && Number(a.days_left) <= 60;
-                return (
-                  <tr key={a.id}>
-                    <td data-label="Agent">
-                      <Link className="cell-main cell-link" to={`/admin/agents/${a.id}`}>
-                        {a.first_name} {a.last_name}
-                      </Link>
-                      <div className="cell-sub">
-                        {a.agency_name ? `${a.agency_name} · ` : ""}
-                        {a.email}
-                      </div>
-                    </td>
-                    <td data-label="Country">{a.country || "-"}</td>
-                    <td data-label="Agreement">
-                      <StatusBadge status={a.agreement_status} />
-                    </td>
-                    <td data-label="Expires">
-                      {a.expires_at ? (
-                        <>
-                          {formatDate(a.expires_at)}
-                          {a.agreement_status === "active" && (
-                            <span className={`badge-days${soon ? " is-soon" : ""}`}>
-                              {a.days_left} days
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        "-"
+        <DataTable
+          label="Agents"
+          head={["Agent", "Country", "Agreement", "Expires", { label: "Actions" }]}
+          isEmpty={!rows.length}
+          emptyText={
+            loadingList
+              ? "Loading agents..."
+              : "No agents match this view. Invite agents from the Invitations page."
+          }
+        >
+          {rows.map((a) => {
+            const inProgress = ["sent", "submitted", "rejected"].includes(a.agreement_status);
+            const soon = a.agreement_status === "active" && Number(a.days_left) <= 60;
+            return (
+              <TableRow key={a.id}>
+                <TableCell data-label="Agent">
+                  <Link className="cell-main cell-link" to={`/admin/agents/${a.id}`}>
+                    {a.first_name} {a.last_name}
+                  </Link>
+                  <div className="cell-sub">
+                    {a.agency_name ? `${a.agency_name} · ` : ""}
+                    {a.email}
+                  </div>
+                </TableCell>
+                <TableCell data-label="Country">{a.country || "-"}</TableCell>
+                <TableCell data-label="Agreement">
+                  <StatusBadge status={a.agreement_status} />
+                </TableCell>
+                <TableCell data-label="Expires">
+                  {a.expires_at ? (
+                    <>
+                      {formatDate(a.expires_at)}
+                      {a.agreement_status === "active" && (
+                        <span className={`badge-days${soon ? " is-soon" : ""}`}>
+                          {a.days_left} days
+                        </span>
                       )}
-                    </td>
-                    <td data-label="">
-                      <div className="cell-actions">
-                        <Link className="row-btn" to={`/admin/agents/${a.id}`}>
-                          Details
-                        </Link>
-                        {!inProgress && (
-                          <button type="button" className="row-btn" onClick={() => openSend(a)}>
-                            {a.agreement_status ? "Send renewal" : "Send agreement"}
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {!rows.length && (
-            <div className="admin-empty">
-              {loadingList
-                ? "Loading agents..."
-                : "No agents match this view. Invite agents from the Invitations page."}
-            </div>
-          )}
-        </div>
+                    </>
+                  ) : (
+                    "-"
+                  )}
+                </TableCell>
+                <TableCell data-label="">
+                  <div className="cell-actions">
+                    <Btn component={Link} to={`/admin/agents/${a.id}`}>
+                      Details
+                    </Btn>
+                    {!inProgress && (
+                      <Btn onClick={() => openSend(a)}>
+                        {a.agreement_status ? "Send renewal" : "Send agreement"}
+                      </Btn>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </DataTable>
 
         <Pager page={page} limit={PAGE_SIZE} total={total} disabled={loadingList} onChange={setPage} />
-      </section>
+      </Panel>
 
       <FormDialog
         open={Boolean(target)}
@@ -240,27 +222,36 @@ const Agents = ({ role }) => {
           To change the wording, <Link className="admin-link" to="/admin/agreements/template">edit the agreement template</Link> first.
         </p>
 
-        <div className={`admin-field${errors.title ? " has-error" : ""}`}>
-          <label htmlFor="agr-title">Title</label>
-          <input id="agr-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          {errors.title && <span className="admin-error">{errors.title}</span>}
-        </div>
+        <Field
+          id="agr-title"
+          label="Title"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          error={errors.title}
+        />
 
-        <div className="admin-field">
-          <label htmlFor="agr-months">Valid for</label>
-          <select id="agr-months" value={form.months} onChange={(e) => setForm({ ...form, months: e.target.value })}>
-            <option value="6">6 months</option>
-            <option value="12">12 months (1 year)</option>
-            <option value="24">24 months</option>
-            <option value="36">36 months</option>
-          </select>
-          <span className="admin-hint">Counts from the start date you choose when you countersign it.</span>
-        </div>
+        <Field
+          id="agr-months"
+          label="Valid for"
+          value={form.months}
+          onChange={(e) => setForm({ ...form, months: e.target.value })}
+          helper="Counts from the start date you choose when you countersign it."
+          options={[
+            { value: "6", label: "6 months" },
+            { value: "12", label: "12 months (1 year)" },
+            { value: "24", label: "24 months" },
+            { value: "36", label: "36 months" },
+          ]}
+        />
 
-        <div className="admin-field">
-          <label htmlFor="agr-note">Message to the agent (optional)</label>
-          <textarea id="agr-note" value={form.note} maxLength={1000} onChange={(e) => setForm({ ...form, note: e.target.value })} />
-        </div>
+        <Field
+          id="agr-note"
+          label="Message to the agent (optional)"
+          multiline
+          value={form.note}
+          inputProps={{ maxLength: 1000 }}
+          onChange={(e) => setForm({ ...form, note: e.target.value })}
+        />
       </FormDialog>
 
       <CustomSnackbar {...snackbar} onClose={handleClose} />

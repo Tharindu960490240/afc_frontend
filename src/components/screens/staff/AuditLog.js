@@ -9,6 +9,7 @@ import { ExportButton, Pager, formatDateTime } from "../admin/shared";
 import { ChangeDetail, auditText } from "./comsShared";
 import { getHomeRoute } from "../../../const/roles";
 import { exportAudit, listAudit } from "../../../services/comsService";
+import { FilterField, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
 const PAGE_SIZE = 25;
 const ENTITIES = [
@@ -60,37 +61,52 @@ const AuditLog = ({ role }) => {
         <p>Every change is recorded with who made it, when, and the old and new values. Entries cannot be edited or deleted.</p>
       </div>
 
-      <section className="admin-panel">
+      <Panel>
         <div className="filter-controls" style={{ marginBottom: 14 }}>
-          <select className="admin-input" aria-label="Area" value={entity} onChange={(e) => { setEntity(e.target.value); setPage(1); }}>
-            {ENTITIES.map((x) => <option key={x.key} value={x.key}>{x.label}</option>)}
-          </select>
-          <input className="admin-input" type="date" aria-label="From date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} />
-          <input className="admin-input" type="date" aria-label="To date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} />
+          <FilterField
+            label="Area"
+            value={entity}
+            onChange={(e) => { setEntity(e.target.value); setPage(1); }}
+            options={ENTITIES.map((x) => ({ value: x.key, label: x.label }))}
+          />
+          <FilterField
+            label="From date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={from}
+            onChange={(e) => { setFrom(e.target.value); setPage(1); }}
+          />
+          <FilterField
+            label="To date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={to}
+            onChange={(e) => { setTo(e.target.value); setPage(1); }}
+          />
           <ExportButton
             run={() => exportAudit({ entity_type: entity, from, to })}
             onError={(m) => setSnackbar({ open: true, message: m, severity: "error" })}
           />
         </div>
 
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>When</th>
-                <th>Who</th>
-                <th>What</th>
-              </tr>
-            </thead>
-            <tbody>
+        <TableContainer className="admin-table-wrap">
+          <Table className="admin-table">
+            <TableHead>
+              <TableRow>
+                <TableCell>When</TableCell>
+                <TableCell>Who</TableCell>
+                <TableCell>What</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {rows.map((r) => (
-                <tr key={r.id}>
-                  <td data-label="When">{formatDateTime(r.created_at)}</td>
-                  <td data-label="Who">
+                <TableRow key={r.id}>
+                  <TableCell data-label="When">{formatDateTime(r.created_at)}</TableCell>
+                  <TableCell data-label="Who">
                     {r.actor_first_name ? `${r.actor_first_name} ${r.actor_last_name}` : "System"}
                     {r.ip && <div className="cell-sub">{r.ip}</div>}
-                  </td>
-                  <td data-label="What">
+                  </TableCell>
+                  <TableCell data-label="What">
                     <span className="cell-main">{auditText(r.action)}</span>
                     {r.entity_type === "agent" && r.entity_id && (
                       <div className="cell-sub">
@@ -98,15 +114,15 @@ const AuditLog = ({ role }) => {
                       </div>
                     )}
                     <ChangeDetail before={r.before} after={r.after} metadata={r.metadata} />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
           {!rows.length && <div className="admin-empty">{loading ? "Loading..." : "Nothing recorded for this view."}</div>}
-        </div>
+        </TableContainer>
         <Pager page={page} limit={PAGE_SIZE} total={total} disabled={loading} onChange={setPage} />
-      </section>
+      </Panel>
       <CustomSnackbar {...snackbar} onClose={handleClose} />
     </div>
   );

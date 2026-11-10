@@ -4,6 +4,7 @@ import { Navigate } from "react-router-dom";
 import "../styles/home.css";
 import AuthLogo from "../AuthLogo";
 import { ROLE_HOME, normalizeRole } from "../../const/roles";
+import { Btn } from "../ui";
 
 // /home only forwards people to the right place:
 //   signed out          -> sign in
@@ -24,9 +25,9 @@ const Home = ({ isSignedIn, role, onSignOut }) => {
           Your account is signed in but has no portal role yet. Please contact
           the college so they can finish setting it up.
         </p>
-        <button className="button-success" onClick={onSignOut}>
+        <Btn kind="primary" size="medium" fullWidth onClick={onSignOut}>
           Sign out
-        </button>
+        </Btn>
       </div>
     </div>
   );

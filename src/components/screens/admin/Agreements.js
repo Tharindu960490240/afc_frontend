@@ -5,6 +5,7 @@ import { ArrowBack } from "@mui/icons-material";
 import "../../styles/adminPages.css";
 import CustomSnackbar from "../CustomSnackbar";
 import { ExportButton, Pager, StatusBadge, formatDate } from "./shared";
+import { Btn, DataTable, Panel, TabBar, TableCell, TableRow } from "../../ui";
 import { exportAgreements, listAgreements, downloadAgreementFile } from "../../../services/agreementService";
 import { getHomeRoute } from "../../../const/roles";
 
@@ -62,94 +63,70 @@ const Agreements = ({ role }) => {
         </p>
       </div>
 
-      <section className="admin-panel">
+      <Panel>
         <div className="admin-toolbar">
-          <div className="filter-tabs" role="tablist">
-            {TABS.map((t) => (
-              <button
-                key={t.key || "all"}
-                type="button"
-                role="tab"
-                aria-selected={status === t.key}
-                className={`filter-tab${status === t.key ? " is-active" : ""}`}
-                onClick={() => {
-                  setStatus(t.key);
-                  setPage(1);
-                }}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <TabBar
+            label="Agreement status"
+            value={status || "all"}
+            onChange={(v) => {
+              setStatus(v === "all" ? "" : v);
+              setPage(1);
+            }}
+            tabs={TABS.map((t) => ({ value: t.key || "all", label: t.label }))}
+          />
           <ExportButton
             run={() => exportAgreements({ status })}
             onError={(m) => setSnackbar({ open: true, message: m, severity: "error" })}
           />
         </div>
 
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Agent</th>
-                <th>Agreement</th>
-                <th>Status</th>
-                <th>Sent</th>
-                <th>Expires</th>
-                <th aria-label="Actions" />
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((a) => (
-                <tr key={a.id}>
-                  <td data-label="Agent">
-                    <div className="cell-main">
-                      {a.agent_first_name} {a.agent_last_name}
-                    </div>
-                    <div className="cell-sub">{a.agency_name || a.agent_email}</div>
-                  </td>
-                  <td data-label="Agreement">{a.title}</td>
-                  <td data-label="Status">
-                    <StatusBadge status={a.status} />
-                  </td>
-                  <td data-label="Sent">{formatDate(a.sent_at)}</td>
-                  <td data-label="Expires">{a.expires_at ? formatDate(a.expires_at) : "-"}</td>
-                  <td data-label="">
-                    <div className="cell-actions">
-                      {a.final_file_id && (
-                        <button
-                          type="button"
-                          className="row-btn"
-                          onClick={async () => {
-                            const r = await downloadAgreementFile(a.id, {
-                              id: a.final_file_id,
-                              original_name: `AGR-${String(a.id).padStart(5, "0")} signed.pdf`,
-                            });
-                            if (!r.success)
-                              setSnackbar({ open: true, message: r.message || "Could not download the file.", severity: "error" });
-                          }}
-                        >
-                          Download PDF
-                        </button>
-                      )}
-                      <Link className="row-btn" to={`/admin/agreements/${a.id}`} style={{ textDecoration: "none" }}>
-                        {a.status === "submitted" ? "Countersign" : "View"}
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!rows.length && (
-            <div className="admin-empty">
-              {loadingList ? "Loading agreements..." : "No agreements here yet. Send one from the Agents page."}
-            </div>
-          )}
-        </div>
+        <DataTable
+          label="Agreements"
+          head={["Agent", "Agreement", "Status", "Sent", "Expires", { label: "Actions" }]}
+          isEmpty={!rows.length}
+          emptyText={loadingList ? "Loading agreements..." : "No agreements here yet. Send one from the Agents page."}
+        >
+          {rows.map((a) => (
+            <TableRow key={a.id}>
+              <TableCell data-label="Agent">
+                <div className="cell-main">
+                  {a.agent_first_name} {a.agent_last_name}
+                </div>
+                <div className="cell-sub">{a.agency_name || a.agent_email}</div>
+              </TableCell>
+              <TableCell data-label="Agreement">{a.title}</TableCell>
+              <TableCell data-label="Status">
+                <StatusBadge status={a.status} />
+              </TableCell>
+              <TableCell data-label="Sent">{formatDate(a.sent_at)}</TableCell>
+              <TableCell data-label="Expires">{a.expires_at ? formatDate(a.expires_at) : "-"}</TableCell>
+              <TableCell data-label="">
+                <div className="cell-actions">
+                  {a.final_file_id && (
+                    <Btn
+                      onClick={async () => {
+                        const r = await downloadAgreementFile(a.id, {
+                          id: a.final_file_id,
+                          original_name: `AGR-${String(a.id).padStart(5, "0")} signed.pdf`,
+                        });
+                        if (!r.success)
+                          setSnackbar({ open: true, message: r.message || "Could not download the file.", severity: "error" });
+                      }}
+                    >
+                      Download PDF
+                    </Btn>
+                  )}
+                  <Btn component={Link} to={`/admin/agreements/${a.id}`}>
+                    {a.status === "submitted" ? "Countersign" : "View"}
+                  </Btn>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </DataTable>
 
         <Pager page={page} limit={PAGE_SIZE} total={total} disabled={loadingList} onChange={setPage} />
-      </section>
+      </Panel>
 
       <CustomSnackbar {...snackbar} onClose={handleClose} />
     </div>
