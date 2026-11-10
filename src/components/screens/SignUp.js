@@ -35,7 +35,7 @@ import { getInvitation, acceptInvitation } from "../../services/invitationServic
 import { ROLES, ROLE_LABELS, normalizeRole } from "../../const/roles";
 import { COUNTRIES } from "../../const/countries";
 import { getAge, validateSignUp } from "../../utils/validation";
-import { Btn } from "../ui";
+import { Btn, PasswordStrength } from "../ui";
 
 // ===============================
 // Wording per role
@@ -452,6 +452,7 @@ const SignUp = () => {
             InputProps={adornment(Lock)}
           />
         </div>
+        <PasswordStrength value={values.password || ""} sx={{ mb: 2 }} />
 
         {/* Privacy consent */}
         <div className="signup-consent">

@@ -7,7 +7,7 @@ import CustomSnackbar from "./CustomSnackbar";
 import LoadingSpinner from "./LoadingSpinner";
 import { getHomeRoute } from "../../const/roles";
 import { changePassword } from "../../services/authService";
-import { Btn, Field, Panel } from "../ui";
+import { Btn, Field, Panel, PasswordStrength } from "../ui";
 import { IconButton, InputAdornment } from "@mui/material";
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,72}$/;
@@ -94,6 +94,7 @@ const ChangePassword = ({ role }) => {
             value={form.current} onChange={set("current")} error={errors.current} show={show} onToggle={() => setShow(!show)} />
           <PasswordInput id="pw-new" label="New password" autoComplete="new-password"
             value={form.next} onChange={set("next")} error={errors.next} show={show} onToggle={() => setShow(!show)} />
+          <PasswordStrength value={form.next} />
           <PasswordInput id="pw-confirm" label="Confirm new password" autoComplete="new-password"
             value={form.confirm} onChange={set("confirm")} error={errors.confirm} show={show} onToggle={() => setShow(!show)} />
           <p className="admin-hint">You will stay signed in on this device. Any other device will be signed out.</p>

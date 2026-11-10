@@ -19,6 +19,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { theme } from "./theme";
+export { default as PasswordStrength, passwordScore, PASSWORD_RULES } from "./PasswordStrength";
 
 // ===============================
 // Theme
@@ -58,6 +59,9 @@ export const Field = ({ label, error, helper, options, multiline, rows, onChange
   const hasBlank = isSelect && options.some((o) => o.value === "");
   return (
     <TextField
+      fullWidth
+      size="small"
+      variant="outlined"
       className={`${wide ? "is-wide " : ""}${className}`.trim() || undefined}
       label={label}
       error={Boolean(error)}

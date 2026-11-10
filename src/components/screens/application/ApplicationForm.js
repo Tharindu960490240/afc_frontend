@@ -11,7 +11,7 @@ import {
   blankPerson, blankReferee, businessNumberLabel, initialValues, isAustralia,
   stepOfError, stepsFor, toPayload, validateAll, validateStep,
 } from "./applicationModel";
-import { Btn, Notice } from "../../ui";
+import { Btn, Notice, PasswordStrength } from "../../ui";
 
 const CONSENT_TEXT =
   "I agree to Australian Federation College collecting and handling my personal information to manage my registration and our work together, in line with the Australian Privacy Principles.";
@@ -122,6 +122,7 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
         })}
         {text("confirmPassword", "Confirm password", { type: showPassword ? "text" : "password", autoComplete: "new-password" })}
       </div>
+      <PasswordStrength value={values.password || ""} sx={{ mb: 1 }} />
     </>
   );
 
