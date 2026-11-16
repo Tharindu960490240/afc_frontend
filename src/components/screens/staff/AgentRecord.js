@@ -20,6 +20,9 @@ import {
   daysUntil,
 } from "./comsShared";
 import { COUNTRIES } from "../../../const/countries";
+import DueDiligencePanel from "./DueDiligencePanel";
+import TasksPanel from "./TasksPanel";
+import { canWorkTask } from "./taskShared";
 import {
   addAgentPerson,
   changeAgentStatus,
@@ -29,6 +32,7 @@ import {
   recordMilestone,
   removeAgentPerson,
   restoreAgentRecord,
+  sendAgentAgreement,
   sendApplicationLink,
   updateAgentPerson,
   updateAgentRecord,
@@ -38,7 +42,9 @@ import { Badge, Btn, CheckField, Field, Notice, Panel, TONE_BY_STATUS, TabBar, T
 const TABS = [
   { key: "overview", label: "Overview" },
   { key: "people", label: "People" },
+  { key: "due_diligence", label: "Due diligence" },
   { key: "agreements", label: "Agreements" },
+  { key: "tasks", label: "Onboarding tasks" },
   { key: "history", label: "Status history" },
   { key: "activity", label: "Activity" },
 ];
@@ -69,7 +75,7 @@ const detailForm = (a) => ({
 
 const EMPTY_PERSON = { name: "", email: "", role: "staff", marn: "", involved_in_enrolments: false, location: "", is_primary_contact: false };
 
-const AgentRecord = () => {
+const AgentRecord = ({ role, user }) => {
   const { id } = useParams();
   const [agent, setAgent] = useState(null);
   const [meta, setMeta] = useState({ staff: [], transitions: {}, permissions: {} });
@@ -243,6 +249,10 @@ const AgentRecord = () => {
   const submitMilestone = () => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(form.date)) return setErrors({ date: "Choose a date" });
     run(() => recordMilestone(agent.id, form.type, form.date), form.type === "prisms" ? "PRISMS entry recorded." : "Induction recorded.");
+  };
+
+  const submitAgreement = () => {
+    run(() => sendAgentAgreement(agent.id, form.note.trim() ? { note: form.note.trim() } : {}), "Agreement sent. The agent has been emailed.");
   };
 
   const sendLink = async () => {
@@ -544,10 +554,19 @@ const AgentRecord = () => {
 
       {tab === "agreements" && (
         <Panel>
-          <h2>Agreements</h2>
+          <div className="admin-toolbar">
+            <h2 style={{ margin: 0 }}>Agreements</h2>
+            {!deleted && perms.sendAgreement && agent.status === "approved" && !agent.agreements.some((a) => ["sent", "submitted", "rejected", "active"].includes(a.status)) && (
+              <Btn kind="primary" size="medium" onClick={() => open("agreement", { note: "" })}>
+                Send agreement
+              </Btn>
+            )}
+          </div>
           {agent.agreements.length === 0 ? (
             <div className="admin-empty">
-              No agreement yet. Agreements are sent from the <Link className="admin-link" to="/admin/agents">Agents page</Link> once the agent has an account.
+              {agent.status === "approved"
+                ? "The agent is approved. Send the agreement from the current template. The agent signs it in the portal, then the CEO countersigns."
+                : "No agreement yet. It can be sent once the agent is approved."}
             </div>
           ) : (
             <TableContainer className="admin-table-wrap">
@@ -581,6 +600,12 @@ const AgentRecord = () => {
               : "No fully signed agreement is in force. The agent cannot become Active until one is."}
           </p>
         </Panel>
+      )}
+
+      {tab === "due_diligence" && <DueDiligencePanel agent={agent} onChanged={load} showMessage={showMessage} />}
+
+      {tab === "tasks" && (
+        <TasksPanel agent={agent} canWork={(t) => canWorkTask(user, role, t)} onChanged={load} showMessage={showMessage} />
       )}
 
       {tab === "history" && (
@@ -629,7 +654,7 @@ const AgentRecord = () => {
       <FormDialog
         open={dialog === "status"}
         title="Change status"
-        intro={`Now: ${STATUS_LABELS[agent.status]}. Only moves you are allowed to make are listed. Approving or rejecting an application is done after due diligence (coming in the next part).`}
+        intro={`Now: ${STATUS_LABELS[agent.status]}. Only moves you are allowed to make are listed. Approving or rejecting an application is a recorded decision made on the Due diligence tab.`}
         submitLabel="Change status"
         onSubmit={submitStatus}
         onCancel={close}
@@ -643,6 +668,17 @@ const AgentRecord = () => {
           options={moves.map((m) => ({ value: m.to, label: STATUS_LABELS[m.to] }))}
         />
         <Field id="st-reason" label={moves.find((m) => m.to === form.status)?.reason ? "Reason (required)" : "Note (optional)"} error={errors.reason} multiline value={form.reason || ""} onChange={setField("reason")} inputProps={{ maxLength: 1000 }} />
+      </FormDialog>
+
+      <FormDialog
+        open={dialog === "agreement"}
+        title="Send the agent agreement"
+        intro="The agreement is written from the current template with the agent's details filled in. The agent is emailed and signs it in the portal. The CEO then countersigns, and onboarding starts."
+        submitLabel="Send agreement"
+        onSubmit={submitAgreement}
+        onCancel={close}
+      >
+        <Field id="ag-note" label="Message to the agent (optional)" multiline value={form.note || ""} onChange={setField("note")} inputProps={{ maxLength: 1000 }} />
       </FormDialog>
 
       <FormDialog

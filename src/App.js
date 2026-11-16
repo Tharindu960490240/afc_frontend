@@ -39,6 +39,8 @@ import AgentRegisterList from "./components/screens/staff/AgentRegister";
 import AgentRecord from "./components/screens/staff/AgentRecord";
 import Holidays from "./components/screens/staff/Holidays";
 import AuditLog from "./components/screens/staff/AuditLog";
+import TaskBoard from "./components/screens/staff/TaskBoard";
+import ReferenceForm from "./components/screens/ReferenceForm";
 
 import LoadingSpinner from "./components/screens/LoadingSpinner";
 import { AppTheme } from "./components/ui";
@@ -67,6 +69,7 @@ const MainBodyWrapper = ({ children, isSignedIn, role, user, onSignOut }) => {
     location.pathname.startsWith("/signup") ||
     location.pathname.startsWith("/register") ||
     location.pathname.startsWith("/verify") ||
+    location.pathname.startsWith("/reference") ||
     location.pathname.startsWith("/forgot-password") ||
     location.pathname.startsWith("/reset-password");
 
@@ -252,7 +255,15 @@ const App = () => {
             path="/coms/agents/:id"
             element={
               <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={STAFF_ROLES}>
-                <AgentRecord />
+                <AgentRecord role={role} user={user} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/coms/tasks"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={STAFF_ROLES}>
+                <TaskBoard role={role} user={user} />
               </ProtectedRoute>
             }
           />
@@ -450,6 +461,7 @@ const App = () => {
             element={<ResetPassword onSignOut={handleSignOut} />}
           />
           <Route path="/verify/:token" element={<VerifyAccount />} />
+          <Route path="/reference/:token" element={<ReferenceForm />} />
           <Route path="*" element={<Navigate to={startPath} replace />} />
         </Routes>
       </MainBodyWrapper>

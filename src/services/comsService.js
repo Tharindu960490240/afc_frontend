@@ -39,3 +39,43 @@ export const listAudit = (params) => apiRequest(`${E.AUDIT}${toQuery(params)}`);
 // ---------- the signed-in agent's own application ----------
 export const getMyApplication = () => apiRequest(API_ENDPOINTS.AGENT_APPLICATION);
 export const submitMyApplication = (payload) => apiRequest(API_ENDPOINTS.AGENT_APPLICATION, { method: "POST", body: payload });
+
+// ---------- Part 2: due diligence, decision, agreement ----------
+// Evidence files travel inside the request as base64 (see the server's upload rules: 3 MB, PDF/JPG/PNG/DOCX/XLSX/EML/MSG).
+export const MAX_FILE_MB = 3;
+export const fileToPayload = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve({ name: file.name, data: String(reader.result).split(",")[1] || "" });
+    reader.onerror = () => reject(new Error("Could not read the file."));
+    reader.readAsDataURL(file);
+  });
+
+export const getDueDiligence = (id) => apiRequest(E.DUE_DILIGENCE(id));
+export const addReferee = (id, payload) => apiRequest(E.REFEREES(id), { method: "POST", body: payload });
+export const updateReferee = (id, rid, payload) => apiRequest(E.REFEREE(id, rid), { method: "PATCH", body: payload });
+export const removeReferee = (id, rid, reason) => apiRequest(E.REFEREE_DELETE(id, rid), { method: "POST", body: { reason } });
+export const requestReference = (id, rid) => apiRequest(E.REFEREE_REQUEST(id, rid), { method: "POST" });
+export const recordPhoneCheck = (id, rid, payload) => apiRequest(E.REFEREE_PHONE(id, rid), { method: "POST", body: payload });
+export const remindReferee = (id, cid) => apiRequest(E.CHECK_REMIND(id, cid), { method: "POST" });
+export const setReferenceOutcome = (id, cid, payload) => apiRequest(E.CHECK_OUTCOME(id, cid), { method: "POST", body: payload });
+export const recordDueDiligenceCheck = (id, payload) => apiRequest(E.DD_CHECKS(id), { method: "POST", body: payload });
+export const recordDeclarations = (id, payload) => apiRequest(E.DD_DECLARATIONS(id), { method: "POST", body: payload });
+export const getRejectionDraft = (id, reason) => apiRequest(E.REJECTION_DRAFT(id), { method: "POST", body: { reason } });
+export const decideAgent = (id, payload) => apiRequest(E.DECISION(id), { method: "POST", body: payload });
+export const sendAgentAgreement = (id, payload) => apiRequest(E.AGENT_AGREEMENT(id), { method: "POST", body: payload || {} });
+export const downloadComsFile = (fileId, name) => apiDownload(E.FILE(fileId), name || "file");
+
+// ---------- Part 2: tasks ----------
+export const getTaskMeta = () => apiRequest(E.TASKS_META);
+export const listTasks = (params) => apiRequest(`${E.TASKS}${toQuery(params)}`);
+export const createTask = (payload) => apiRequest(E.TASKS, { method: "POST", body: payload });
+export const completeTask = (id, payload) => apiRequest(E.TASK_COMPLETE(id), { method: "POST", body: payload });
+export const assignTask = (id, ownerId) => apiRequest(E.TASK_ASSIGN(id), { method: "POST", body: { owner_id: ownerId } });
+export const cancelTask = (id, reason) => apiRequest(E.TASK_CANCEL(id), { method: "POST", body: { reason } });
+export const downloadTaskEvidence = (id, name) => apiDownload(E.TASK_EVIDENCE(id), name || "evidence");
+export const exportTasks = (params) => apiDownload(`${E.TASKS_EXPORT}${toQuery(params)}`, `tasks-${new Date().toLocaleDateString("en-CA")}.csv`);
+
+// ---------- the referee's own page ----------
+export const getReferenceForm = (token) => apiRequest(API_ENDPOINTS.REFERENCE(token));
+export const submitReferenceForm = (token, answers) => apiRequest(API_ENDPOINTS.REFERENCE(token), { method: "POST", body: { answers } });

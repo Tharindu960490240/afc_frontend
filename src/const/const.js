@@ -65,6 +65,7 @@ export const API_ENDPOINTS = {
   },
 
   AGENT_APPLICATION: `${API_BASE_URL}/agent-application`,
+  REFERENCE: (token) => `${API_BASE_URL}/reference/${token}`, // the referee's own page (no sign-in)
 
   COMS: {
     AGENTS: `${API_BASE_URL}/coms/agents`,
@@ -84,6 +85,28 @@ export const API_ENDPOINTS = {
     AUDIT: `${API_BASE_URL}/coms/audit`,
     AUDIT_EXPORT: `${API_BASE_URL}/coms/audit/export`,
     HOLIDAYS_EXPORT: `${API_BASE_URL}/coms/holidays/export`,
+    // Part 2: due diligence, decision, agreement, tasks
+    DUE_DILIGENCE: (id) => `${API_BASE_URL}/coms/agents/${id}/due-diligence`,
+    DD_CHECKS: (id) => `${API_BASE_URL}/coms/agents/${id}/due-diligence/checks`,
+    DD_DECLARATIONS: (id) => `${API_BASE_URL}/coms/agents/${id}/due-diligence/declarations`,
+    REFEREES: (id) => `${API_BASE_URL}/coms/agents/${id}/referees`,
+    REFEREE: (id, rid) => `${API_BASE_URL}/coms/agents/${id}/referees/${rid}`,
+    REFEREE_DELETE: (id, rid) => `${API_BASE_URL}/coms/agents/${id}/referees/${rid}/delete`,
+    REFEREE_REQUEST: (id, rid) => `${API_BASE_URL}/coms/agents/${id}/referees/${rid}/request`,
+    REFEREE_PHONE: (id, rid) => `${API_BASE_URL}/coms/agents/${id}/referees/${rid}/phone-check`,
+    CHECK_REMIND: (id, cid) => `${API_BASE_URL}/coms/agents/${id}/reference-checks/${cid}/remind`,
+    CHECK_OUTCOME: (id, cid) => `${API_BASE_URL}/coms/agents/${id}/reference-checks/${cid}/outcome`,
+    REJECTION_DRAFT: (id) => `${API_BASE_URL}/coms/agents/${id}/rejection-draft`,
+    DECISION: (id) => `${API_BASE_URL}/coms/agents/${id}/decision`,
+    AGENT_AGREEMENT: (id) => `${API_BASE_URL}/coms/agents/${id}/agreement`,
+    FILE: (id) => `${API_BASE_URL}/coms/files/${id}/download`,
+    TASKS: `${API_BASE_URL}/coms/tasks`,
+    TASKS_META: `${API_BASE_URL}/coms/tasks/meta`,
+    TASKS_EXPORT: `${API_BASE_URL}/coms/tasks/export`,
+    TASK_COMPLETE: (id) => `${API_BASE_URL}/coms/tasks/${id}/complete`,
+    TASK_ASSIGN: (id) => `${API_BASE_URL}/coms/tasks/${id}/assign`,
+    TASK_CANCEL: (id) => `${API_BASE_URL}/coms/tasks/${id}/cancel`,
+    TASK_EVIDENCE: (id) => `${API_BASE_URL}/coms/tasks/${id}/evidence`,
   },
 
   USERS: {

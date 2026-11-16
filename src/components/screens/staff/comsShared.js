@@ -84,6 +84,24 @@ export const AUDIT_TEXT = {
   "agent.email_verified": "Confirmed their email",
   "agent.approved": "Registration approved",
   "agent.rejected": "Registration rejected",
+  "agent.referee_added": "Referee added",
+  "agent.referee_updated": "Referee changed",
+  "agent.referee_removed": "Referee removed",
+  "agent.referee_requested": "Reference form sent to a referee",
+  "agent.reference_reminded": "Referee reminded",
+  "agent.reference_received": "Reference received",
+  "agent.reference_phone_recorded": "Phone reference recorded",
+  "agent.reference_outcome_set": "Reference outcome set",
+  "agent.due_diligence_check": "Due diligence check recorded",
+  "agent.declarations_recorded": "Declarations recorded",
+  "agent.onboarding_started": "Onboarding started",
+  "agent.activated": "Agent made Active",
+  "task.created": "Task created",
+  "task.completed": "Task completed",
+  "task.assigned": "Task reassigned",
+  "task.cancelled": "Task cancelled",
+  "task.exported": "Tasks exported",
+  "coms.file_downloaded": "File downloaded",
   "holiday.added": "Public holiday added",
   "holiday.removed": "Public holiday removed",
   "invitation.created": "Invitation sent",
@@ -108,13 +126,15 @@ const FIELD_LABELS = {
   email: "Email", website: "Website", marn: "MARN", account_manager_id: "Account manager", tier: "Tier",
   risk_rating: "Risk rating", risk_override_reason: "Risk reason", contact_cadence_days: "Contact every (days)",
   status: "Status", name: "Name", role: "Role", reason: "Reason", date: "Date",
+  organisation: "Organisation", outcome: "Outcome", abn: "ABN check", marn_check: "MARN check", prisms: "PRISMS check",
+  coi_declared: "Conflict of interest", code_of_ethics: "Code of ethics",
 };
 const show = (v) => (v === null || v === undefined || v === "" ? "(empty)" : Array.isArray(v) ? v.join(", ") : typeof v === "boolean" ? (v ? "Yes" : "No") : String(v));
 
 // Shows "Phone: old -> new" for each changed field
 export const ChangeDetail = ({ before, after, metadata }) => {
   const keys = Array.from(new Set([...Object.keys(before || {}), ...Object.keys(after || {})]));
-  const extra = metadata && metadata.reason ? metadata.reason : null;
+  const extra = metadata && (metadata.reason || metadata.summary || metadata.note) ? metadata.reason || metadata.summary || metadata.note : null;
   if (!keys.length && !extra) return null;
   return (
     <div className="audit-detail">

@@ -43,7 +43,7 @@ const holidaysItem = {
 const auditItem = {
   icon: FactCheck, label: "Audit log", text: "See who changed what, and when.", path: "/coms/audit", ready: true,
 };
-const tasksItem = { icon: Checklist, label: "Tasks", text: "PRISMS, ASQAnet and website deadlines.", path: "/coms/tasks", ready: false };
+const tasksItem = { icon: Checklist, label: "Tasks", text: "PRISMS, ASQAnet, website and induction deadlines.", path: "/coms/tasks", ready: true };
 const leadsItem = { icon: TrackChanges, label: "Leads", text: "Today's leads, response timers and follow-ups.", path: "/coms/leads", ready: false };
 const renewalsItem = { icon: Autorenew, label: "Renewals", text: "Agreements ending in the next 120 days.", path: "/coms/renewals", ready: false };
 const profileItem = {
@@ -58,7 +58,7 @@ const staffMenu = (...items) => [
 const withHome = (menu, home) => menu.map((i) => (i.home ? { ...i, path: home } : i));
 
 export const NAV_ITEMS = {
-  ceo: withHome(staffMenu(registerItem, renewalsItem, holidaysItem, auditItem), "/ceo"),
+  ceo: withHome(staffMenu(registerItem, renewalsItem, tasksItem, holidaysItem, auditItem), "/ceo"),
   director: withHome(staffMenu(registerItem, leadsItem, renewalsItem, tasksItem, holidaysItem), "/director"),
   marketing_officer: withHome(staffMenu(registerItem, leadsItem, renewalsItem, tasksItem, holidaysItem), "/marketing_officer"),
   admissions: withHome(staffMenu(registerItem, leadsItem), "/admissions"),
@@ -72,6 +72,7 @@ export const NAV_ITEMS = {
     { icon: ManageAccounts, label: "Users", text: "See everyone with an account and suspend or reactivate access.", path: "/admin/users", ready: true },
     { icon: Groups, label: "Agents", text: "See each agent and send agreements.", path: "/admin/agents", ready: true },
     registerItem,
+    tasksItem,
     holidaysItem,
     auditItem,
     { icon: Description, label: "Agreements", text: "Countersign agent agreements and edit the agreement template.", path: "/admin/agreements", ready: true, group: "Admissions" },

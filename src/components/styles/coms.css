@@ -269,3 +269,40 @@
 @media (max-width: 600px) {
   .sla-chip { white-space: normal; }
 }
+
+/* ---------- Part 2: due diligence, referees, tasks ---------- */
+.dd-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.dd-head h2 { margin: 0; }
+.dd-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.dd-list li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 4px; border-bottom: 1px solid var(--border-color); color: var(--muted-color); }
+.dd-list li:last-child { border-bottom: none; }
+.dd-list li strong { display: block; color: var(--text-color); font-size: 14px; }
+.dd-list li small { display: block; font-size: 12.5px; margin-top: 2px; }
+.dd-list li svg { margin-top: 1px; flex: none; }
+.dd-list li.is-done svg { color: #2e7d32; }
+.dd-list li.is-failed svg { color: var(--brand-red); }
+.dd-referee { border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
+.dd-referee-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+.dd-referee-head strong { display: block; font-size: 15px; }
+.dd-referee-head small, .dd-none { color: var(--muted-color); font-size: 12.5px; }
+.dd-ref-check { display: grid; grid-template-columns: 1fr auto auto; gap: 8px 12px; align-items: center; padding: 10px 0 0; margin-top: 10px; border-top: 1px dashed var(--border-color); font-size: 14px; }
+.dd-ref-check > span:first-child small { display: block; color: var(--muted-color); font-size: 12.5px; }
+.dd-summary { grid-column: 1 / -1; color: var(--muted-color); font-size: 13px; }
+.dd-check { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+.dd-check:last-child { border-bottom: none; }
+.dd-check strong { display: block; font-size: 14px; }
+.dd-check small { color: var(--muted-color); font-size: 12.5px; }
+.dd-answers { margin: 0; }
+.dd-answers > div { padding: 8px 0; border-bottom: 1px solid var(--border-color); }
+.dd-answers dt { font-size: 13px; color: var(--muted-color); }
+.dd-answers dd { margin: 2px 0 0; font-size: 14.5px; font-weight: 600; }
+.dd-file { display: grid; gap: 4px; font-size: 14px; }
+.dd-file label { font-weight: 600; }
+.dd-file small { color: var(--muted-color); font-size: 12.5px; }
+.dd-file small.is-error { color: var(--brand-red); }
+.reference-page { max-width: 760px; }
+.reference-form { text-align: left; }
+.reference-form h2, .reference-form > .signup-subtitle { text-align: center; }
+.reference-q { margin: 0 0 18px; display: grid; gap: 8px; }
+.reference-actions { margin-top: 10px; text-align: center; }
+@media (max-width: 700px) { .dd-ref-check, .dd-check { grid-template-columns: 1fr; } }
