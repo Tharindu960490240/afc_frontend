@@ -66,6 +66,20 @@ export const decideAgent = (id, payload) => apiRequest(E.DECISION(id), { method:
 export const sendAgentAgreement = (id, payload) => apiRequest(E.AGENT_AGREEMENT(id), { method: "POST", body: payload || {} });
 export const downloadComsFile = (fileId, name) => apiDownload(E.FILE(fileId), name || "file");
 
+// ---------- the agent folder: documents, requests for information, commission and bonus ----------
+export const listDocuments = (id) => apiRequest(E.DOCUMENTS(id));
+export const uploadDocument = (id, payload) => apiRequest(E.DOCUMENTS(id), { method: "POST", body: payload });
+export const reviewDocument = (id, docId, payload) => apiRequest(E.DOCUMENT_REVIEW(id, docId), { method: "POST", body: payload });
+export const removeDocument = (id, docId, reason) => apiRequest(E.DOCUMENT_DELETE(id, docId), { method: "POST", body: { reason } });
+export const downloadDocument = (id, docId, name) => apiDownload(E.DOCUMENT_DOWNLOAD(id, docId), name || "document");
+export const requestInformation = (id, message) => apiRequest(E.REQUEST_INFO(id), { method: "POST", body: { message } });
+export const downloadApplicationPdf = (id, name) => apiDownload(E.APPLICATION_PDF(id), name || "Education Agent Application Form.pdf");
+export const recordTerms = (id, payload) => apiRequest(E.AGENT_TERMS(id), { method: "POST", body: payload });
+export const getMyDocuments = () => apiRequest(E.MY_DOCUMENTS);
+export const uploadMyDocument = (payload) => apiRequest(E.MY_DOCUMENTS, { method: "POST", body: payload });
+export const removeMyDocument = (docId) => apiRequest(E.MY_DOCUMENT_DELETE(docId), { method: "POST", body: {} });
+export const downloadMyDocument = (docId, name) => apiDownload(E.MY_DOCUMENT_DOWNLOAD(docId), name || "document");
+
 // ---------- Part 2: tasks ----------
 export const getTaskMeta = () => apiRequest(E.TASKS_META);
 export const listTasks = (params) => apiRequest(`${E.TASKS}${toQuery(params)}`);

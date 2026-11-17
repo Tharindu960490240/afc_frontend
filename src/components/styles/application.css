@@ -74,3 +74,11 @@
   .app-row span { flex: none; }
   .app-actions .app-btn { min-width: 0; flex: 1; }
 }
+
+/* ---------- AFC form V2.0 additions ---------- */
+.app-inline { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 4px; }
+.app-inline > :first-child { flex: 1; }
+.app-card-tight { padding-bottom: 8px; }
+.app-hint { margin: 0 0 8px; color: var(--muted-color); font-size: 13px; }
+.app-privacy { border: 1px solid var(--border-color); border-radius: 10px; padding: 4px 14px; background: var(--card-muted-bg, rgba(127,127,127,.06)); margin-bottom: 12px; }
+.app-privacy p { margin: 10px 0; font-size: 13.5px; line-height: 1.55; color: var(--muted-color); }

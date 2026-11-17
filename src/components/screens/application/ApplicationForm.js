@@ -8,16 +8,23 @@ import { Add, Delete, Visibility, VisibilityOff } from "@mui/icons-material";
 import "../../styles/application.css";
 import { COUNTRIES } from "../../../const/countries";
 import {
-  blankPerson, blankReferee, businessNumberLabel, initialValues, isAustralia,
+  blankMarket, blankPerson, blankPlace, blankRecruited, blankReferee, blankRegistration, businessNumberLabel, initialValues, isAustralia,
   stepOfError, stepsFor, toPayload, validateAll, validateStep,
 } from "./applicationModel";
 import { Btn, Notice, PasswordStrength } from "../../ui";
 
 const CONSENT_TEXT =
   "I agree to Australian Federation College collecting and handling my personal information to manage my registration and our work together, in line with the Australian Privacy Principles.";
+// Wording follows the AFC Education Agent Application Form V2.0, sections 10 and 11.
 const ETHICS_TEXT =
-  "I agree to act honestly and professionally, to give students accurate and complete information, to declare any conflict of interest, and to follow the National Code of Practice for Providers of Education and Training to Overseas Students and the college's agent code of ethics.";
-const TRUE_TEXT = "I confirm that the information in this application is true and complete, and that I am authorised to apply for this business.";
+  "I understand my responsibilities as an education agent under the National Code 2018 Standard 4 and have a good understanding of the international education system in Australia, including the International Education and Training Code of Ethics. I will give students accurate and complete information and declare any conflict of interest.";
+const TRUE_TEXT = "I declare that the information provided is true and correct, and that I am authorised to apply for this business.";
+const PRIVACY_TEXT = "I agree to the collection, use and disclosure of my personal information as per the Privacy Notice above.";
+const PRIVACY_NOTICE = [
+  "The college is a registered training organisation and is required to collect education agents' personal information. This may be shared with the Australian Government as required for the purposes of:",
+  "promoting compliance with the ESOS Act and the National Code; assisting with the regulation of agents; promoting compliance with the conditions of a particular student visa or visas, or of student visas generally; or facilitating the monitoring and control of immigration.",
+  "Information about education agents can also be accessed by all registered providers through PRISMS and includes the outcome of the enrolments, the percentage of completed CoEs by the education agent, and the number of CoEs created with the education agent's involvement against the total number of CoEs created for the provider.",
+];
 const ROLE_LABEL = { director: "Director", staff: "Staff", sub_agent: "Sub-agent" };
 
 // mode "public": website page with an account step. mode "portal": an invited agent who is already signed in.
@@ -65,6 +72,11 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
   const next = () => {
     setAttempted((a) => ({ ...a, [current]: true }));
     if (Object.keys(validateStep(current, ctxValues)).length) { scrollTop(); return; }
+    if (current === "business") {
+      // section 2 starts with the number and country already given in section 1
+      setValues((p) => (p.registrations.length === 1 && !p.registrations[0].number && !p.registrations[0].country
+        ? { ...p, registrations: [{ number: p.abn_acn, country: p.country }] } : p));
+    }
     setStep((s) => s + 1);
     setBanner("");
     scrollTop();
@@ -137,6 +149,52 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
     </FormControl>
   );
 
+  // a list of one-line answers (services, memberships)
+  const strRows = (list, label, { min = 0, max = 10, addLabel }) => (
+    <>
+      {values[list].map((v, i) => (
+        <div className="app-inline" key={i}>
+          <TextField
+            className="custom-textfield" size="small" label={`${label} ${i + 1}`} fullWidth value={v}
+            onChange={(e) => { setValues((p) => ({ ...p, [list]: p[list].map((x, j) => (j === i ? e.target.value : x)) })); clearServer(`${list}.${i}`); }}
+            onBlur={() => touch(`${list}.${i}`)} error={show(`${list}.${i}`)} helperText={msg(`${list}.${i}`)}
+          />
+          {values[list].length > min && (
+            <IconButton aria-label={`Remove ${label} ${i + 1}`} onClick={() => setValues((p) => ({ ...p, [list]: p[list].filter((_, j) => j !== i) }))}><Delete /></IconButton>
+          )}
+        </div>
+      ))}
+      {show(list) && <FormHelperText error>{errors[list]}</FormHelperText>}
+      {values[list].length < max && (
+        <Btn startIcon={<Add fontSize="small" />} onClick={() => setValues((p) => ({ ...p, [list]: [...p[list], ""] }))}>{addLabel}</Btn>
+      )}
+    </>
+  );
+  // a list of small cards of fields (offices, partners, markets, registrations ...)
+  const itemRows = (list, blank, render, { min = 0, max = 10, addLabel, empty }) => (
+    <>
+      {values[list].length === 0 && empty && <p className="app-empty">{empty}</p>}
+      {values[list].map((item, i) => (
+        <div className="app-card app-card-tight" key={i}>
+          <div className="app-grid two">{render(i, item)}</div>
+          {values[list].length > min && (
+            <Btn kind="ghost" onClick={() => setValues((p) => ({ ...p, [list]: p[list].filter((_, j) => j !== i) }))} startIcon={<Delete fontSize="small" />}>Remove</Btn>
+          )}
+        </div>
+      ))}
+      {show(list) && <FormHelperText error>{errors[list]}</FormHelperText>}
+      {values[list].length < max && (
+        <Btn startIcon={<Add fontSize="small" />} onClick={() => setValues((p) => ({ ...p, [list]: [...p[list], blank()] }))}>{addLabel}</Btn>
+      )}
+    </>
+  );
+  const placeCards = (list, noun) => itemRows(list, blankPlace, (i) => (
+    <>
+      {text("location", "Location", { list, i, hint: "City and country" })}
+      {text("details", "Details", { list, i, required: false, hint: `About this ${noun}` })}
+    </>
+  ), { addLabel: `Add ${noun}`, empty: `No ${noun}s listed. Leave it empty if you have none.` });
+
   const business = (
     <>
       <p className="app-lead">These details go to the government system the college must report to (PRISMS), so please enter them exactly as registered.</p>
@@ -177,7 +235,42 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
       </div>
       <div className="app-grid two">
         {text("marn", "Agency MARN (if any)", { required: false, hint: "Migration agent number, 7 digits" })}
+        {text("owner_name", "Chief Executive Officer / Owner", { hint: "Full name" })}
       </div>
+      <div className="app-grid two">
+        {text("staff_count", "Number of staff", { type: "number", inputProps: { min: 0 }, hint: "Include yourself" })}
+        {text("years_in_business", "Years the company has existed", { type: "number", inputProps: { min: 0 } })}
+      </div>
+      {yesNo("gst_registered", "Is the company registered for GST?")}
+    </>
+  );
+
+  const operations = (
+    <>
+      <p className="app-lead">What the company does, where it operates, and its registrations (sections 1 and 2 of the college's form).</p>
+      <h3 className="app-sub">Services provided by the company</h3>
+      {strRows("services", "Service", { min: 1, max: 10, addLabel: "Add a service" })}
+      <h3 className="app-sub">Offshore offices</h3>
+      {placeCards("offshore_offices", "office")}
+      <h3 className="app-sub">Sub-contractors</h3>
+      {placeCards("sub_contractors", "sub-contractor")}
+      <h3 className="app-sub">Offshore partners</h3>
+      {placeCards("offshore_partners", "partner")}
+      <h3 className="app-sub">Company registration details</h3>
+      <p className="app-hint">Registration numbers and the country of registration.</p>
+      {itemRows("registrations", blankRegistration, (i, r) => (
+        <>
+          {text("number", "Registration number", { list: "registrations", i })}
+          <Autocomplete
+            options={COUNTRIES} value={r.country || null}
+            onChange={(e, v) => setItem("registrations", i, "country", v || "")} onBlur={() => touch(`registrations.${i}.country`)}
+            renderInput={(params) => (
+              <TextField {...params} className="custom-textfield" size="small" label="Country of registration" required
+                error={show(`registrations.${i}.country`)} helperText={msg(`registrations.${i}.country`)} />
+            )}
+          />
+        </>
+      ), { min: 1, addLabel: "Add a registration" })}
     </>
   );
 
@@ -240,6 +333,55 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
     </>
   );
 
+  const recruited = (list, noun) => itemRows(list, blankRecruited, (i) => (
+    <>
+      {text("sector", noun === "au" ? "Sector (VET or University)" : "Education sector", { list, i })}
+      {text("students", "Number of students recruited", { list, i, type: "number", inputProps: { min: 0 } })}
+    </>
+  ), { addLabel: "Add a row", empty: "None added. Leave it empty if you have no experience here yet." });
+
+  const experience = (
+    <>
+      <p className="app-lead">Your experience recruiting students, and how well you know the Australian education system (sections 3 to 5).</p>
+      <h3 className="app-sub">Students recruited: Australian sectors (VET / University)</h3>
+      {recruited("recruited_australia", "au")}
+      <h3 className="app-sub">Students recruited: all other education sectors</h3>
+      {recruited("recruited_other", "other")}
+      <h3 className="app-sub">Familiarity with the Australian education industry</h3>
+      {yesNo("esos_read", "Have you read and understood the ESOS Act 2000?")}
+      {values.esos_read === "no" && yesNo("esos_intend", "If no, do you intend to familiarise yourself with it?")}
+      {yesNo("national_code_read", "Have you read and understood the National Code 2018?")}
+      {values.national_code_read === "no" && yesNo("national_code_intend", "If no, do you intend to familiarise yourself with it?")}
+      <h3 className="app-sub">Your personal experience</h3>
+      <div className="app-grid">
+        {text("experience_education", "Education industry generally", { multiline: true, minRows: 4, hint: "Your own experience, roles and years" })}
+        {text("experience_other", "Any other major business areas", { required: false, multiline: true, minRows: 3 })}
+      </div>
+    </>
+  );
+
+  const markets = (
+    <>
+      <p className="app-lead">Where you recruit from, the organisations you belong to, and what you will do for the college (sections 6 to 8).</p>
+      <h3 className="app-sub">Current geographical areas</h3>
+      {itemRows("markets", blankMarket, (i) => (
+        <>
+          {text("area", "Geographical area", { list: "markets", i, hint: "For example Kerala, India" })}
+          {text("characteristics", "Characteristics of this area", { list: "markets", i, required: false, hint: "Size, main interests, typical students" })}
+        </>
+      ), { min: 1, max: 15, addLabel: "Add an area" })}
+      <div className="app-grid">
+        {text("potential_markets", "Potential areas from which you would like to recruit", { required: false, multiline: true, minRows: 3 })}
+      </div>
+      <h3 className="app-sub">Professional organisations you are a member of</h3>
+      {strRows("memberships", "Organisation", { max: 10, addLabel: "Add an organisation" })}
+      <h3 className="app-sub">Services to be provided to Australian Federation College</h3>
+      <div className="app-grid">
+        {text("services_to_afc", "Outline of the services", { multiline: true, minRows: 4, hint: "What you will do for the college and its students" })}
+      </div>
+    </>
+  );
+
   const referees = (
     <>
       <p className="app-lead">
@@ -256,13 +398,14 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
             )}
           </div>
           <div className="app-grid two">
-            {text("name", "Full name", { list: "referees", i })}
-            {text("organisation", "Organisation", { list: "referees", i })}
+            {text("organisation", "Company name", { list: "referees", i })}
+            {text("name", "Contact person name", { list: "referees", i })}
           </div>
           <div className="app-grid two">
-            {text("email", "Email", { list: "referees", i, type: "email" })}
+            {text("position", "Contact person position", { list: "referees", i })}
             {text("phone", "Phone", { list: "referees", i, hint: "A number we can call, with country code" })}
           </div>
+          <div className="app-grid">{text("email", "Email", { list: "referees", i, type: "email" })}</div>
         </div>
       ))}
       {values.referees.length < 3 && (
@@ -292,9 +435,19 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
           {text("coi_details", "Please describe it", { multiline: true, minRows: 3, hint: "Who is involved and what the connection is" })}
         </div>
       )}
-      {check("code_of_ethics", ETHICS_TEXT)}
+      <h3 className="app-sub">Privacy notice</h3>
+      <div className="app-privacy">
+        {PRIVACY_NOTICE.map((t, i) => <p key={i}>{t}</p>)}
+      </div>
+      <h3 className="app-sub">Education agent declaration</h3>
       {check("information_true", TRUE_TEXT)}
+      {check("privacy_agreed", PRIVACY_TEXT)}
+      {check("code_of_ethics", ETHICS_TEXT)}
       {mode === "public" && check("consent", CONSENT_TEXT)}
+      <div className="app-grid two">
+        {text("declaration_name", "Name of the Chief Executive Officer / Owner", { hint: "Typing your name signs this declaration" })}
+        <TextField className="custom-textfield" size="small" label="Date" value={new Date().toLocaleDateString("en-AU")} fullWidth disabled helperText=" " />
+      </div>
     </>
   );
 
@@ -318,18 +471,36 @@ const ApplicationForm = ({ mode, initial, onSubmit, accountEmail }) => {
         {line(businessNumberLabel(values.country), values.abn_acn)}{line("Body corporate", values.is_body_corporate === "yes" ? "Yes" : "No")}
         {line("Principal place of business", values.principal_address)}{line("Registered office", values.registered_office_address)}
         {line("Postal address", values.postal_address)}{line("Business phone", values.business_phone)}
-        {line("Website", values.website)}{line("Agency MARN", values.marn)}</>)}
+        {line("Website", values.website)}{line("Agency MARN", values.marn)}
+        {line("CEO / Owner", values.owner_name)}{line("Number of staff", values.staff_count)}
+        {line("Years in existence", values.years_in_business)}{line("Registered for GST", values.gst_registered === "yes" ? "Yes" : "No")}</>)}
+      {section("Services and offices", "operations", <>
+        {line("Services", values.services.filter((x) => x.trim()).join("; "))}
+        {line("Offshore offices", values.offshore_offices.map((p) => p.location).join("; ") || "None")}
+        {line("Sub-contractors", values.sub_contractors.map((p) => p.location).join("; ") || "None")}
+        {line("Offshore partners", values.offshore_partners.map((p) => p.location).join("; ") || "None")}
+        {line("Registrations", values.registrations.map((r) => `${r.number} (${r.country})`).join("; "))}</>)}
       {section("People", "people", <>
         {line("You", `${values.applicant_role === "director" ? "Director or owner" : "Staff member"}${values.applicant_in_enrolments ? ", involved in enrolments" : ""}`)}
         {values.people.map((p, i) => <React.Fragment key={i}>{line(ROLE_LABEL[p.role], `${p.name} (${p.email})`)}</React.Fragment>)}</>)}
-      {section("Referees", "referees", values.referees.map((r, i) => <React.Fragment key={i}>{line(`Referee ${i + 1}`, `${r.name}, ${r.organisation} (${r.email})`)}</React.Fragment>))}
+      {section("Experience", "experience", <>
+        {line("Recruited: Australian sectors", values.recruited_australia.map((r) => `${r.sector}: ${r.students}`).join("; ") || "None")}
+        {line("Recruited: other sectors", values.recruited_other.map((r) => `${r.sector}: ${r.students}`).join("; ") || "None")}
+        {line("Read the ESOS Act 2000", values.esos_read === "yes" ? "Yes" : `No${values.esos_intend === "yes" ? ", intends to" : ""}`)}
+        {line("Read the National Code 2018", values.national_code_read === "yes" ? "Yes" : `No${values.national_code_intend === "yes" ? ", intends to" : ""}`)}
+        {line("Education experience", values.experience_education)}{line("Other business areas", values.experience_other)}</>)}
+      {section("Markets and services", "markets", <>
+        {line("Current areas", values.markets.map((m) => m.area).join("; "))}{line("Potential areas", values.potential_markets)}
+        {line("Memberships", values.memberships.filter((x) => x.trim()).join("; ") || "None")}{line("Services to the college", values.services_to_afc)}</>)}
+      {section("Referees", "referees", values.referees.map((r, i) => <React.Fragment key={i}>{line(`Referee ${i + 1}`, `${r.name}, ${r.position}, ${r.organisation} (${r.email})`)}</React.Fragment>))}
       {section("Declarations", "declarations", <>
         {line("Conflict of interest", values.coi_declared === "yes" ? `Yes: ${values.coi_details}` : "None declared")}
-        {line("Code of ethics", "Accepted")}{line("Information is correct", "Confirmed")}</>)}
+        {line("Code of ethics", "Accepted")}{line("Information is correct", "Confirmed")}{line("Privacy notice", "Agreed")}
+        {line("Declared by", values.declaration_name)}</>)}
     </>
   );
 
-  const body = { account, business, people, referees, declarations, review }[current];
+  const body = { account, business, operations, people, experience, markets, referees, declarations, review }[current];
 
   return (
     <div className="app-form" ref={top}>

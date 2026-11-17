@@ -47,7 +47,7 @@ const CHECK_STATUS = {
 const FILE_TYPES = ".pdf,.jpg,.jpeg,.png,.docx,.xlsx,.eml,.msg";
 
 // a file picker that says what is allowed
-const FilePick = ({ id, label, file, error, onChange }) => (
+export const FilePick = ({ id, label, file, error, onChange }) => (
   <div className="dd-file">
     <label htmlFor={id}>{label}</label>
     <input id={id} type="file" accept={FILE_TYPES} onChange={(e) => onChange(e.target.files?.[0] || null)} />
@@ -173,7 +173,7 @@ const DueDiligencePanel = ({ agent, onChanged, showMessage }) => {
     if (!/^\S+@\S+\.\S+$/.test((form.email || "").trim())) e.email = "Enter a valid email address";
     setErrors(e);
     if (Object.keys(e).length) return;
-    const body = { name: form.name.trim(), organisation: form.organisation.trim(), email: form.email.trim(), phone: (form.phone || "").trim() || null };
+    const body = { name: form.name.trim(), position: (form.position || "").trim() || null, organisation: form.organisation.trim(), email: form.email.trim(), phone: (form.phone || "").trim() || null };
     if (target) run(() => updateReferee(agent.id, target.id, body), "Referee saved.");
     else run(() => addReferee(agent.id, body), "Referee added.");
   };
@@ -360,7 +360,7 @@ const DueDiligencePanel = ({ agent, onChanged, showMessage }) => {
       <Panel>
         <div className="admin-toolbar">
           <h2 style={{ margin: 0 }}>Referees</h2>
-          {canRecord && <Btn kind="primary" size="medium" onClick={() => open("referee", { name: "", organisation: "", email: "", phone: "" })}>Add referee</Btn>}
+          {canRecord && <Btn kind="primary" size="medium" onClick={() => open("referee", { name: "", position: "", organisation: "", email: "", phone: "" })}>Add referee</Btn>}
         </div>
         <p className="admin-hint" style={{ marginTop: 0 }}>
           At least one positive check is needed to decide; two are recommended. Send the online reference form by email, or record a phone call with the same questions.
@@ -373,7 +373,7 @@ const DueDiligencePanel = ({ agent, onChanged, showMessage }) => {
               <div className="dd-referee-head">
                 <div>
                   <strong>{r.name}</strong>
-                  <small>{r.organisation} · {r.email}{r.phone ? ` · ${r.phone}` : ""}</small>
+                  <small>{r.position ? `${r.position}, ` : ""}{r.organisation} · {r.email}{r.phone ? ` · ${r.phone}` : ""}</small>
                 </div>
                 {canRecord && (
                   <div className="cell-actions">
@@ -383,7 +383,7 @@ const DueDiligencePanel = ({ agent, onChanged, showMessage }) => {
                       <Btn onClick={() => sendRequest(r)} disabled={busy}>Email reference form</Btn>
                     )}
                     <Btn onClick={() => open("phone", { call_date: today(), spoke_to: r.name, summary: "", outcome: "", file: null }, r)}>Record phone check</Btn>
-                    <Btn onClick={() => open("referee", { name: r.name, organisation: r.organisation, email: r.email, phone: r.phone || "" }, r)}>Edit</Btn>
+                    <Btn onClick={() => open("referee", { name: r.name, position: r.position || "", organisation: r.organisation, email: r.email, phone: r.phone || "" }, r)}>Edit</Btn>
                     <Btn kind="danger" onClick={() => open("removeReferee", { reason: "" }, r)}>Remove</Btn>
                   </div>
                 )}
@@ -470,7 +470,8 @@ const DueDiligencePanel = ({ agent, onChanged, showMessage }) => {
       <FormDialog open={dialog === "referee"} title={target ? "Edit referee" : "Add a referee"} submitLabel={target ? "Save" : "Add referee"} onSubmit={submitReferee} onCancel={close}>
         <div className="field-grid">
           <Field id="rf-name" label="Name" error={errors.name} value={form.name || ""} onChange={setField("name")} inputProps={{ maxLength: 120 }} />
-          <Field id="rf-org" label="Organisation" error={errors.organisation} value={form.organisation || ""} onChange={setField("organisation")} inputProps={{ maxLength: 160 }} />
+          <Field id="rf-pos" label="Position" error={errors.position} value={form.position || ""} onChange={setField("position")} inputProps={{ maxLength: 120 }} />
+          <Field id="rf-org" label="Company name" error={errors.organisation} value={form.organisation || ""} onChange={setField("organisation")} inputProps={{ maxLength: 160 }} />
           <Field id="rf-email" label="Email" type="email" error={errors.email} value={form.email || ""} onChange={setField("email")} />
           <Field id="rf-phone" label="Phone (optional)" error={errors.phone} value={form.phone || ""} onChange={setField("phone")} />
         </div>

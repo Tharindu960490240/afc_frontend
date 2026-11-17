@@ -307,3 +307,6 @@
 .reference-q { margin: 0 0 18px; display: grid; gap: 8px; }
 .reference-actions { margin-top: 10px; text-align: center; }
 @media (max-width: 700px) { .dd-ref-check, .dd-check { grid-template-columns: 1fr; } }
+
+/* multi-line inputs: keep the first line of text clear of the floating label */
+.MuiOutlinedInput-root.MuiInputBase-multiline.MuiInputBase-sizeSmall { padding-top: 14px; padding-bottom: 10px; }

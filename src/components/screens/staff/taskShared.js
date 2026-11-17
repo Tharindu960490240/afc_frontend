@@ -59,6 +59,7 @@ export const CompleteTaskDialog = ({ task, open, onClose, onDone, onError }) => 
       title={`Complete: ${task.title}`}
       intro={
         task.type === "PRISMS_ADD" ? "Confirm the agent is entered in PRISMS. Attach a screenshot or the confirmation if you have one."
+          : task.type === "COMMISSION_REPORT" ? "Record the commission and bonus on the agent record (Onboarding tasks tab). That emails Accounts and closes this task."
           : task.type === "INDUCTION" ? "Confirm the induction was held. Once the agreement, PRISMS and induction are all recorded the agent becomes Active."
             : regulatory ? "Add the evidence for this regulatory task." : "Add a note if you wish."
       }

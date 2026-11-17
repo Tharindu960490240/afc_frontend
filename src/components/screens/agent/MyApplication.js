@@ -5,6 +5,7 @@ import { ArrowBack, CheckCircle } from "@mui/icons-material";
 import "../../styles/adminPages.css";
 import LoadingSpinner from "../LoadingSpinner";
 import ApplicationForm from "../application/ApplicationForm";
+import MyDocuments from "./MyDocuments";
 import { valuesFromServer } from "../application/applicationModel";
 import { getMyApplication, submitMyApplication } from "../../../services/comsService";
 import { getHomeRoute } from "../../../const/roles";
@@ -42,7 +43,7 @@ const MyApplication = ({ role }) => {
       </Link>
       <div className="admin-head">
         <h1>My application</h1>
-        <p>Your business details, the people in it and two referees. The college uses these to review you and to report to the government.</p>
+        <p>This is the college's Education Agent Application Form: your company profile, experience, markets, two referees and a declaration, followed by the documents we need. The college uses these to review you and to report to the government.</p>
       </div>
 
       <LoadingSpinner open={loading} />
@@ -65,6 +66,7 @@ const MyApplication = ({ role }) => {
           If something needs to change, please contact the college.
         </div>
       )}
+      {!loading && data && <MyDocuments />}
     </div>
   );
 };

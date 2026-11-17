@@ -21,6 +21,8 @@ import {
 } from "./comsShared";
 import { COUNTRIES } from "../../../const/countries";
 import DueDiligencePanel from "./DueDiligencePanel";
+import DocumentsPanel from "./DocumentsPanel";
+import ApplicationPanel from "./ApplicationPanel";
 import TasksPanel from "./TasksPanel";
 import { canWorkTask } from "./taskShared";
 import {
@@ -42,6 +44,8 @@ import { Badge, Btn, CheckField, Field, Notice, Panel, TONE_BY_STATUS, TabBar, T
 const TABS = [
   { key: "overview", label: "Overview" },
   { key: "people", label: "People" },
+  { key: "application", label: "Application" },
+  { key: "documents", label: "Documents" },
   { key: "due_diligence", label: "Due diligence" },
   { key: "agreements", label: "Agreements" },
   { key: "tasks", label: "Onboarding tasks" },
@@ -347,6 +351,11 @@ const AgentRecord = ({ role, user }) => {
               Send application link
             </Btn>
           )}
+          {!deleted && perms.dueDiligence && !agent.sms_contact_at && ["applied", "due_diligence", "approved", "onboarding", "active"].includes(agent.status) && (
+            <Btn onClick={() => open("milestone", { type: "sms_contact", date: today() })}>
+              Record SMS contact created
+            </Btn>
+          )}
           {!deleted && perms.recordPrisms && ["approved", "onboarding", "active", "under_review"].includes(agent.status) && (
             <Btn onClick={() => open("milestone", { type: "prisms", date: today() })}>
               Record PRISMS entry
@@ -400,6 +409,9 @@ const AgentRecord = ({ role, user }) => {
               </Item>
               <Item label="PRISMS entry">{agent.prisms_recorded_at ? formatDate(agent.prisms_recorded_at) : "Not recorded"}</Item>
               <Item label="Induction">{agent.induction_recorded_at ? formatDate(agent.induction_recorded_at) : "Not recorded"}</Item>
+              <Item label="SMS contact created">{agent.sms_contact_at ? formatDate(agent.sms_contact_at) : "Not recorded"}</Item>
+              <Item label="Commission">{agent.commission_terms || "Not recorded"}</Item>
+              <Item label="Bonus">{agent.bonus_terms || (agent.terms_recorded_at ? "None" : "Not recorded")}</Item>
             </div>
             {agent.risk_override_reason && <p className="admin-hint" style={{ marginTop: 12 }}>Risk note: {agent.risk_override_reason}</p>}
             {agent.rejection_reason && <p className="admin-hint" style={{ marginTop: 12 }}>Reason for rejection: {agent.rejection_reason}</p>}
@@ -602,6 +614,8 @@ const AgentRecord = ({ role, user }) => {
         </Panel>
       )}
 
+      {tab === "application" && <ApplicationPanel agent={agent} showMessage={showMessage} />}
+      {tab === "documents" && <DocumentsPanel agent={agent} onChanged={load} showMessage={showMessage} />}
       {tab === "due_diligence" && <DueDiligencePanel agent={agent} onChanged={load} showMessage={showMessage} />}
 
       {tab === "tasks" && (
@@ -798,11 +812,13 @@ const AgentRecord = ({ role, user }) => {
 
       <FormDialog
         open={dialog === "milestone"}
-        title={form.type === "prisms" ? "Record PRISMS entry" : "Record induction"}
+        title={form.type === "prisms" ? "Record PRISMS entry" : form.type === "sms_contact" ? "Record SMS contact created" : "Record induction"}
         intro={
           form.type === "prisms"
             ? "Confirm the agent has been entered in PRISMS. This is needed before the agent can become Active."
-            : "Confirm the induction session has been held. This is needed before the agent can become Active."
+            : form.type === "sms_contact"
+              ? "Confirm the agent's contact has been created in the student management system (step 2 of the agent processing procedure)."
+              : "Confirm the induction session has been held. This is needed before the agent can become Active."
         }
         submitLabel="Record"
         onSubmit={submitMilestone}
