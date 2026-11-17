@@ -123,6 +123,7 @@ const TIMER_FIELDS = [
   ["referee_link_days", "Referee form link stays valid for (days)", 1, 90],
   ["referee_reminder_days", "Remind a referee every (working days)", 1, 30],
   ["referee_max_reminders", "Reminders per referee (at most)", 0, 10],
+  ["task_escalation_days", "Registration task: escalate to a manager on working day", 1, 30],
 ];
 const Timers = ({ data, save, busy, errors }) => {
   const [v, setV] = useState(() => ({ ...data.timers }));
@@ -163,8 +164,7 @@ const Tasks = ({ data, save, busy, errors }) => {
     <Panel>
       <h2>Tasks created when an agreement is countersigned</h2>
       <p className="admin-hint" style={{ marginTop: 0 }}>
-        Use <strong>{"{agent}"}</strong> in a task name to insert the agency name. Everyone in the chosen role is told about the task. The "legal deadline" is a backstop
-        in calendar days from the agreement start (ASQAnet: alert at day 20, escalate at day 25 of 30). Changes apply to agreements countersigned from now on.
+        Use <strong>{"{agent}"}</strong> in a task name to insert the agency name. Everyone in the chosen role is told about the task. Registration tasks (PRISMS, ASQAnet, website) are escalated to a manager on the working day set under Deadlines, and after the deadline only a manager can close them. Changes apply to agreements countersigned from now on.
       </p>
       {items.map((t, i) => (
         <div className="app-card" key={t.type} style={!t.enabled ? { opacity: 0.6 } : undefined}>
@@ -175,8 +175,6 @@ const Tasks = ({ data, save, busy, errors }) => {
             <Field id={`td-${t.type}`} type="number" label="Due after (days)" value={t.due_days} inputProps={{ min: 1, max: 120 }} onChange={(e) => set(i, { due_days: Number(e.target.value) })} />
             <Field id={`tb-${t.type}`} label="Counted in" value={t.due_basis} onChange={(e) => set(i, { due_basis: e.target.value })}
               options={[{ value: "business", label: "Working days" }, { value: "calendar", label: "Calendar days" }]} />
-            <Field id={`tl-${t.type}`} type="number" label="Legal deadline (calendar days, optional)" value={t.legal_days ?? ""} inputProps={{ min: 1, max: 365 }}
-              onChange={(e) => set(i, { legal_days: e.target.value === "" ? null : Number(e.target.value) })} />
             <CheckField label="Prefer the agent's account manager as owner" checked={t.prefer_account_manager} onChange={(v) => set(i, { prefer_account_manager: v })} />
             <CheckField label={MUST_STAY_ON.includes(t.type) ? "Switched on (needed to make the agent Active)" : "Switched on"} checked={t.enabled}
               disabled={MUST_STAY_ON.includes(t.type)} error={errors[`items.${i}.enabled`]} onChange={(v) => set(i, { enabled: v })} />

@@ -21,6 +21,9 @@ export const revokeInvitation = (id) =>
 export const listUsers = (params) =>
   apiRequest(`${API_ENDPOINTS.USERS.BASE}${toQuery(params)}`);
 
+export const setUserAuthorised = (id, authorised) =>
+  apiRequest(API_ENDPOINTS.USERS.AUTHORISED(id), { method: "PATCH", body: { authorised } });
+
 // status: "active" | "suspended"
 export const setUserStatus = (id, status) =>
   apiRequest(API_ENDPOINTS.USERS.UPDATE_STATUS(id), {

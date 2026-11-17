@@ -79,6 +79,8 @@ export const sendCertificate = (id) => apiRequest(E.CERTIFICATE_SEND(id), { meth
 export const getMyCertificate = () => apiRequest(E.MY_CERTIFICATE);
 export const downloadMyCertificate = (name) => apiDownload(E.MY_CERTIFICATE_DOWNLOAD, name || "Certificate of Appointment.pdf");
 export const recordTerms = (id, payload) => apiRequest(E.AGENT_TERMS(id), { method: "POST", body: payload });
+export const getTermsDraft = (id) => apiRequest(E.AGENT_TERMS_DRAFT(id));
+export const sendTerms = (id, payload) => apiRequest(E.AGENT_TERMS_SEND(id), { method: "POST", body: payload });
 export const getMyDocuments = () => apiRequest(E.MY_DOCUMENTS);
 export const uploadMyDocument = (payload) => apiRequest(E.MY_DOCUMENTS, { method: "POST", body: payload });
 export const removeMyDocument = (docId) => apiRequest(E.MY_DOCUMENT_DELETE(docId), { method: "POST", body: {} });

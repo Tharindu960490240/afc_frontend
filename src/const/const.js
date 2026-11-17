@@ -52,13 +52,6 @@ export const API_ENDPOINTS = {
       `${API_BASE_URL}/agreements/${id}/files/${fileId}/download`,
   },
 
-  REGISTRATIONS: {
-    BASE: `${API_BASE_URL}/registrations`,
-    COUNTS: `${API_BASE_URL}/registrations/counts`,
-    APPROVE: (id) => `${API_BASE_URL}/registrations/${id}/approve`,
-    REJECT: (id) => `${API_BASE_URL}/registrations/${id}/reject`,
-  },
-
   AGREEMENT_TEMPLATE: {
     BASE: `${API_BASE_URL}/agreement-template`,
     PREVIEW: `${API_BASE_URL}/agreement-template/preview`,
@@ -122,6 +115,8 @@ export const API_ENDPOINTS = {
     MY_CERTIFICATE_DOWNLOAD: `${API_BASE_URL}/agent-application/certificate/download`,
     APPLICATION_PDF: (id) => `${API_BASE_URL}/coms/agents/${id}/application.pdf`,
     AGENT_TERMS: (id) => `${API_BASE_URL}/coms/agents/${id}/terms`,
+    AGENT_TERMS_DRAFT: (id) => `${API_BASE_URL}/coms/agents/${id}/terms/draft`,
+    AGENT_TERMS_SEND: (id) => `${API_BASE_URL}/coms/agents/${id}/terms/send`,
     MY_DOCUMENTS: `${API_BASE_URL}/agent-application/documents`,
     MY_DOCUMENT_DELETE: (docId) => `${API_BASE_URL}/agent-application/documents/${docId}/delete`,
     MY_DOCUMENT_DOWNLOAD: (docId) => `${API_BASE_URL}/agent-application/documents/${docId}/download`,
@@ -138,6 +133,7 @@ export const API_ENDPOINTS = {
     BASE: `${API_BASE_URL}/users`,
     EXPORT: `${API_BASE_URL}/users/export`,
     UPDATE_STATUS: (id) => `${API_BASE_URL}/users/${id}/status`,
+    AUTHORISED: (id) => `${API_BASE_URL}/users/${id}/authorised`,
   },
 };
 

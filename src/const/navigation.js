@@ -12,8 +12,6 @@ import {
   AssignmentInd,
   CalendarMonth,
   FactCheck,
-  TrackChanges,
-  Autorenew,
   Checklist,
   Settings,
 } from "@mui/icons-material";
@@ -41,8 +39,6 @@ const auditItem = {
   icon: FactCheck, label: "Audit log", text: "See who changed what, and when.", path: "/coms/audit", ready: true,
 };
 const tasksItem = { icon: Checklist, label: "Tasks", text: "PRISMS, ASQAnet, website and induction deadlines.", path: "/coms/tasks", ready: true };
-const leadsItem = { icon: TrackChanges, label: "Leads", text: "Today's leads, response timers and follow-ups.", path: "/coms/leads", ready: false };
-const renewalsItem = { icon: Autorenew, label: "Renewals", text: "Agreements ending in the next 120 days.", path: "/coms/renewals", ready: false };
 const profileItem = {
   icon: Person, label: "My profile", text: "See and update your details and change your password.",
   path: "/account/profile", ready: true,
@@ -55,10 +51,10 @@ const staffMenu = (...items) => [
 const withHome = (menu, home) => menu.map((i) => (i.home ? { ...i, path: home } : i));
 
 export const NAV_ITEMS = {
-  ceo: withHome(staffMenu(registerItem, renewalsItem, tasksItem, holidaysItem, auditItem), "/ceo"),
-  director: withHome(staffMenu(registerItem, leadsItem, renewalsItem, tasksItem, holidaysItem), "/director"),
-  marketing_officer: withHome(staffMenu(registerItem, leadsItem, renewalsItem, tasksItem, holidaysItem), "/marketing_officer"),
-  admissions: withHome(staffMenu(registerItem, leadsItem), "/admissions"),
+  ceo: withHome(staffMenu(registerItem, tasksItem, holidaysItem, auditItem), "/ceo"),
+  director: withHome(staffMenu(registerItem, tasksItem, holidaysItem), "/director"),
+  marketing_officer: withHome(staffMenu(registerItem, tasksItem, holidaysItem), "/marketing_officer"),
+  admissions: withHome(staffMenu(registerItem), "/admissions"),
   coe_admin: withHome(staffMenu(registerItem, tasksItem, holidaysItem), "/coe_admin"),
   accounts: withHome(staffMenu(registerItem), "/accounts"),
   compliance: withHome(staffMenu(registerItem, tasksItem, holidaysItem, auditItem), "/compliance"),

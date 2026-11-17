@@ -19,8 +19,6 @@ import AgentRegister from "./components/screens/AgentRegister";
 import AgentRegisterVerify from "./components/screens/AgentRegisterVerify";
 import MyProfile from "./components/screens/MyProfile";
 import ChangePassword from "./components/screens/ChangePassword";
-import AgentDetail from "./components/screens/admin/AgentDetail";
-import Registrations from "./components/screens/admin/Registrations";
 import "./App.css";
 import { getHomeRoute, ROLES, STAFF_ROLES } from "./const/roles";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -29,7 +27,6 @@ import "./components/styles/sideNav.css";
 import RoleDashboard from "./components/screens/RoleDashboard";
 import Invitations from "./components/screens/admin/Invitations";
 import Users from "./components/screens/admin/Users";
-import Agents from "./components/screens/admin/Agents";
 import Agreements from "./components/screens/admin/Agreements";
 import AgreementDetail from "./components/screens/admin/AgreementDetail";
 import AgreementTemplate from "./components/screens/admin/AgreementTemplate";
@@ -318,45 +315,6 @@ const App = () => {
             }
           />
 
-          <Route
-            path="/admin/agents"
-            element={
-              <ProtectedRoute
-                isSignedIn={isSignedIn}
-                token={token}
-                role={role}
-                allowedRoles={[ROLES.ADMIN]}
-              >
-                <Agents role={role} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/agents/:id"
-            element={
-              <ProtectedRoute
-                isSignedIn={isSignedIn}
-                token={token}
-                role={role}
-                allowedRoles={[ROLES.ADMIN]}
-              >
-                <AgentDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/registrations"
-            element={
-              <ProtectedRoute
-                isSignedIn={isSignedIn}
-                token={token}
-                role={role}
-                allowedRoles={[ROLES.ADMIN]}
-              >
-                <Registrations role={role} />
-              </ProtectedRoute>
-            }
-          />
           <Route
             path="/admin/agreements"
             element={

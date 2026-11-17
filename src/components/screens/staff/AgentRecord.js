@@ -608,7 +608,7 @@ const AgentRecord = ({ role, user }) => {
               </Table>
             </TableContainer>
           )}
-          {agent.status === "active" && (
+          {["onboarding", "active"].includes(agent.status) && (
             <div className="record-head" style={{ marginTop: 16 }}>
               <strong>Certificate of appointment</strong>
               <Btn

@@ -154,7 +154,7 @@ const MyAgreement = ({ role }) => {
         <Panel>
           <h2>Certificate of Appointment</h2>
           <p className="admin-hint" style={{ marginTop: 0 }}>
-            Your onboarding is complete. Your certificate was also sent to your email.
+            The college has countersigned your agreement. Your certificate was also sent to your email.
           </p>
           <Btn
             kind="primary"

@@ -7,8 +7,8 @@ import LoadingSpinner from "../LoadingSpinner";
 import CustomSnackbar from "../CustomSnackbar";
 import { ConfirmDialog, ExportButton, Pager, formatDate, formatDateTime } from "./shared";
 import { Badge, Btn, DataTable, FilterField, Panel, TONE_BY_STATUS, TableCell, TableRow } from "../../ui";
-import { exportUsers, listUsers, setUserStatus } from "../../../services/adminService";
-import { ROLES, ROLE_LABELS, getHomeRoute } from "../../../const/roles";
+import { exportUsers, listUsers, setUserAuthorised, setUserStatus } from "../../../services/adminService";
+import { ROLES, ROLE_LABELS, STAFF_ROLES, getHomeRoute } from "../../../const/roles";
 
 const PAGE_SIZE = 10;
 
@@ -40,6 +40,13 @@ const Users = ({ role, user }) => {
   });
   const showMessage = (message, severity = "success") =>
     setSnackbar({ open: true, message, severity });
+  const toggleAuthorised = async (u) => {
+    setWorking(true);
+    const res = await setUserAuthorised(u.id, !u.is_authorised_staff);
+    setWorking(false);
+    if (res.success) { showMessage(res.data.is_authorised_staff ? `${u.first_name} is now authorised staff.` : `${u.first_name} is no longer authorised staff.`); load(); }
+    else showMessage(res.message || "Could not update this user.", "error");
+  };
   const handleClose = () => setSnackbar((prev) => ({ ...prev, open: false }));
 
   // wait until the person stops typing before searching
@@ -171,7 +178,10 @@ const Users = ({ role, user }) => {
                   </div>
                   <div className="cell-sub">{u.email}</div>
                 </TableCell>
-                <TableCell data-label="Role">{ROLE_LABELS[u.role] || u.role}</TableCell>
+                <TableCell data-label="Role">
+                  {ROLE_LABELS[u.role] || u.role}
+                  {u.is_authorised_staff && <div className="cell-sub">Authorised staff</div>}
+                </TableCell>
                 <TableCell data-label="Status">
                   <Badge tone={TONE_BY_STATUS[u.status] || "neutral"} label={STATUS_TEXT[u.status] || u.status} />
                 </TableCell>
@@ -179,9 +189,14 @@ const Users = ({ role, user }) => {
                 <TableCell data-label="Joined">{formatDate(u.created_at)}</TableCell>
                 <TableCell data-label="">
                   <div className="cell-actions">
+                    {STAFF_ROLES.includes(u.role) && u.status === "active" && (
+                      <Btn kind="outline" disabled={working} onClick={() => toggleAuthorised(u)}>
+                        {u.is_authorised_staff ? "Remove authorised" : "Make authorised"}
+                      </Btn>
+                    )}
                     {["pending_approval", "unverified", "rejected"].includes(u.status) ? (
-                      <Btn component={Link} to="/admin/registrations">
-                        Registrations
+                      <Btn component={Link} to="/coms/agents">
+                        Agent register
                       </Btn>
                     ) : (
                       <Btn

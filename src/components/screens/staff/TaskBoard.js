@@ -151,6 +151,7 @@ const TaskBoard = ({ role, user }) => {
             <TableRow key={t.id}>
               <TableCell data-label="Task">
                 <strong>{t.title}</strong>
+                {t.description && t.status === "open" && <div className="cell-sub" style={{ whiteSpace: "pre-line" }}>{t.description}</div>}
                 {t.agent_id && <div className="cell-sub"><Link className="admin-link" to={`/coms/agents/${t.agent_id}`}>{t.agent_name}</Link></div>}
                 {t.legal_deadline && <div className="cell-sub">Legal deadline {formatDate(t.legal_deadline)}</div>}
               </TableCell>
