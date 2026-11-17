@@ -79,6 +79,7 @@ export const API_ENDPOINTS = {
     AGENT_STATUS: (id) => `${API_BASE_URL}/coms/agents/${id}/status`,
     AGENT_LINK: (id) => `${API_BASE_URL}/coms/agents/${id}/application-link`,
     AGENT_MILESTONE: (id) => `${API_BASE_URL}/coms/agents/${id}/milestones`,
+    AGENT_INDUCTION_MINE: `${API_BASE_URL}/agent-application/induction`,
     AGENT_INDUCTIONS: (id) => `${API_BASE_URL}/coms/agents/${id}/inductions`,
     AGENT_INDUCTION: (id, iid, action) => `${API_BASE_URL}/coms/agents/${id}/inductions/${iid}/${action}`,
     AGENT_DELETE: (id) => `${API_BASE_URL}/coms/agents/${id}/delete`,

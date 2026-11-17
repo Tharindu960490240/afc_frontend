@@ -25,6 +25,9 @@ export const completeInduction = (id, iid, payload) => apiRequest(E.AGENT_INDUCT
 export const rescheduleInduction = (id, iid, payload) => apiRequest(E.AGENT_INDUCTION(id, iid, "reschedule"), { method: "POST", body: payload });
 export const cancelInduction = (id, iid, reason) => apiRequest(E.AGENT_INDUCTION(id, iid, "cancel"), { method: "POST", body: { reason } });
 
+export const markInductionMissed = (id, iid, reason) => apiRequest(E.AGENT_INDUCTION(id, iid, "missed"), { method: "POST", body: { reason } });
+export const getMyInduction = () => apiRequest(E.AGENT_INDUCTION_MINE);
+
 export const deleteAgentRecord = (id, reason) => apiRequest(E.AGENT_DELETE(id), { method: "POST", body: { reason } });
 export const restoreAgentRecord = (id) => apiRequest(E.AGENT_RESTORE(id), { method: "POST" });
 

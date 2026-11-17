@@ -6,6 +6,7 @@ import {
   Description,
   WorkspacePremium,
   UploadFile,
+  School,
   Folder,
   Assignment,
   Person,
@@ -74,6 +75,7 @@ export const NAV_ITEMS = {
     { icon: Dashboard, label: "Dashboard", path: "/agent", ready: true, home: true },
     { icon: Assignment, label: "My application", text: "Complete your business details, people and referees.", path: "/agent/application", ready: true, group: "Getting started" },
     { icon: UploadFile, label: "My agreement", text: "Read and sign your agent agreement online.", path: "/agent/agreement", ready: true },
+    { icon: School, label: "My induction", text: "See when your induction is and how to join it.", path: "/agent/induction", ready: true },
     { icon: Person, label: "My profile", text: "See and update your details and change your password.", path: "/account/profile", ready: true },
   ],
   teacher: [

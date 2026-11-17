@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { formatDate, FormDialog } from "../admin/shared";
-import { cancelInduction, completeInduction, recordInduction, rescheduleInduction } from "../../../services/comsService";
+import { cancelInduction, completeInduction, markInductionMissed, recordInduction, rescheduleInduction } from "../../../services/comsService";
 import { Btn, Field, Notice, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
 const MODES = [
@@ -9,7 +9,7 @@ const MODES = [
   { value: "phone", label: "By phone" },
 ];
 const MODE_LABEL = Object.fromEntries(MODES.map((m) => [m.value, m.label]));
-const STATUS_LABEL = { scheduled: "Scheduled", held: "Held", cancelled: "Cancelled" };
+const STATUS_LABEL = { scheduled: "Scheduled", held: "Held", cancelled: "Cancelled", missed: "Did not attend" };
 const ELIGIBLE = ["approved", "onboarding", "active", "under_review"];
 const today = () => new Date().toLocaleDateString("en-CA");
 
@@ -31,7 +31,7 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
   const setField = (name) => (e) => setForm((f) => ({ ...f, [name]: e.target.value }));
   const open = (name, initial, row = null) => { setForm(initial); setErrors({}); setTarget(row); setDialog(name); };
   const close = () => setDialog(null);
-  const base = () => ({ conducted_by: String(currentUserId || ""), mode: "online", attendees: "", notes: "" });
+  const base = () => ({ conducted_by: String(currentUserId || ""), mode: "online", attendees: "", notes: "", start_time: "10:00", meeting_url: "", location: "" });
 
   const submit = async (call, ok) => {
     setBusy(true);
@@ -46,6 +46,20 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
     attendees: (form.attendees || "").trim() || undefined,
     notes: (form.notes || "").trim() || undefined,
   });
+  // how the agent joins: a link for online, a place for in person, the number we will call for phone
+  const booking = () => ({
+    start_time: form.start_time || undefined,
+    meeting_url: form.mode === "online" ? (form.meeting_url || "").trim() || undefined : undefined,
+    location: form.mode !== "online" ? (form.location || "").trim() || undefined : undefined,
+  });
+  const bookingErrors = () => {
+    if (!form.scheduled_for) return { scheduled_for: "Choose the date" };
+    if (!form.start_time) return { start_time: "Choose the start time" };
+    if (form.mode === "online" && !(form.meeting_url || "").trim()) return { meeting_url: "Add the meeting link so the agent can join" };
+    if (form.mode === "online" && !/^https?:\/\//i.test(form.meeting_url.trim())) return { meeting_url: "Enter a full link starting with https://" };
+    if (form.mode !== "online" && !(form.location || "").trim()) return { location: form.mode === "phone" ? "Add the phone number the agent will be called on" : "Add where the induction will be held" };
+    return null;
+  };
   const onSubmit = () => {
     if (dialog === "held") {
       if (!form.held_on) return setErrors({ held_on: "Choose the date the induction was held" });
@@ -53,8 +67,8 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
       return submit(() => recordInduction(agent.id, { outcome: "held", held_on: form.held_on, ...payload() }), "Induction recorded.");
     }
     if (dialog === "schedule") {
-      if (!form.scheduled_for) return setErrors({ scheduled_for: "Choose the date" });
-      return submit(() => recordInduction(agent.id, { outcome: "scheduled", scheduled_for: form.scheduled_for, ...payload() }), "Induction scheduled. The agent has been emailed.");
+      if (bookingErrors()) return setErrors(bookingErrors());
+      return submit(() => recordInduction(agent.id, { outcome: "scheduled", scheduled_for: form.scheduled_for, ...payload(), ...booking() }), "Induction scheduled. The agent has been emailed.");
     }
     if (dialog === "complete") {
       if (!form.held_on) return setErrors({ held_on: "Choose the date the induction was held" });
@@ -62,11 +76,12 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
       return submit(() => completeInduction(agent.id, target.id, { held_on: form.held_on, ...payload() }), "Induction recorded.");
     }
     if (dialog === "reschedule") {
-      if (!form.scheduled_for) return setErrors({ scheduled_for: "Choose the date" });
+      if (bookingErrors()) return setErrors(bookingErrors());
       const p = payload();
-      return submit(() => rescheduleInduction(agent.id, target.id, { scheduled_for: form.scheduled_for, conducted_by: p.conducted_by, mode: p.mode }), "Induction moved. The agent has been emailed.");
+      return submit(() => rescheduleInduction(agent.id, target.id, { scheduled_for: form.scheduled_for, conducted_by: p.conducted_by, mode: p.mode, ...booking() }), "Induction moved. The agent has been emailed.");
     }
     if ((form.reason || "").trim().length < 3) return setErrors({ reason: "Please give a reason" });
+    if (dialog === "missed") return submit(() => markInductionMissed(agent.id, target.id, form.reason.trim()), "Recorded as not attended. You can book another induction.");
     return submit(() => cancelInduction(agent.id, target.id, form.reason.trim()), "Induction cancelled.");
   };
 
@@ -95,7 +110,9 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
 
       {scheduled && (
         <Notice severity="info" sx={{ mb: 2 }}>
-          Scheduled for {formatDate(scheduled.scheduled_for)} ({MODE_LABEL[scheduled.mode]}), run by {scheduled.conducted_by_name || "no one yet"}.
+          Scheduled for {formatDate(scheduled.scheduled_for)}{scheduled.start_time ? ` at ${scheduled.start_time}` : ""} ({MODE_LABEL[scheduled.mode]}), run by {scheduled.conducted_by_name || "no one yet"}.
+          {scheduled.meeting_url && <> Link: <a href={scheduled.meeting_url} target="_blank" rel="noreferrer">{scheduled.meeting_url}</a>.</>}
+          {scheduled.location ? ` ${scheduled.mode === "phone" ? "Phone" : "Where"}: ${scheduled.location}.` : ""}
           {scheduled.scheduled_for < today() ? " The date has passed: record the outcome or move it." : ""}
         </Notice>
       )}
@@ -105,7 +122,8 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
           {scheduled ? (
             <>
               <Btn kind="primary" size="medium" onClick={() => open("complete", { ...base(), conducted_by: String(scheduled.conducted_by || currentUserId || ""), mode: scheduled.mode, held_on: scheduled.scheduled_for > today() ? today() : scheduled.scheduled_for }, scheduled)}>Record that it was held</Btn>
-              <Btn size="medium" onClick={() => open("reschedule", { conducted_by: String(scheduled.conducted_by || ""), mode: scheduled.mode, scheduled_for: scheduled.scheduled_for >= today() ? scheduled.scheduled_for : today() }, scheduled)}>Change date</Btn>
+              <Btn size="medium" onClick={() => open("reschedule", { conducted_by: String(scheduled.conducted_by || ""), mode: scheduled.mode, scheduled_for: scheduled.scheduled_for >= today() ? scheduled.scheduled_for : today(), start_time: scheduled.start_time || "10:00", meeting_url: scheduled.meeting_url || "", location: scheduled.location || "" }, scheduled)}>Change booking</Btn>
+              <Btn kind="danger" size="medium" onClick={() => open("missed", { reason: "" }, scheduled)}>Agent did not attend</Btn>
               <Btn kind="danger" size="medium" onClick={() => open("cancel", { reason: "" }, scheduled)}>Cancel booking</Btn>
             </>
           ) : (
@@ -132,12 +150,12 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
             <TableBody>
               {list.map((i) => (
                 <TableRow key={i.id}>
-                  <TableCell>{formatDate(i.held_on || i.scheduled_for)}</TableCell>
+                  <TableCell>{formatDate(i.held_on || i.scheduled_for)}{i.start_time ? ` ${i.start_time}` : ""}</TableCell>
                   <TableCell>{STATUS_LABEL[i.status]}</TableCell>
                   <TableCell>{i.conducted_by_name || "-"}</TableCell>
                   <TableCell>{MODE_LABEL[i.mode] || "-"}</TableCell>
                   <TableCell style={{ whiteSpace: "pre-wrap" }}>
-                    {i.status === "cancelled" ? `Cancelled: ${i.cancel_reason || ""}` : i.notes || "-"}
+                    {i.status === "cancelled" || i.status === "missed" ? `${i.status === "missed" ? "Did not attend" : "Cancelled"}: ${i.cancel_reason || ""}` : i.notes || "-"}
                     {i.attendees ? `\nAttended: ${i.attendees}` : ""}
                   </TableCell>
                 </TableRow>
@@ -162,15 +180,24 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
       </FormDialog>
       <FormDialog
         open={dialog === "schedule" || dialog === "reschedule"}
-        title={dialog === "reschedule" ? "Change the induction date" : "Schedule induction"}
-        intro="The agent is emailed the date, and the person running it is reminded the day before."
+        title={dialog === "reschedule" ? "Change the induction booking" : "Schedule induction"}
+        intro="The agent is emailed the details and sees them in the agent portal. Both the agent and the person running it are reminded the day before."
         submitLabel={dialog === "reschedule" ? "Save" : "Schedule"}
         onSubmit={onSubmit}
         onCancel={close}
       >
         {dateField("in-sched", "scheduled_for", "Date", errors.scheduled_for, today())}
+        <Field id="in-time" type="time" label="Start time (college time)" error={errors.start_time} InputLabelProps={{ shrink: true }} value={form.start_time || ""} onChange={setField("start_time")} />
         {whoField}
         {modeField}
+        {form.mode === "online" ? (
+          <Field id="in-link" label="Meeting link (Teams, Zoom, Google Meet)" error={errors.meeting_url} placeholder="https://" value={form.meeting_url || ""} onChange={setField("meeting_url")} inputProps={{ maxLength: 500 }} />
+        ) : (
+          <Field id="in-loc" label={form.mode === "phone" ? "Phone number we will call" : "Where it will be held"} error={errors.location} value={form.location || ""} onChange={setField("location")} inputProps={{ maxLength: 300 }} />
+        )}
+      </FormDialog>
+      <FormDialog open={dialog === "missed"} title="The agent did not attend" intro="The induction is not recorded as held and the agent stays unable to become Active. You can book another one." submitLabel="Record" danger onSubmit={onSubmit} onCancel={close}>
+        <Field id="in-miss" label="What happened (required)" error={errors.reason} multiline value={form.reason || ""} onChange={setField("reason")} inputProps={{ maxLength: 1000 }} />
       </FormDialog>
       <FormDialog open={dialog === "cancel"} title="Cancel this induction booking?" submitLabel="Cancel booking" danger onSubmit={onSubmit} onCancel={close}>
         <Field id="in-reason" label="Reason (required)" error={errors.reason} multiline value={form.reason || ""} onChange={setField("reason")} inputProps={{ maxLength: 1000 }} />

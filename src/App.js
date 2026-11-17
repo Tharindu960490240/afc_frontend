@@ -32,6 +32,7 @@ import AgreementDetail from "./components/screens/admin/AgreementDetail";
 import AgreementTemplate from "./components/screens/admin/AgreementTemplate";
 import Settings from "./components/screens/admin/Settings";
 import MyAgreement from "./components/screens/agent/MyAgreement";
+import MyInduction from "./components/screens/agent/MyInduction";
 import MyApplication from "./components/screens/agent/MyApplication";
 import AgentRegisterList from "./components/screens/staff/AgentRegister";
 import AgentRecord from "./components/screens/staff/AgentRecord";
@@ -386,6 +387,19 @@ const App = () => {
                 allowedRoles={[ROLES.AGENT]}
               >
                 <MyAgreement role={role} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agent/induction"
+            element={
+              <ProtectedRoute
+                isSignedIn={isSignedIn}
+                token={token}
+                role={role}
+                allowedRoles={[ROLES.AGENT]}
+              >
+                <MyInduction role={role} />
               </ProtectedRoute>
             }
           />
