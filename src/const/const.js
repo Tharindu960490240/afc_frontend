@@ -64,6 +64,17 @@ export const API_ENDPOINTS = {
     PREVIEW: `${API_BASE_URL}/agreement-template/preview`,
   },
 
+  SETTINGS: {
+    BASE: `${API_BASE_URL}/settings`,
+    QUESTIONS: `${API_BASE_URL}/settings/reference-questions`,
+    DOCUMENTS: `${API_BASE_URL}/settings/document-types`,
+    TIMERS: `${API_BASE_URL}/settings/timers`,
+    COLLEGE: `${API_BASE_URL}/settings/college`,
+    SIGNATURE: `${API_BASE_URL}/settings/signature`,
+    SIGNATURE_REMOVE: `${API_BASE_URL}/settings/signature/remove`,
+    TASKS: `${API_BASE_URL}/settings/onboarding-tasks`,
+  },
+
   AGENT_APPLICATION: `${API_BASE_URL}/agent-application`,
   REFERENCE: (token) => `${API_BASE_URL}/reference/${token}`, // the referee's own page (no sign-in)
 

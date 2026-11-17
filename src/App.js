@@ -33,6 +33,7 @@ import Agents from "./components/screens/admin/Agents";
 import Agreements from "./components/screens/admin/Agreements";
 import AgreementDetail from "./components/screens/admin/AgreementDetail";
 import AgreementTemplate from "./components/screens/admin/AgreementTemplate";
+import Settings from "./components/screens/admin/Settings";
 import MyAgreement from "./components/screens/agent/MyAgreement";
 import MyApplication from "./components/screens/agent/MyApplication";
 import AgentRegisterList from "./components/screens/staff/AgentRegister";
@@ -366,6 +367,14 @@ const App = () => {
                 allowedRoles={[ROLES.ADMIN]}
               >
                 <Agreements role={role} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/settings"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={[ROLES.ADMIN]}>
+                <Settings />
               </ProtectedRoute>
             }
           />

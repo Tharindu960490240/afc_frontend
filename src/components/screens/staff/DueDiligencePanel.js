@@ -550,7 +550,7 @@ const DueDiligencePanel = ({ agent, onChanged, showMessage }) => {
 
       <Dialog open={dialog === "answers"} onClose={close} maxWidth="sm" fullWidth>
         <DialogTitle>Reference answers</DialogTitle>
-        <DialogContent>{target && <AnswerList questions={questions} answers={target.answers} />}</DialogContent>
+        <DialogContent>{target && <AnswerList questions={target.questions || questions} answers={target.answers} />}</DialogContent>
         <DialogActions><Btn onClick={close}>Close</Btn></DialogActions>
       </Dialog>
 

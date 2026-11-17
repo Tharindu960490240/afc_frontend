@@ -151,7 +151,7 @@ const DocumentsPanel = ({ agent, onChanged, showMessage }) => {
 
       <FormDialog open={dialog === "upload"} title="Add a document" submitLabel="Add" onSubmit={submitUpload} onCancel={close}>
         <Field id="doc-kind" label="Document type" value={form.kind || ""} onChange={setField("kind")}
-          options={Object.keys(kinds).map((k) => ({ value: k, label: kinds[k].label }))} />
+          options={Object.keys(kinds).filter((k) => kinds[k].active !== false).map((k) => ({ value: k, label: kinds[k].label }))} />
         {form.kind === "other" && <Field id="doc-label" label="Describe the document" error={errors.label} value={form.label || ""} onChange={setField("label")} inputProps={{ maxLength: 160 }} />}
         <FilePick id="doc-file" label="File" file={form.file} error={errors.file} onChange={(f) => setForm((x) => ({ ...x, file: f }))} />
       </FormDialog>

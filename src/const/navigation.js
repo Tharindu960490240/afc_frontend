@@ -15,6 +15,7 @@ import {
   TrackChanges,
   Autorenew,
   Checklist,
+  Settings,
 } from "@mui/icons-material";
 
 // ===============================
@@ -69,6 +70,7 @@ export const NAV_ITEMS = {
     tasksItem,
     holidaysItem,
     auditItem,
+    { icon: Settings, label: "Settings", text: "Reference questions, documents, deadlines, onboarding tasks and certificate details.", path: "/admin/settings", ready: true },
     { icon: Description, label: "Agreements", text: "Countersign agent agreements and edit the agreement template.", path: "/admin/agreements", ready: true, group: "Agreements" },
   ],
   agent: [

@@ -92,7 +92,7 @@ const MyDocuments = () => {
           {msg && <Notice severity="success" sx={{ mb: 1 }}>{msg}</Notice>}
           <div className="app-grid two">
             <Field id="md-kind" label="Document type" value={kind} onChange={(e) => setKind(e.target.value)}
-              options={[{ value: "", label: "Choose..." }, ...Object.keys(kinds).filter((k) => k !== "application_form").map((k) => ({ value: k, label: kinds[k].label }))]} />
+              options={[{ value: "", label: "Choose..." }, ...Object.keys(kinds).filter((k) => k !== "application_form" && kinds[k].active !== false).map((k) => ({ value: k, label: kinds[k].label }))]} />
             {kind === "other" && <Field id="md-label" label="Describe the document" value={label} onChange={(e) => setLabel(e.target.value)} inputProps={{ maxLength: 160 }} />}
           </div>
           <FilePick key={pickKey} id="md-file" label="File" file={file} onChange={setFile} />
