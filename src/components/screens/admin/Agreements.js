@@ -6,7 +6,7 @@ import "../../styles/adminPages.css";
 import CustomSnackbar from "../CustomSnackbar";
 import { ExportButton, Pager, StatusBadge, formatDate } from "./shared";
 import { Btn, DataTable, Panel, TabBar, TableCell, TableRow } from "../../ui";
-import { exportAgreements, listAgreements, downloadAgreementFile } from "../../../services/agreementService";
+import { exportAgreements, listAgreements, downloadAgreementPdf } from "../../../services/agreementService";
 import { getHomeRoute } from "../../../const/roles";
 
 const PAGE_SIZE = 10;
@@ -104,20 +104,16 @@ const Agreements = ({ role }) => {
               <TableCell data-label="Expires">{a.expires_at ? formatDate(a.expires_at) : "-"}</TableCell>
               <TableCell data-label="">
                 <div className="cell-actions">
-                  {a.final_file_id && (
-                    <Btn
-                      onClick={async () => {
-                        const r = await downloadAgreementFile(a.id, {
-                          id: a.final_file_id,
-                          original_name: `AGR-${String(a.id).padStart(5, "0")} signed.pdf`,
-                        });
-                        if (!r.success)
-                          setSnackbar({ open: true, message: r.message || "Could not download the file.", severity: "error" });
-                      }}
-                    >
-                      Download PDF
-                    </Btn>
-                  )}
+                  <Btn
+                    onClick={async () => {
+                      const ref = `AGR-${String(a.id).padStart(5, "0")}`;
+                      const r = await downloadAgreementPdf(a.id, `${ref} ${a.final_file_id || ["active", "expired"].includes(a.status) ? "signed" : "unsigned copy"}.pdf`);
+                      if (!r.success)
+                        setSnackbar({ open: true, message: r.message || "Could not download the file.", severity: "error" });
+                    }}
+                  >
+                    {a.final_file_id || ["active", "expired"].includes(a.status) ? "Download PDF" : "Download unsigned PDF"}
+                  </Btn>
                   <Btn component={Link} to={`/admin/agreements/${a.id}`}>
                     {a.status === "submitted" ? "Countersign" : "View"}
                   </Btn>

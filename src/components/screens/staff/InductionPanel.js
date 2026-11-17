@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { formatDate, FormDialog } from "../admin/shared";
-import { cancelInduction, completeInduction, markInductionMissed, recordInduction, rescheduleInduction } from "../../../services/comsService";
+import { cancelInduction, completeInduction, editInduction, markInductionMissed, recordInduction, rescheduleInduction, undoInduction } from "../../../services/comsService";
 import { Btn, Field, Notice, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
 const MODES = [
@@ -9,7 +9,7 @@ const MODES = [
   { value: "phone", label: "By phone" },
 ];
 const MODE_LABEL = Object.fromEntries(MODES.map((m) => [m.value, m.label]));
-const STATUS_LABEL = { scheduled: "Scheduled", held: "Held", cancelled: "Cancelled", missed: "Did not attend" };
+const STATUS_LABEL = { scheduled: "Scheduled", held: "Held", cancelled: "Cancelled", missed: "Did not attend", voided: "Undone" };
 const ELIGIBLE = ["approved", "onboarding", "active", "under_review"];
 const today = () => new Date().toLocaleDateString("en-CA");
 
@@ -24,6 +24,8 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
   const list = agent.inductions || [];
   const scheduled = list.find((i) => i.status === "scheduled");
   const held = list.filter((i) => i.status === "held");
+  const canEdit = !!agent.permissions?.recordInduction && !agent.deleted_at;
+  const canUndo = !!agent.permissions?.remove && !agent.deleted_at;
   const can = agent.permissions?.recordInduction && ELIGIBLE.includes(agent.status) && !agent.deleted_at;
   if (!ELIGIBLE.includes(agent.status) && list.length === 0) return null;
 
@@ -37,7 +39,7 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
     setBusy(true);
     const res = await call();
     setBusy(false);
-    if (res.success) { close(); showMessage(ok); onChanged(); }
+    if (res.success) { close(); showMessage(res.data && res.data.warning ? res.data.warning : ok, res.data && res.data.warning ? "warning" : "success"); onChanged(); }
     else { if (res.errors) setErrors(res.errors); showMessage(res.message || "Something went wrong.", "error"); }
   };
   const payload = () => ({
@@ -80,7 +82,13 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
       const p = payload();
       return submit(() => rescheduleInduction(agent.id, target.id, { scheduled_for: form.scheduled_for, conducted_by: p.conducted_by, mode: p.mode, ...booking() }), "Induction moved. The agent has been emailed.");
     }
+    if (dialog === "edit") {
+      if (!form.held_on) return setErrors({ held_on: "Choose the date the induction was held" });
+      if (!(form.notes || "").trim()) return setErrors({ notes: "Add a note about what was covered" });
+      return submit(() => editInduction(agent.id, target.id, { held_on: form.held_on, ...payload() }), "Induction updated.");
+    }
     if ((form.reason || "").trim().length < 3) return setErrors({ reason: "Please give a reason" });
+    if (dialog === "undo") return submit(() => undoInduction(agent.id, target.id, form.reason.trim()), "Induction undone.");
     if (dialog === "missed") return submit(() => markInductionMissed(agent.id, target.id, form.reason.trim()), "Recorded as not attended. You can book another induction.");
     return submit(() => cancelInduction(agent.id, target.id, form.reason.trim()), "Induction cancelled.");
   };
@@ -145,6 +153,7 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
                 <TableCell>Run by</TableCell>
                 <TableCell>How</TableCell>
                 <TableCell>Notes</TableCell>
+                {(canEdit || canUndo) && <TableCell />}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -155,9 +164,17 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
                   <TableCell>{i.conducted_by_name || "-"}</TableCell>
                   <TableCell>{MODE_LABEL[i.mode] || "-"}</TableCell>
                   <TableCell style={{ whiteSpace: "pre-wrap" }}>
-                    {i.status === "cancelled" || i.status === "missed" ? `${i.status === "missed" ? "Did not attend" : "Cancelled"}: ${i.cancel_reason || ""}` : i.notes || "-"}
+                    {["cancelled", "missed", "voided"].includes(i.status) ? `${{ missed: "Did not attend", voided: "Undone", cancelled: "Cancelled" }[i.status]}: ${i.cancel_reason || ""}` : i.notes || "-"}
                     {i.attendees ? `\nAttended: ${i.attendees}` : ""}
                   </TableCell>
+                  {(canEdit || canUndo) && (
+                    <TableCell style={{ whiteSpace: "nowrap" }}>
+                      {i.status === "held" && canEdit && (
+                        <Btn size="small" onClick={() => open("edit", { held_on: i.held_on, conducted_by: String(i.conducted_by || ""), mode: i.mode, attendees: i.attendees || "", notes: i.notes || "" }, i)}>Edit</Btn>
+                      )}{" "}
+                      {i.status === "held" && canUndo && <Btn size="small" kind="danger" onClick={() => open("undo", { reason: "" }, i)}>Undo</Btn>}
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -166,10 +183,10 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
       )}
 
       <FormDialog
-        open={dialog === "held" || dialog === "complete"}
-        title="Record induction"
-        intro="Record when the induction was held, who ran it and what was covered. This is needed before the agent can become Active."
-        submitLabel="Record"
+        open={dialog === "held" || dialog === "complete" || dialog === "edit"}
+        title={dialog === "edit" ? "Correct this induction" : "Record induction"}
+        intro={dialog === "edit" ? "Fix the date, who ran it or the notes. The change is kept in the activity log with the old and new values." : "Record when the induction was held, who ran it and what was covered. This is needed before the agent can become Active."}
+        submitLabel={dialog === "edit" ? "Save" : "Record"}
         onSubmit={onSubmit}
         onCancel={close}
       >
@@ -195,6 +212,9 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
         ) : (
           <Field id="in-loc" label={form.mode === "phone" ? "Phone number we will call" : "Where it will be held"} error={errors.location} value={form.location || ""} onChange={setField("location")} inputProps={{ maxLength: 300 }} />
         )}
+      </FormDialog>
+      <FormDialog open={dialog === "undo"} title="Undo this induction?" intro="Use this only if it was recorded by mistake, for example against the wrong agent. The record stays in the activity log. If it was the only induction, the agent will show as not inducted again." submitLabel="Undo induction" danger onSubmit={onSubmit} onCancel={close}>
+        <Field id="in-undo" label="Reason (required)" error={errors.reason} multiline value={form.reason || ""} onChange={setField("reason")} inputProps={{ maxLength: 1000 }} />
       </FormDialog>
       <FormDialog open={dialog === "missed"} title="The agent did not attend" intro="The induction is not recorded as held and the agent stays unable to become Active. You can book another one." submitLabel="Record" danger onSubmit={onSubmit} onCancel={close}>
         <Field id="in-miss" label="What happened (required)" error={errors.reason} multiline value={form.reason || ""} onChange={setField("reason")} inputProps={{ maxLength: 1000 }} />

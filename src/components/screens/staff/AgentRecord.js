@@ -7,6 +7,7 @@ import "../../styles/coms.css";
 import LoadingSpinner from "../LoadingSpinner";
 import CustomSnackbar from "../CustomSnackbar";
 import { FormDialog, StatusBadge, formatDate, formatDateTime } from "../admin/shared";
+import { downloadAgreementPdf } from "../../../services/agreementService";
 import {
   AgentStatusBadge,
   ChangeDetail,
@@ -56,6 +57,9 @@ const TABS = [
 ];
 
 const today = () => new Date().toLocaleDateString("en-CA");
+
+// roles the agreement service lets open an agreement (Accounts and Admissions cannot)
+const AGREEMENT_VIEWERS = ["admin", "ceo", "director", "marketing_officer", "compliance", "coe_admin"];
 
 const Item = ({ label, children }) => (
   <div className="summary-item">
@@ -149,6 +153,7 @@ const AgentRecord = ({ role, user }) => {
   }
 
   const perms = agent.permissions || {};
+  const canDownloadAgreement = AGREEMENT_VIEWERS.includes(role);
   const deleted = Boolean(agent.deleted_at);
   const moves = (meta.transitions || {})[agent.status] || [];
   const hasLogin = agent.persons.some((p) => p.portal_user_id);
@@ -607,6 +612,7 @@ const AgentRecord = ({ role, user }) => {
                     <TableCell>Sent</TableCell>
                     <TableCell>Starts</TableCell>
                     <TableCell>Ends</TableCell>
+                    {canDownloadAgreement && <TableCell />}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -617,6 +623,20 @@ const AgentRecord = ({ role, user }) => {
                       <TableCell data-label="Sent">{formatDate(a.sent_at)}</TableCell>
                       <TableCell data-label="Starts">{formatDate(a.effective_date)}</TableCell>
                       <TableCell data-label="Ends">{formatDate(a.expires_at)}</TableCell>
+                      {canDownloadAgreement && (
+                        <TableCell data-label="">
+                          <Btn
+                            size="small"
+                            onClick={async () => {
+                              const signed = ["active", "expired"].includes(a.display_status);
+                              const r = await downloadAgreementPdf(a.id, `AGR-${String(a.id).padStart(5, "0")} ${signed ? "signed" : "unsigned copy"}.pdf`);
+                              if (r && r.success === false) showMessage(r.message || "Could not download the agreement.", "error");
+                            }}
+                          >
+                            {["active", "expired"].includes(a.display_status) ? "Download PDF" : "Download unsigned PDF"}
+                          </Btn>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
