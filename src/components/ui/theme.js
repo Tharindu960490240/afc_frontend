@@ -98,7 +98,7 @@ export const theme = createTheme({
     MuiAutocomplete: { styleOverrides: { paper: { background: "var(--card-color)", color: "var(--text-color)", border: `1px solid ${line}` }, option: { fontSize: 14 }, noOptions: { color: "var(--muted-color)" } } },
     MuiDialog: { styleOverrides: { paper: { background: "var(--card-color)", color: "var(--text-color)", borderRadius: 14 } } },
     MuiDialogTitle: { styleOverrides: { root: { fontSize: 18, fontWeight: 700, color: "var(--text-color)" } } },
-    MuiDialogActions: { styleOverrides: { root: { padding: "0 24px 20px", gap: 6 } } },
+    MuiDialogActions: { styleOverrides: { root: { padding: "18px 24px 20px", gap: 8 } } },
     MuiTableContainer: { styleOverrides: { root: { border: "1px solid var(--border-color)", borderRadius: 10, background: "var(--card-color)" } } },
     MuiTableCell: {
       styleOverrides: {

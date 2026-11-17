@@ -304,6 +304,11 @@ body.si {
 .MuiDialogContent-root {
   border-top: 1px solid var(--border-color) !important;
   border-bottom: 1px solid var(--border-color) !important;
+  padding: 20px 24px 24px;
+}
+/* MUI removes the top padding after a title; keep the text off the divider line */
+.MuiDialogTitle-root + .MuiDialogContent-root {
+  padding-top: 20px;
 }
 
 /* Target MUI input */
