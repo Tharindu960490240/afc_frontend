@@ -268,8 +268,6 @@ const ResetPassword = ({ onSignOut }) => {
           />
         </div>
 
-        <PasswordStrength value={data.password || ""} sx={{ mt: 1, mb: 1 }} />
-
         {/* Confirm password */}
         <div className="input-container">
           <TextField
@@ -285,7 +283,9 @@ const ResetPassword = ({ onSignOut }) => {
             className="custom-textfield"
             error={!data.passwordMatch}
             helperText={
-              !data.passwordMatch ? t("reset_password_page.passwordMismatch") : ""
+              !data.passwordMatch
+                ? t("reset_password_page.passwordMismatch")
+                : ""
             }
             required
             InputProps={{
@@ -297,6 +297,7 @@ const ResetPassword = ({ onSignOut }) => {
             }}
           />
         </div>
+        <PasswordStrength value={data.password || ""} sx={{ mt: 1, mb: 1 }} />
 
         <div className="button-group">
           <Btn kind="primary" size="medium" type="submit" fullWidth>
