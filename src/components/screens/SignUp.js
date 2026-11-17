@@ -31,7 +31,10 @@ import AuthLogo from "../AuthLogo";
 import LoadingSpinner from "./LoadingSpinner";
 import CustomSnackbar from "./CustomSnackbar";
 
-import { getInvitation, acceptInvitation } from "../../services/invitationService";
+import {
+  getInvitation,
+  acceptInvitation,
+} from "../../services/invitationService";
 import { ROLES, ROLE_LABELS, normalizeRole } from "../../const/roles";
 import { COUNTRIES } from "../../const/countries";
 import { getAge, validateSignUp } from "../../utils/validation";
@@ -153,7 +156,8 @@ const SignUp = () => {
     [values, role],
   );
 
-  const showError = (name) => Boolean(errors[name] && (touched[name] || submitted));
+  const showError = (name) =>
+    Boolean(errors[name] && (touched[name] || submitted));
 
   const setField = (name, value) =>
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -252,7 +256,9 @@ const SignUp = () => {
           <AuthLogo />
           <ErrorOutline className="signup-icon signup-icon-warn" />
           <h2>
-            {isMissing ? "Sign-up is by invitation only" : "Invitation not valid"}
+            {isMissing
+              ? "Sign-up is by invitation only"
+              : "Invitation not valid"}
           </h2>
           <p className="signup-subtitle">
             {isMissing
@@ -283,7 +289,12 @@ const SignUp = () => {
           <p className="signup-subtitle">
             {copy?.next || "Sign in to continue."}
           </p>
-          <Btn kind="primary" size="medium" fullWidth onClick={() => navigate("/signin", { replace: true })}>
+          <Btn
+            kind="primary"
+            size="medium"
+            fullWidth
+            onClick={() => navigate("/signin", { replace: true })}
+          >
             Go to sign in
           </Btn>
         </div>
@@ -334,7 +345,11 @@ const SignUp = () => {
         {/* Phone */}
         <div className="form-row full">
           <TextField
-            {...fieldProps("phone", "Phone number", "Include your country code if outside Australia")}
+            {...fieldProps(
+              "phone",
+              "Phone number",
+              "Include your country code if outside Australia",
+            )}
             autoComplete="tel"
             inputMode="tel"
             onChange={(e) => {
@@ -428,7 +443,11 @@ const SignUp = () => {
         {/* Password */}
         <div className="form-row desktop-two">
           <TextField
-            {...fieldProps("password", "Password", "8+ characters, upper and lower case, a number and one of @ $ ! % * ? &")}
+            {...fieldProps(
+              "password",
+              "Password",
+              "8+ characters, upper and lower case, a number and one of @ $ ! % * ? &",
+            )}
             type={showPassword ? "text" : "password"}
             autoComplete="new-password"
             InputProps={{
@@ -437,7 +456,9 @@ const SignUp = () => {
                 <InputAdornment position="end">
                   <IconButton
                     onClick={() => setShowPassword((s) => !s)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
                     {showPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
@@ -449,7 +470,21 @@ const SignUp = () => {
             {...fieldProps("confirmPassword", "Confirm password")}
             type={showPassword ? "text" : "password"}
             autoComplete="new-password"
-            InputProps={adornment(Lock)}
+            InputProps={{
+              ...adornment(Lock),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword((s) => !s)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </div>
         <PasswordStrength value={values.password || ""} sx={{ mb: 2 }} />

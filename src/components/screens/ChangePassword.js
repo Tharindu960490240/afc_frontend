@@ -10,7 +10,8 @@ import { changePassword } from "../../services/authService";
 import { Btn, Field, Panel, PasswordStrength } from "../ui";
 import { IconButton, InputAdornment } from "@mui/material";
 
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,72}$/;
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,72}$/;
 const EMPTY = { current: "", next: "", confirm: "" };
 
 // Any signed-in user (admin, agent, teacher, student) can change their own password here.
@@ -23,8 +24,16 @@ const PasswordInput = ({ id, label, error, show, onToggle, ...props }) => (
     InputProps={{
       endAdornment: (
         <InputAdornment position="end">
-          <IconButton edge="end" onClick={onToggle} aria-label={show ? "Hide password" : "Show password"}>
-            {show ? <Visibility fontSize="small" /> : <VisibilityOff fontSize="small" />}
+          <IconButton
+            edge="end"
+            onClick={onToggle}
+            aria-label={show ? "Hide password" : "Show password"}
+          >
+            {show ? (
+              <Visibility fontSize="small" />
+            ) : (
+              <VisibilityOff fontSize="small" />
+            )}
           </IconButton>
         </InputAdornment>
       ),
@@ -38,8 +47,13 @@ const ChangePassword = ({ role }) => {
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
-  const showMessage = (message, severity = "success") => setSnackbar({ open: true, message, severity });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const showMessage = (message, severity = "success") =>
+    setSnackbar({ open: true, message, severity });
   const handleClose = () => setSnackbar((prev) => ({ ...prev, open: false }));
 
   const set = (key) => (e) => {
@@ -52,22 +66,30 @@ const ChangePassword = ({ role }) => {
     const problems = {};
     if (!form.current) problems.current = "Enter your current password";
     if (!PASSWORD_REGEX.test(form.next)) {
-      problems.next = "Use 8-72 characters with upper and lower case letters, a number and one of @$!%*?&";
+      problems.next =
+        "Use 8-72 characters with upper and lower case letters, a number and one of @$!%*?&";
     } else if (form.next === form.current) {
       problems.next = "Choose a password you have not used before";
     }
-    if (form.confirm !== form.next) problems.confirm = "The passwords do not match";
+    if (form.confirm !== form.next)
+      problems.confirm = "The passwords do not match";
     if (Object.keys(problems).length) return setErrors(problems);
 
     setBusy(true);
-    const res = await changePassword(localStorage.getItem("Token"), form.current, form.next);
+    const res = await changePassword(
+      localStorage.getItem("Token"),
+      form.current,
+      form.next,
+    );
     setBusy(false);
 
     if (res.success) {
       // the old token stops working after a change, the server hands back a new one
       if (res.data?.token) localStorage.setItem("Token", res.data.token);
       setForm(EMPTY);
-      showMessage("Your password has been changed. We also sent you a confirmation email.");
+      showMessage(
+        "Your password has been changed. We also sent you a confirmation email.",
+      );
     } else {
       setErrors({
         current: res.errors?.currentPassword,
@@ -90,16 +112,47 @@ const ChangePassword = ({ role }) => {
 
       <Panel style={{ maxWidth: 520, margin: "0 auto" }}>
         <form noValidate onSubmit={submit} className="dialog-form">
-          <PasswordInput id="pw-current" label="Current password" autoComplete="current-password"
-            value={form.current} onChange={set("current")} error={errors.current} show={show} onToggle={() => setShow(!show)} />
-          <PasswordInput id="pw-new" label="New password" autoComplete="new-password"
-            value={form.next} onChange={set("next")} error={errors.next} show={show} onToggle={() => setShow(!show)} />
+          <PasswordInput
+            id="pw-current"
+            label="Current password"
+            autoComplete="current-password"
+            value={form.current}
+            onChange={set("current")}
+            error={errors.current}
+            show={show}
+            onToggle={() => setShow(!show)}
+          />
+          <PasswordInput
+            id="pw-new"
+            label="New password"
+            autoComplete="new-password"
+            value={form.next}
+            onChange={set("next")}
+            error={errors.next}
+            show={show}
+            onToggle={() => setShow(!show)}
+          />
+
+          <PasswordInput
+            id="pw-confirm"
+            label="Confirm new password"
+            autoComplete="new-password"
+            value={form.confirm}
+            onChange={set("confirm")}
+            error={errors.confirm}
+            show={show}
+            onToggle={() => setShow(!show)}
+          />
+
           <PasswordStrength value={form.next} />
-          <PasswordInput id="pw-confirm" label="Confirm new password" autoComplete="new-password"
-            value={form.confirm} onChange={set("confirm")} error={errors.confirm} show={show} onToggle={() => setShow(!show)} />
-          <p className="admin-hint">You will stay signed in on this device. Any other device will be signed out.</p>
+          <p className="admin-hint">
+            You will stay signed in on this device. Any other device will be
+            signed out.
+          </p>
           <div className="action-row" style={{ justifyContent: "center" }}>
-            <Btn kind="primary" size="medium" type="submit"  disabled={busy}>Change password</Btn>
+            <Btn kind="primary" size="medium" type="submit" disabled={busy}>
+              Change password
+            </Btn>
           </div>
         </form>
       </Panel>

@@ -294,10 +294,22 @@ const ResetPassword = ({ onSignOut }) => {
                   <Lock />
                 </InputAdornment>
               ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={togglePasswordVisibility}
+                    aria-label={
+                      data.showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {data.showPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              ),
             }}
           />
         </div>
-        <PasswordStrength value={data.password || ""} sx={{ mt: 1, mb: 1 }} />
+        <PasswordStrength value={data.password || ""} sx={{ mt: 2, mb: 2 }} />
 
         <div className="button-group">
           <Btn kind="primary" size="medium" type="submit" fullWidth>
