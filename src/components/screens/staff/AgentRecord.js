@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowBack } from "@mui/icons-material";
 
 import "../../styles/adminPages.css";
@@ -83,6 +83,7 @@ const EMPTY_PERSON = { name: "", email: "", role: "staff", marn: "", involved_in
 
 const AgentRecord = ({ role, user }) => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [agent, setAgent] = useState(null);
   const [meta, setMeta] = useState({ staff: [], transitions: {}, permissions: {} });
   const [loading, setLoading] = useState(true);
@@ -246,10 +247,24 @@ const AgentRecord = ({ role, user }) => {
     else run(() => addAgentPerson(agent.id, body), "Person added.");
   };
 
+  // the record no longer exists once deleted, so go back to the register instead of reloading it
+  const deleteAgent = async () => {
+    setBusy(true);
+    const res = await deleteAgentRecord(agent.id, form.reason.trim());
+    setBusy(false);
+    if (res.success) {
+      close();
+      navigate("/coms/agents", { state: { message: "Agent deleted. An administrator can restore it." } });
+    } else {
+      if (res.errors) setErrors(res.errors);
+      showMessage(res.message || "Something went wrong.", "error");
+    }
+  };
+
   const submitDelete = () => {
     if (form.reason.trim().length < 3) return setErrors({ reason: "Please give a reason" });
     if (dialog === "removePerson") run(() => removeAgentPerson(agent.id, target.id, form.reason.trim()), "Person removed.");
-    else run(() => deleteAgentRecord(agent.id, form.reason.trim()), "Agent deleted. An administrator can restore it.");
+    else deleteAgent();
   };
 
   const submitMilestone = () => {

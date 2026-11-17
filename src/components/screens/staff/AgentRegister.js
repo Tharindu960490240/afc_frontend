@@ -1,6 +1,6 @@
 import TableSortLabel from "@mui/material/TableSortLabel";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowBack } from "@mui/icons-material";
 
 import "../../styles/adminPages.css";
@@ -31,6 +31,7 @@ const EMPTY = { legal_name: "", contact_name: "", email: "", phone: "", country:
 
 const AgentRegister = ({ role }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [tab, setTab] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState("");
@@ -52,6 +53,15 @@ const AgentRegister = ({ role }) => {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const showMessage = (message, severity = "success") => setSnackbar({ open: true, message, severity });
   const handleClose = () => setSnackbar((prev) => ({ ...prev, open: false }));
+
+  // message passed from another screen (for example after deleting an agent)
+  useEffect(() => {
+    const message = location.state && location.state.message;
+    if (message) {
+      setSnackbar({ open: true, message, severity: "success" });
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location, navigate]);
 
   useEffect(() => {
     getAgentMeta().then((res) => res.success && setMeta(res.data));
