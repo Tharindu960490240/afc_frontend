@@ -39,6 +39,7 @@ const auditItem = {
   icon: FactCheck, label: "Audit log", text: "See who changed what, and when.", path: "/coms/audit", ready: true,
 };
 const tasksItem = { icon: Checklist, label: "Tasks", text: "PRISMS, ASQAnet, website and induction deadlines.", path: "/coms/tasks", ready: true };
+const agreementsItem = { icon: Description, label: "Agreements", text: "Read and countersign agent agreements.", path: "/admin/agreements", ready: true };
 const profileItem = {
   icon: Person, label: "My profile", text: "See and update your details and change your password.",
   path: "/account/profile", ready: true,
@@ -51,7 +52,7 @@ const staffMenu = (...items) => [
 const withHome = (menu, home) => menu.map((i) => (i.home ? { ...i, path: home } : i));
 
 export const NAV_ITEMS = {
-  ceo: withHome(staffMenu(registerItem, tasksItem, holidaysItem, auditItem), "/ceo"),
+  ceo: withHome(staffMenu(registerItem, agreementsItem, tasksItem, holidaysItem, auditItem), "/ceo"),
   director: withHome(staffMenu(registerItem, tasksItem, holidaysItem), "/director"),
   marketing_officer: withHome(staffMenu(registerItem, tasksItem, holidaysItem), "/marketing_officer"),
   admissions: withHome(staffMenu(registerItem), "/admissions"),

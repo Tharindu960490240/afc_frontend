@@ -59,7 +59,7 @@ const Agreements = ({ role }) => {
         <h1>Agreements</h1>
         <p>
           Agreements waiting for you to countersign are listed first.{" "}
-          <Link className="admin-link" to="/admin/agreements/template">Edit agreement template</Link>
+          {role === "admin" && <Link className="admin-link" to="/admin/agreements/template">Edit agreement template</Link>}
         </p>
       </div>
 
@@ -74,10 +74,12 @@ const Agreements = ({ role }) => {
             }}
             tabs={TABS.map((t) => ({ value: t.key || "all", label: t.label }))}
           />
-          <ExportButton
-            run={() => exportAgreements({ status })}
-            onError={(m) => setSnackbar({ open: true, message: m, severity: "error" })}
-          />
+          {role === "admin" && (
+            <ExportButton
+              run={() => exportAgreements({ status })}
+              onError={(m) => setSnackbar({ open: true, message: m, severity: "error" })}
+            />
+          )}
         </div>
 
         <DataTable

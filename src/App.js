@@ -322,7 +322,7 @@ const App = () => {
                 isSignedIn={isSignedIn}
                 token={token}
                 role={role}
-                allowedRoles={[ROLES.ADMIN]}
+                allowedRoles={[ROLES.ADMIN, ROLES.CEO]}
               >
                 <Agreements role={role} />
               </ProtectedRoute>
@@ -356,7 +356,7 @@ const App = () => {
                 isSignedIn={isSignedIn}
                 token={token}
                 role={role}
-                allowedRoles={[ROLES.ADMIN]}
+                allowedRoles={[ROLES.ADMIN, ROLES.CEO]}
               >
                 <AgreementDetail />
               </ProtectedRoute>
