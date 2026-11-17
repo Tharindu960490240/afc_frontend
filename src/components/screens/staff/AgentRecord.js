@@ -379,8 +379,8 @@ const AgentRecord = ({ role, user }) => {
             </Btn>
           )}
           {!deleted && perms.recordInduction && ["approved", "onboarding", "active", "under_review"].includes(agent.status) && (
-            <Btn onClick={() => open("milestone", { type: "induction", date: today() })}>
-              Record induction
+            <Btn onClick={() => setTab("tasks")}>
+              Induction
             </Btn>
           )}
           {!deleted && perms.remove && (
@@ -425,7 +425,7 @@ const AgentRecord = ({ role, user }) => {
                 ) : null}
               </Item>
               <Item label="PRISMS entry">{agent.prisms_recorded_at ? formatDate(agent.prisms_recorded_at) : "Not recorded"}</Item>
-              <Item label="Induction">{agent.induction_recorded_at ? formatDate(agent.induction_recorded_at) : "Not recorded"}</Item>
+              <Item label="Induction">{agent.induction_recorded_at ? formatDate(agent.induction_recorded_at) : (agent.inductions || []).some((i) => i.status === "scheduled") ? `Scheduled ${formatDate(agent.inductions.find((i) => i.status === "scheduled").scheduled_for)}` : "Not recorded"}</Item>
               <Item label="SMS contact created">{agent.sms_contact_at ? formatDate(agent.sms_contact_at) : "Not recorded"}</Item>
               <Item label="Commission">{agent.commission_terms || "Not recorded"}</Item>
               <Item label="Bonus">{agent.bonus_terms || (agent.terms_recorded_at ? "None" : "Not recorded")}</Item>
@@ -664,7 +664,7 @@ const AgentRecord = ({ role, user }) => {
       {tab === "due_diligence" && <DueDiligencePanel agent={agent} onChanged={load} showMessage={showMessage} />}
 
       {tab === "tasks" && (
-        <TasksPanel agent={agent} canWork={(t) => canWorkTask(user, role, t)} onChanged={load} showMessage={showMessage} />
+        <TasksPanel agent={agent} staff={meta.staff} currentUserId={user && user.id} canWork={(t) => canWorkTask(user, role, t)} onChanged={load} showMessage={showMessage} />
       )}
 
       {tab === "history" && (
@@ -863,7 +863,7 @@ const AgentRecord = ({ role, user }) => {
             ? "Confirm the agent has been entered in PRISMS. This is needed before the agent can become Active."
             : form.type === "sms_contact"
               ? "Confirm the agent's contact has been created in the student management system (step 2 of the agent processing procedure)."
-              : "Confirm the induction session has been held. This is needed before the agent can become Active."
+              : ""
         }
         submitLabel="Record"
         onSubmit={submitMilestone}

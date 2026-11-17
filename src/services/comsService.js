@@ -17,6 +17,14 @@ export const changeAgentStatus = (id, status, reason) =>
 export const sendApplicationLink = (id) => apiRequest(E.AGENT_LINK(id), { method: "POST" });
 export const recordMilestone = (id, type, date) =>
   apiRequest(E.AGENT_MILESTONE(id), { method: "POST", body: { type, ...(date ? { date } : {}) } });
+
+// ---------- induction (Phase 3) ----------
+// { outcome: "held" | "scheduled", held_on, scheduled_for, conducted_by, mode, attendees, notes }
+export const recordInduction = (id, payload) => apiRequest(E.AGENT_INDUCTIONS(id), { method: "POST", body: payload });
+export const completeInduction = (id, iid, payload) => apiRequest(E.AGENT_INDUCTION(id, iid, "complete"), { method: "POST", body: payload });
+export const rescheduleInduction = (id, iid, payload) => apiRequest(E.AGENT_INDUCTION(id, iid, "reschedule"), { method: "POST", body: payload });
+export const cancelInduction = (id, iid, reason) => apiRequest(E.AGENT_INDUCTION(id, iid, "cancel"), { method: "POST", body: { reason } });
+
 export const deleteAgentRecord = (id, reason) => apiRequest(E.AGENT_DELETE(id), { method: "POST", body: { reason } });
 export const restoreAgentRecord = (id) => apiRequest(E.AGENT_RESTORE(id), { method: "POST" });
 

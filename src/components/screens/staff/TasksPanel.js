@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import { formatDate } from "../admin/shared";
 import { CategoryBadge, CompleteTaskDialog, TaskDue } from "./taskShared";
+import InductionPanel from "./InductionPanel";
 import { downloadTaskEvidence, getTermsDraft, recordTerms, sendTerms } from "../../../services/comsService";
 import { Btn, Field, Notice, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
@@ -70,7 +71,7 @@ const TermsBox = ({ agent, onChanged, showMessage }) => {
   );
 };
 
-const TasksPanel = ({ agent, canWork, onChanged, showMessage }) => {
+const TasksPanel = ({ agent, canWork, onChanged, showMessage, staff, currentUserId }) => {
   const [target, setTarget] = useState(null);
   const tasks = agent.tasks || [];
   const open = tasks.filter((t) => t.status === "open");
@@ -82,6 +83,7 @@ const TasksPanel = ({ agent, canWork, onChanged, showMessage }) => {
 
   return (
     <Panel>
+      <InductionPanel agent={agent} staff={staff} currentUserId={currentUserId} onChanged={onChanged} showMessage={showMessage} />
       <TermsBox key={agent.terms_recorded_at || "new"} agent={agent} onChanged={onChanged} showMessage={showMessage} />
       <div className="admin-toolbar">
         <h2 style={{ margin: 0 }}>Onboarding and regulatory tasks</h2>
