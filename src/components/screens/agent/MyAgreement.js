@@ -26,6 +26,7 @@ import {
   downloadAgreementFile,
   downloadAgreementPdf,
 } from "../../../services/agreementService";
+import { getMyCertificate, downloadMyCertificate } from "../../../services/comsService";
 import { getHomeRoute } from "../../../const/roles";
 import { Btn, Notice, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
@@ -38,6 +39,10 @@ const MyAgreement = ({ role }) => {
   const [current, setCurrent] = useState(null); // the active (or expired) one
   const [sig, setSig] = useState(EMPTY_SIGNATURE);
   const [errors, setErrors] = useState({});
+  const [certificate, setCertificate] = useState(null);
+  useEffect(() => {
+    getMyCertificate().then((r) => r.success && setCertificate(r.data));
+  }, []);
   const [busy, setBusy] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
@@ -143,6 +148,25 @@ const MyAgreement = ({ role }) => {
           The college will send your agreement here. You will get an email when
           it arrives.
         </div>
+      )}
+
+      {!loading && certificate?.available && (
+        <Panel>
+          <h2>Certificate of Appointment</h2>
+          <p className="admin-hint" style={{ marginTop: 0 }}>
+            Your onboarding is complete. Your certificate was also sent to your email.
+          </p>
+          <Btn
+            kind="primary"
+            size="medium"
+            onClick={async () => {
+              const r = await downloadMyCertificate();
+              if (r && r.success === false) showMessage(r.message || "Could not download the certificate.", "error");
+            }}
+          >
+            Download certificate (PDF)
+          </Btn>
+        </Panel>
       )}
 
       {!loading && shown && (

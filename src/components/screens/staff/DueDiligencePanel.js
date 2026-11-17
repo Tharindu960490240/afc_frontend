@@ -124,6 +124,7 @@ const DueDiligencePanel = ({ agent, onChanged, showMessage }) => {
   };
 
   if (!dd) return <Panel><div className="admin-empty">Loading due diligence...</div></Panel>;
+  const decl = dd.declarations || {};
 
   const canRecord = dd.permissions.record && ["applied", "due_diligence"].includes(agent.status);
   const questions = dd.questions || [];
@@ -438,8 +439,8 @@ const DueDiligencePanel = ({ agent, onChanged, showMessage }) => {
           {canRecord && (
             <Btn
               onClick={() => open("declarations", {
-                coi: fromBool(dd.declarations.coi_declared), coi_details: dd.declarations.coi_details || "",
-                ethics: !!dd.declarations.code_of_ethics_ack_at, review_note: dd.declarations.review_note || "", file: null,
+                coi: fromBool(decl.coi_declared), coi_details: decl.coi_details || "",
+                ethics: !!decl.code_of_ethics_ack_at, review_note: decl.review_note || "", file: null,
               })}
             >
               Record or review
@@ -449,19 +450,19 @@ const DueDiligencePanel = ({ agent, onChanged, showMessage }) => {
         <div className="summary-grid">
           <div className="summary-item">
             <span>Conflict of interest</span>
-            <strong>{dd.declarations.coi_declared === null || dd.declarations.coi_declared === undefined ? "Not declared yet" : dd.declarations.coi_declared ? `Yes: ${dd.declarations.coi_details || ""}` : "None declared"}</strong>
+            <strong>{decl.coi_declared === null || decl.coi_declared === undefined ? "Not declared yet" : decl.coi_declared ? `Yes: ${decl.coi_details || ""}` : "None declared"}</strong>
           </div>
           <div className="summary-item">
             <span>Code of ethics</span>
-            <strong>{dd.declarations.code_of_ethics_ack_at ? `Accepted ${formatDate(dd.declarations.code_of_ethics_ack_at)}` : "Not accepted"}</strong>
+            <strong>{decl.code_of_ethics_ack_at ? `Accepted ${formatDate(decl.code_of_ethics_ack_at)}` : "Not accepted"}</strong>
           </div>
           <div className="summary-item">
             <span>College review</span>
-            <strong>{dd.declarations.reviewed_at ? `${formatDate(dd.declarations.reviewed_at)}${dd.declarations.review_note ? ` · ${dd.declarations.review_note}` : ""}` : "Not reviewed yet"}</strong>
+            <strong>{decl.reviewed_at ? `${formatDate(decl.reviewed_at)}${decl.review_note ? ` · ${decl.review_note}` : ""}` : "Not reviewed yet"}</strong>
           </div>
           <div className="summary-item">
             <span>Declaration file</span>
-            <strong>{dd.declarations.file ? <Btn onClick={() => downloadFile(dd.declarations.file)}>{dd.declarations.file.name}</Btn> : "None"}</strong>
+            <strong>{decl.file ? <Btn onClick={() => downloadFile(decl.file)}>{decl.file.name}</Btn> : "None"}</strong>
           </div>
         </div>
       </Panel>

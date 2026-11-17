@@ -29,12 +29,14 @@ import {
   addAgentPerson,
   changeAgentStatus,
   deleteAgentRecord,
+  downloadCertificate,
   getAgentMeta,
   getAgentRecord,
   recordMilestone,
   removeAgentPerson,
   restoreAgentRecord,
   sendAgentAgreement,
+  sendCertificate,
   sendApplicationLink,
   updateAgentPerson,
   updateAgentRecord,
@@ -605,6 +607,34 @@ const AgentRecord = ({ role, user }) => {
                 </TableBody>
               </Table>
             </TableContainer>
+          )}
+          {agent.status === "active" && (
+            <div className="record-head" style={{ marginTop: 16 }}>
+              <strong>Certificate of appointment</strong>
+              <Btn
+                size="medium"
+                onClick={async () => {
+                  const r = await downloadCertificate(agent.id, `${agent.legal_name} - Certificate of Appointment.pdf`);
+                  if (r && r.success === false) showMessage(r.message || "Could not download the certificate.", "error");
+                }}
+              >
+                Download (PDF)
+              </Btn>
+              {perms.sendAgreement && (
+                <Btn
+                  size="medium"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    const r = await sendCertificate(agent.id);
+                    setBusy(false);
+                    showMessage(r.success ? `Certificate emailed to ${r.data.sent_to}.` : r.message || "Could not send the certificate.", r.success ? "success" : "error");
+                  }}
+                >
+                  Email it to the agent
+                </Btn>
+              )}
+            </div>
           )}
           <p className="admin-hint" style={{ marginTop: 12 }}>
             {agent.has_signed_agreement
