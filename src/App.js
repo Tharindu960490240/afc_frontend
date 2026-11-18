@@ -36,6 +36,7 @@ import MyInduction from "./components/screens/agent/MyInduction";
 import MyApplication from "./components/screens/agent/MyApplication";
 import AgentRegisterList from "./components/screens/staff/AgentRegister";
 import AgentRecord from "./components/screens/staff/AgentRecord";
+import InductionContent from "./components/screens/staff/InductionContent";
 import Holidays from "./components/screens/staff/Holidays";
 import AuditLog from "./components/screens/staff/AuditLog";
 import TaskBoard from "./components/screens/staff/TaskBoard";
@@ -255,6 +256,14 @@ const App = () => {
             element={
               <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={STAFF_ROLES}>
                 <AgentRecord role={role} user={user} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/coms/induction"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={STAFF_ROLES}>
+                <InductionContent role={role} />
               </ProtectedRoute>
             }
           />

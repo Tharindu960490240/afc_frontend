@@ -40,6 +40,7 @@ const auditItem = {
   icon: FactCheck, label: "Audit log", text: "See who changed what, and when.", path: "/coms/audit", ready: true,
 };
 const tasksItem = { icon: Checklist, label: "Tasks", text: "PRISMS, ASQAnet, website and induction deadlines.", path: "/coms/tasks", ready: true };
+const inductionItem = { icon: School, label: "Induction and materials", text: "Agent induction modules, policies and the marketing materials agents download.", path: "/coms/induction", ready: true };
 const agreementsItem = { icon: Description, label: "Agreements", text: "Read and countersign agent agreements.", path: "/admin/agreements", ready: true };
 const profileItem = {
   icon: Person, label: "My profile", text: "See and update your details and change your password.",
@@ -53,19 +54,20 @@ const staffMenu = (...items) => [
 const withHome = (menu, home) => menu.map((i) => (i.home ? { ...i, path: home } : i));
 
 export const NAV_ITEMS = {
-  ceo: withHome(staffMenu(registerItem, agreementsItem, tasksItem, holidaysItem, auditItem), "/ceo"),
-  director: withHome(staffMenu(registerItem, tasksItem, holidaysItem), "/director"),
-  marketing_officer: withHome(staffMenu(registerItem, tasksItem, holidaysItem), "/marketing_officer"),
+  ceo: withHome(staffMenu(registerItem, agreementsItem, tasksItem, inductionItem, holidaysItem, auditItem), "/ceo"),
+  director: withHome(staffMenu(registerItem, tasksItem, inductionItem, holidaysItem), "/director"),
+  marketing_officer: withHome(staffMenu(registerItem, tasksItem, inductionItem, holidaysItem), "/marketing_officer"),
   admissions: withHome(staffMenu(registerItem), "/admissions"),
   coe_admin: withHome(staffMenu(registerItem, tasksItem, holidaysItem), "/coe_admin"),
   accounts: withHome(staffMenu(registerItem), "/accounts"),
-  compliance: withHome(staffMenu(registerItem, tasksItem, holidaysItem, auditItem), "/compliance"),
+  compliance: withHome(staffMenu(registerItem, tasksItem, inductionItem, holidaysItem, auditItem), "/compliance"),
   admin: [
     { icon: Dashboard, label: "Dashboard", path: "/admin", ready: true, home: true },
     { icon: MailOutline, label: "Invitations", text: "Send sign-up links to agents, teachers and students.", path: "/admin/invitations", ready: true, group: "People" },
     { icon: ManageAccounts, label: "Users", text: "See everyone with an account and suspend or reactivate access.", path: "/admin/users", ready: true },
     registerItem,
     tasksItem,
+    inductionItem,
     holidaysItem,
     auditItem,
     { icon: Settings, label: "Settings", text: "Reference questions, documents, deadlines, onboarding tasks and certificate details.", path: "/admin/settings", ready: true },

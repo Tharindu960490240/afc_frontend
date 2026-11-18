@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { formatDate, FormDialog } from "../admin/shared";
+import { formatDate, formatDateTime, FormDialog } from "../admin/shared";
 import { cancelInduction, completeInduction, editInduction, markInductionMissed, recordInduction, rescheduleInduction, undoInduction } from "../../../services/comsService";
 import { Btn, Field, Notice, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
@@ -12,6 +12,13 @@ const MODE_LABEL = Object.fromEntries(MODES.map((m) => [m.value, m.label]));
 const STATUS_LABEL = { scheduled: "Scheduled", held: "Held", cancelled: "Cancelled", missed: "Did not attend", voided: "Undone" };
 const ELIGIBLE = ["approved", "onboarding", "active", "under_review"];
 const today = () => new Date().toLocaleDateString("en-CA");
+const ONLINE_TEXT = {
+  not_started: "The agent has not started the online modules.",
+  in_progress: "The agent is working through the online modules.",
+  awaiting_policy: "All modules are done. The agent still has to acknowledge the policies.",
+  awaiting_staff: "The agent has finished the modules and acknowledged the policies. Please check and confirm. The student application part of the portal opens when you do.",
+  complete: "Online induction complete and confirmed. The agent's portal is fully open.",
+};
 
 // Record, schedule and review the agent's induction (Phase 3). Recording it is one of the three things BR-02 needs before Active.
 const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage }) => {
@@ -22,6 +29,7 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
   const [, setBusy] = useState(false);
 
   const list = agent.inductions || [];
+  const online = ELIGIBLE.includes(agent.status) ? agent.online_induction : null;
   const scheduled = list.find((i) => i.status === "scheduled");
   const held = list.filter((i) => i.status === "held");
   const canEdit = !!agent.permissions?.recordInduction && !agent.deleted_at;
@@ -115,6 +123,24 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
           ? `Induction recorded on ${formatDate(agent.induction_recorded_at)}.`
           : "Not recorded yet. Schedule it, or record it once it has been held. It is needed, with the agreement and PRISMS, before the agent can become Active."}
       </p>
+
+      {online && (
+        <div style={{ margin: "0 0 20px", padding: "14px 16px", border: "1px solid var(--border-color)", borderRadius: 10 }}>
+          <strong>Online induction (agent portal)</strong>
+          <div className="app-hint" style={{ margin: "6px 0 10px" }}>
+            {ONLINE_TEXT[online.stage]} Modules done: {online.modules_completed} of {online.modules_total}.
+          </div>
+          <ul style={{ margin: "0 0 10px", paddingLeft: 18, fontSize: 14, lineHeight: 1.7 }}>
+            {online.modules.map((m) => <li key={m.id}>{m.position}. {m.title}: {m.completed_at ? `completed ${formatDateTime(m.completed_at)}${m.ip ? ` (IP ${m.ip})` : ""}` : "not done"}</li>)}
+            <li>
+              Policies and procedures{online.pp_acknowledged_at ? `: acknowledged ${formatDateTime(online.pp_acknowledged_at)}, version ${online.pp_acknowledged_version}, IP ${online.pp_acknowledged_ip || "-"}` : ": not acknowledged yet"}
+            </li>
+          </ul>
+          {online.stage === "awaiting_staff" && can && (
+            <Btn kind="primary" size="medium" onClick={() => submit(() => recordInduction(agent.id, { outcome: "held", online_confirmation: true }), "Online induction confirmed. The agent's portal is now fully open.")}>Confirm the online induction</Btn>
+          )}
+        </div>
+      )}
 
       {scheduled && (
         <Notice severity="info" sx={{ mb: 2 }}>

@@ -6,13 +6,19 @@ import "../../styles/adminPages.css";
 import { formatDate } from "../admin/shared";
 import { getMyInduction } from "../../../services/comsService";
 import { getHomeRoute } from "../../../const/roles";
-import { Btn, Notice, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
+import CustomSnackbar from "../CustomSnackbar";
+import OnlineInduction from "./OnlineInduction";
+import MyMaterials from "./MyMaterials";
+import { Btn, Notice, TabBar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
 
 const MODE_LABEL = { online: "Online", in_person: "In person", phone: "By phone" };
 
 // The agent's own induction: when it is, who runs it and how to join, plus past sessions.
 const MyInduction = ({ role }) => {
   const [data, setData] = useState(null);
+  const [tab, setTab] = useState("online");
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const showMessage = (message, severity = "success") => setSnackbar({ open: true, message, severity });
 
   useEffect(() => {
     getMyInduction().then((res) => setData(res.success ? res.data : { eligible: false, scheduled: null, history: [] }));
@@ -26,19 +32,28 @@ const MyInduction = ({ role }) => {
       </Link>
       <div className="admin-head">
         <h1>My induction</h1>
-        <p>Your induction with the college covers how we work with agents and how to submit student applications.</p>
+        <p>Your induction covers how we work with agents and how to submit student applications.</p>
       </div>
+      <TabBar label="Induction sections" value={tab} onChange={setTab} tabs={[
+        { value: "online", label: "Online induction" },
+        { value: "materials", label: "Marketing materials" },
+        { value: "session", label: "Induction session" },
+      ]} />
+      <div style={{ height: 20 }} />
+      {tab === "online" && <OnlineInduction showMessage={showMessage} />}
+      {tab === "materials" && <MyMaterials showMessage={showMessage} />}
+      <CustomSnackbar {...snackbar} onClose={() => setSnackbar((p) => ({ ...p, open: false }))} />
 
-      {!data && <div className="admin-panel admin-empty">Loading...</div>}
+      {tab === "session" && !data && <div className="admin-panel admin-empty">Loading...</div>}
 
-      {data && !data.eligible && (
+      {tab === "session" && data && !data.eligible && (
         <div className="admin-panel admin-empty">
           <strong style={{ display: "block", marginBottom: 6 }}>Not available yet</strong>
           Your induction is arranged after the college approves your application. We will email you the date and how to join.
         </div>
       )}
 
-      {data && data.eligible && (
+      {tab === "session" && data && data.eligible && (
         <>
           {data.recorded_at && <Notice severity="success" sx={{ mb: 2 }}>Your induction was completed on {formatDate(data.recorded_at)}.</Notice>}
 

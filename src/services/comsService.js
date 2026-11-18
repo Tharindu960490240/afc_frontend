@@ -30,6 +30,23 @@ export const undoInduction = (id, iid, reason) => apiRequest(E.AGENT_INDUCTION(i
 export const markInductionMissed = (id, iid, reason) => apiRequest(E.AGENT_INDUCTION(id, iid, "missed"), { method: "POST", body: { reason } });
 export const getMyInduction = () => apiRequest(E.AGENT_INDUCTION_MINE);
 
+// ---------- online induction (Phase 3) ----------
+export const getOnlineInduction = () => apiRequest(E.ONLINE_INDUCTION);
+export const completeInductionModule = (id) => apiRequest(E.ONLINE_INDUCTION_MODULE(id), { method: "POST", body: {} });
+export const acknowledgePolicy = (versionId) => apiRequest(E.ONLINE_INDUCTION_ACK, { method: "POST", body: { version_id: versionId } });
+export const getMyMaterials = () => apiRequest(E.MY_MATERIALS);
+export const downloadMyMaterial = (id, name) => apiDownload(E.MY_MATERIAL_DOWNLOAD(id), name);
+// staff
+export const listInductionModules = () => apiRequest(E.INDUCTION_MODULES);
+export const updateInductionModule = (id, payload) => apiRequest(E.INDUCTION_MODULE(id), { method: "PATCH", body: payload });
+export const listPolicies = () => apiRequest(E.INDUCTION_POLICIES);
+export const publishPolicy = (payload) => apiRequest(E.INDUCTION_POLICIES, { method: "POST", body: payload });
+export const listMaterials = () => apiRequest(E.MATERIALS);
+export const createMaterial = (payload) => apiRequest(E.MATERIALS, { method: "POST", body: payload });
+export const approveMaterial = (id) => apiRequest(E.MATERIAL_ACTION(id, "approve"), { method: "POST", body: {} });
+export const retireMaterial = (id) => apiRequest(E.MATERIAL_ACTION(id, "retire"), { method: "POST", body: {} });
+export const downloadMaterial = (id, name) => apiDownload(E.MATERIAL_ACTION(id, "download"), name);
+
 export const deleteAgentRecord = (id, reason) => apiRequest(E.AGENT_DELETE(id), { method: "POST", body: { reason } });
 export const restoreAgentRecord = (id) => apiRequest(E.AGENT_RESTORE(id), { method: "POST" });
 
