@@ -25,6 +25,7 @@ import DueDiligencePanel from "./DueDiligencePanel";
 import DocumentsPanel from "./DocumentsPanel";
 import ApplicationPanel from "./ApplicationPanel";
 import TasksPanel from "./TasksPanel";
+import { CommunicationsPanel, LeadsTrainingPanel, MonitoringPanel } from "./CrmPanels";
 import { canWorkTask } from "./taskShared";
 import {
   addAgentPerson,
@@ -52,6 +53,9 @@ const TABS = [
   { key: "due_diligence", label: "Due diligence" },
   { key: "agreements", label: "Agreements" },
   { key: "tasks", label: "Onboarding tasks" },
+  { key: "communications", label: "Communications" },
+  { key: "leads", label: "Leads and training" },
+  { key: "monitoring", label: "Monitoring" },
   { key: "history", label: "Status history" },
   { key: "activity", label: "Activity" },
 ];
@@ -434,7 +438,18 @@ const AgentRecord = ({ role, user }) => {
               <Item label="SMS contact created">{agent.sms_contact_at ? formatDate(agent.sms_contact_at) : "Not recorded"}</Item>
               <Item label="Commission">{agent.commission_terms || "Not recorded"}</Item>
               <Item label="Bonus">{agent.bonus_terms || (agent.terms_recorded_at ? "None" : "Not recorded")}</Item>
+              {agent.crm && (
+                <>
+                  <Item label="Last contact">{agent.crm.last_contact ? formatDate(agent.crm.last_contact) : "Nothing logged"}</Item>
+                  <Item label="Last monitoring review">{agent.crm.last_review ? formatDate(agent.crm.last_review) : "None yet"}</Item>
+                  <Item label="Next monitoring form">{agent.crm.monitoring_due ? formatDate(agent.crm.monitoring_due) : "Not due yet"}</Item>
+                  <Item label="Student leads">{agent.crm.leads ? `${agent.crm.leads} (${agent.crm.leads_pending} pending)` : "None"}</Item>
+                </>
+              )}
             </div>
+            {agent.crm && agent.crm.overdue_corrective > 0 && (
+              <Notice severity="warning" sx={{ mt: 2 }}>A corrective action notice for this agent is past its due date. Check the Monitoring tab. Not carrying it out is grounds for termination.</Notice>
+            )}
             {agent.risk_override_reason && <p className="admin-hint" style={{ marginTop: 12 }}>Risk note: {agent.risk_override_reason}</p>}
             {agent.rejection_reason && <p className="admin-hint" style={{ marginTop: 12 }}>Reason for rejection: {agent.rejection_reason}</p>}
           </Panel>
@@ -686,6 +701,10 @@ const AgentRecord = ({ role, user }) => {
       {tab === "tasks" && (
         <TasksPanel agent={agent} staff={meta.staff} currentUserId={user && user.id} canWork={(t) => canWorkTask(user, role, t)} onChanged={load} showMessage={showMessage} />
       )}
+
+      {tab === "communications" && <CommunicationsPanel agent={agent} showMessage={showMessage} />}
+      {tab === "leads" && <LeadsTrainingPanel agent={agent} role={role} showMessage={showMessage} />}
+      {tab === "monitoring" && <MonitoringPanel agent={agent} role={role} showMessage={showMessage} onChanged={load} />}
 
       {tab === "history" && (
         <Panel>

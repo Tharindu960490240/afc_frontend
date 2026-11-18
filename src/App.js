@@ -37,6 +37,9 @@ import MyApplication from "./components/screens/agent/MyApplication";
 import AgentRegisterList from "./components/screens/staff/AgentRegister";
 import AgentRecord from "./components/screens/staff/AgentRecord";
 import InductionContent from "./components/screens/staff/InductionContent";
+import Broadcasts from "./components/screens/staff/Broadcasts";
+import MyLeads from "./components/screens/agent/MyLeads";
+import MyCommunications from "./components/screens/agent/MyCommunications";
 import Holidays from "./components/screens/staff/Holidays";
 import AuditLog from "./components/screens/staff/AuditLog";
 import TaskBoard from "./components/screens/staff/TaskBoard";
@@ -260,6 +263,14 @@ const App = () => {
             }
           />
           <Route
+            path="/coms/broadcasts"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={[ROLES.ADMIN, ROLES.CEO, ROLES.DIRECTOR, ROLES.MARKETING]}>
+                <Broadcasts role={role} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/coms/induction"
             element={
               <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={STAFF_ROLES}>
@@ -396,6 +407,22 @@ const App = () => {
                 allowedRoles={[ROLES.AGENT]}
               >
                 <MyAgreement role={role} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agent/leads"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={[ROLES.AGENT]}>
+                <MyLeads role={role} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agent/communications"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={[ROLES.AGENT]}>
+                <MyCommunications role={role} />
               </ProtectedRoute>
             }
           />

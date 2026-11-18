@@ -129,3 +129,28 @@ export const exportTasks = (params) => apiDownload(`${E.TASKS_EXPORT}${toQuery(p
 // ---------- the referee's own page ----------
 export const getReferenceForm = (token) => apiRequest(API_ENDPOINTS.REFERENCE(token));
 export const submitReferenceForm = (token, answers) => apiRequest(API_ENDPOINTS.REFERENCE(token), { method: "POST", body: { answers } });
+
+// ---------- agent CRM (Phase 4) ----------
+// the agent's own portal
+export const getMyLeads = () => apiRequest(E.MY_LEADS);
+export const addMyLead = (payload) => apiRequest(E.MY_LEADS, { method: "POST", body: payload });
+export const updateMyLead = (id, payload) => apiRequest(E.MY_LEAD(id), { method: "PATCH", body: payload });
+export const getMyCommunications = () => apiRequest(E.MY_COMMUNICATIONS);
+// staff: an agent's record
+export const listCommunications = (id) => apiRequest(E.AGENT_COMMS(id));
+export const logCommunication = (id, payload) => apiRequest(E.AGENT_COMMS(id), { method: "POST", body: payload });
+export const editCommunication = (id, cid, payload) => apiRequest(`${E.AGENT_COMMS(id)}/${cid}`, { method: "PATCH", body: payload });
+export const listAgentLeads = (id) => apiRequest(E.AGENT_LEADS(id));
+export const listTraining = (id) => apiRequest(E.AGENT_TRAINING(id));
+export const addTraining = (id, payload) => apiRequest(E.AGENT_TRAINING(id), { method: "POST", body: payload });
+export const getMonitoring = (id) => apiRequest(E.AGENT_MONITORING(id));
+export const saveMonitoringReview = (id, payload) => apiRequest(E.AGENT_MONITORING(id), { method: "POST", body: payload });
+export const createCorrectiveAction = (id, payload) => apiRequest(E.AGENT_CORRECTIVE(id), { method: "POST", body: payload });
+export const updateCorrectiveAction = (id, aid, payload) => apiRequest(`${E.AGENT_CORRECTIVE(id)}/${aid}`, { method: "PATCH", body: payload });
+export const correctiveStep = (id, aid, step, payload) => apiRequest(`${E.AGENT_CORRECTIVE(id)}/${aid}/${step}`, { method: "POST", body: payload || {} });
+// staff: broadcasts
+export const listBroadcasts = () => apiRequest(E.BROADCASTS);
+export const getBroadcast = (id) => apiRequest(E.BROADCAST(id));
+export const createBroadcast = (payload) => apiRequest(E.BROADCASTS, { method: "POST", body: payload });
+export const updateBroadcast = (id, payload) => apiRequest(E.BROADCAST(id), { method: "PATCH", body: payload });
+export const broadcastStep = (id, step) => apiRequest(`${E.BROADCAST(id)}/${step}`, { method: "POST", body: {} });

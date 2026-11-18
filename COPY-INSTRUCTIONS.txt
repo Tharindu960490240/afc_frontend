@@ -1,0 +1,6 @@
+Copy the src folder over your frontend src folder.
+Then delete these 3 files, because the pages were removed (App.js no longer uses them):
+  src/components/screens/admin/Registrations.js
+  src/components/screens/admin/Agents.js
+  src/components/screens/admin/AgentDetail.js
+(Leaving them does no harm, but they are no longer used.)
