@@ -344,20 +344,15 @@ const MyAgreement = ({ role }) => {
                     </TableCell>
                     <TableCell data-label="">
                       <div className="cell-actions">
-                        {a.final_file_id && (
-                          <Btn
-                            onClick={async () => {
-                              const r = await downloadAgreementFile(a.id, {
-                                id: a.final_file_id,
-                                original_name: `AGR-${String(a.id).padStart(5, "0")} signed.pdf`,
-                              });
-                              if (!r.success && r.message)
-                                showMessage(r.message, "error");
-                            }}
-                          >
-                            Download PDF
-                          </Btn>
-                        )}
+                        <Btn
+                          onClick={async () => {
+                            const signed = a.final_file_id || ["active", "expired"].includes(a.status);
+                            const r = await downloadAgreementPdf(a.id, `AGR-${String(a.id).padStart(5, "0")} ${signed ? "signed" : "unsigned copy"}.pdf`);
+                            if (!r.success && r.message) showMessage(r.message, "error");
+                          }}
+                        >
+                          {a.final_file_id || ["active", "expired"].includes(a.status) ? "Download PDF" : "Download unsigned PDF"}
+                        </Btn>
                       </div>
                     </TableCell>
                   </TableRow>
