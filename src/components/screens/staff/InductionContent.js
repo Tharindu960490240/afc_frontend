@@ -20,7 +20,8 @@ const STATUS_TONE = { draft: "warning", approved: "success", retired: "neutral" 
 
 const MANAGE_MODULES = ["admin", "director", "compliance", "marketing_officer"];
 const PUBLISH_POLICY = ["admin", "director", "ceo", "compliance"];
-const MANAGE_MATERIALS = ["admin", "director", "marketing_officer"];
+const MANAGE_MATERIALS = ["admin", "director", "ceo", "marketing_officer"];
+const APPROVE_MATERIALS = ["admin", "director", "ceo"]; // Marketing uploads, AFC management approves
 
 // Staff page for the agent induction: the marketing materials agents download, the six modules, and the policies they acknowledge.
 const InductionContent = ({ role }) => {
@@ -56,6 +57,7 @@ const InductionContent = ({ role }) => {
   };
 
   const canMaterials = MANAGE_MATERIALS.includes(role);
+  const canApprove = APPROVE_MATERIALS.includes(role);
   const canModules = MANAGE_MODULES.includes(role);
   const canPolicy = PUBLISH_POLICY.includes(role);
 
@@ -101,7 +103,7 @@ const InductionContent = ({ role }) => {
       {!loading && tab === "materials" && (
         <>
           <div className="admin-toolbar">
-            <p className="app-hint" style={{ margin: 0 }}>A new upload is a draft. Agents only see it, and are emailed about it, after you approve it.</p>
+            <p className="app-hint" style={{ margin: 0 }}>{canApprove ? "A new upload is a draft. Agents only see it, and are emailed about it, after you approve it." : "A new upload is a draft. Agents only see it, and are emailed about it, after the Director or CEO approves it."}</p>
             {canMaterials && <Btn kind="primary" onClick={() => open("material", { category: "brochure", version: "1.0", approve: false })}>Upload material</Btn>}
           </div>
           {materials.length === 0 ? <div className="admin-panel admin-empty">No materials yet.</div> : (
@@ -118,8 +120,8 @@ const InductionContent = ({ role }) => {
                       <TableCell data-label="Agents told">{m.status === "approved" ? m.notified : "-"}</TableCell>
                       <TableCell data-label="" style={{ whiteSpace: "nowrap" }}>
                         <Btn size="small" onClick={async () => { const r = await downloadMaterial(m.id, m.file_name); if (r && r.success === false) showMessage(r.message || "Could not download.", "error"); }}>Download</Btn>{" "}
-                        {canMaterials && m.status === "draft" && <Btn size="small" kind="primary" onClick={() => setConfirm({ kind: "approve", m })}>Approve</Btn>}{" "}
-                        {canMaterials && m.status !== "retired" && <Btn size="small" kind="danger" onClick={() => setConfirm({ kind: "retire", m })}>Retire</Btn>}
+                        {canApprove && m.status === "draft" && <Btn size="small" kind="primary" onClick={() => setConfirm({ kind: "approve", m })}>Approve</Btn>}{" "}
+                        {canApprove && m.status !== "retired" && <Btn size="small" kind="danger" onClick={() => setConfirm({ kind: "retire", m })}>Retire</Btn>}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -186,7 +188,7 @@ const InductionContent = ({ role }) => {
           <div className="app-hint" style={{ margin: "6px 0 0" }}>PDF, image, Word or Excel, up to {MAX_FILE_MB} MB.</div>
           {errors.file && <div style={{ color: "var(--danger, #c4161b)", fontSize: 13, marginTop: 4 }}>{errors.file}</div>}
         </div>
-        {canMaterials && (
+        {canApprove && (
           <label style={{ display: "flex", gap: 10, alignItems: "center", cursor: "pointer" }}>
             <input type="checkbox" checked={!!form.approve} onChange={(e) => setForm((f) => ({ ...f, approve: e.target.checked }))} />
             <span>Approve now (agents are emailed straight away)</span>
