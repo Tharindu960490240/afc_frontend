@@ -31,6 +31,7 @@ import Agreements from "./components/screens/admin/Agreements";
 import AgreementDetail from "./components/screens/admin/AgreementDetail";
 import AgreementTemplate from "./components/screens/admin/AgreementTemplate";
 import Settings from "./components/screens/admin/Settings";
+import Courses from "./components/screens/admin/Courses";
 import MyAgreement from "./components/screens/agent/MyAgreement";
 import MyInduction from "./components/screens/agent/MyInduction";
 import MyApplication from "./components/screens/agent/MyApplication";
@@ -346,6 +347,14 @@ const App = () => {
                 allowedRoles={[ROLES.ADMIN, ROLES.CEO]}
               >
                 <Agreements role={role} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/courses"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={[ROLES.ADMIN]}>
+                <Courses role={role} />
               </ProtectedRoute>
             }
           />

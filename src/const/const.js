@@ -57,6 +57,11 @@ export const API_ENDPOINTS = {
     PREVIEW: `${API_BASE_URL}/agreement-template/preview`,
   },
 
+  COURSES: {
+    BASE: `${API_BASE_URL}/courses`,
+    ONE: (id) => `${API_BASE_URL}/courses/${id}`,
+  },
+
   SETTINGS: {
     BASE: `${API_BASE_URL}/settings`,
     QUESTIONS: `${API_BASE_URL}/settings/reference-questions`,
