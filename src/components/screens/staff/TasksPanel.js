@@ -5,7 +5,7 @@ import { formatDate } from "../admin/shared";
 import { CategoryBadge, CompleteTaskDialog, TaskDue } from "./taskShared";
 import InductionPanel from "./InductionPanel";
 import { downloadTaskEvidence, getTermsDraft, recordTerms, sendTerms } from "../../../services/comsService";
-import { Btn, Field, Notice, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
+import { Btn, Field, Notice, Panel, TableCell, TableRow, DataTable } from "../../ui";
 
 // The onboarding and regulatory tasks of one agent (agent record, "Onboarding tasks" tab)
 const TermsBox = ({ agent, onChanged, showMessage }) => {
@@ -102,18 +102,7 @@ const TasksPanel = ({ agent, canWork, onChanged, showMessage, staff, currentUser
               {open.length} task{open.length === 1 ? "" : "s"} still open. The agent becomes Active when the agreement, PRISMS and induction are all recorded.
             </Notice>
           )}
-          <TableContainer className="admin-table-wrap">
-            <Table className="admin-table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Task</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Owner</TableCell>
-                  <TableCell>Due</TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          <DataTable label="TasksPanel" head={["Task", "Type", "Owner", "Due", ""]}>
                 {tasks.map((t) => (
                   <TableRow key={t.id}>
                     <TableCell data-label="Task">
@@ -136,9 +125,7 @@ const TasksPanel = ({ agent, canWork, onChanged, showMessage, staff, currentUser
                     </TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </DataTable>
         </>
       )}
       <CompleteTaskDialog

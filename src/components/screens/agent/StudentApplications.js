@@ -8,7 +8,8 @@ import CustomSnackbar from "../CustomSnackbar";
 import { formatDate } from "../admin/shared";
 import { getFormConfig, listMyApplications, startApplication } from "../../../services/studentApplicationService";
 import { getHomeRoute } from "../../../const/roles";
-import { Badge, Btn, DataTable, Notice, Panel, TableCell, TableRow } from "../../ui";
+import { ListTable } from "../admin/ListKit";
+import { Badge, Btn, Notice, TableCell, TableRow } from "../../ui";
 
 export const STATUS = {
   draft: { label: "Draft", tone: "neutral" },
@@ -51,27 +52,36 @@ const StudentApplications = ({ role }) => {
         <p>Submit the students you recommend to AFC. AFC replies within {cfg ? cfg.assessment_working_days : 5} working days of receiving a complete application.</p>
       </div>
       {cfg && !cfg.can_submit && <Notice severity="warning" sx={{ mb: 2 }}>{cfg.blocked_reason} You can start a draft once that is done.</Notice>}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-        <Btn kind="primary" onClick={start} disabled={busy || !cfg || !cfg.can_submit}>New application</Btn>
-      </div>
       {!rows ? <LoadingSpinner /> : (
-        <Panel>
-          <DataTable label="Student applications" head={["Reference", "Student", "Course", "Starts", "Status", ""]} isEmpty={!rows.length} emptyText="No applications yet.">
-            {rows.map((r) => {
-              const st = STATUS[r.status] || { label: r.status, tone: "neutral" };
-              return (
-                <TableRow key={r.id}>
-                  <TableCell>{r.ref_no || "-"}</TableCell>
-                  <TableCell>{r.student}</TableCell>
-                  <TableCell>{r.course || "-"}{r.campus ? <div className="admin-hint" style={{ margin: 0 }}>{r.campus}</div> : null}</TableCell>
-                  <TableCell>{r.commencement_date ? formatDate(r.commencement_date) : "-"}</TableCell>
-                  <TableCell><Badge tone={st.tone} label={st.label} /></TableCell>
-                  <TableCell><Btn onClick={() => navigate(`/agent/applications/${r.id}`)}>{r.status === "draft" || r.status === "info_requested" ? "Continue" : "Open"}</Btn></TableCell>
-                </TableRow>
-              );
-            })}
-          </DataTable>
-        </Panel>
+        <ListTable
+          label="Student applications"
+          head={["Reference", "Student", "Course", "Starts", "Status", ""]}
+          rows={rows}
+          emptyText="No applications yet."
+          tabs={[
+            { value: "all", label: "All" },
+            { value: "draft", label: "Drafts", match: (r) => r.status === "draft" },
+            { value: "open", label: "With AFC", match: (r) => ["received", "under_review"].includes(r.status) },
+            { value: "info", label: "Needs your answer", match: (r) => r.status === "info_requested" },
+            { value: "done", label: "Decided", match: (r) => ["decision_made", "coe_issued", "withdrawn"].includes(r.status) },
+          ]}
+          search={(r) => `${r.ref_no || ""} ${r.student} ${r.course || ""}`}
+          searchPlaceholder="Student, course or reference"
+          actions={<Btn kind="primary" size="medium" onClick={start} disabled={busy || !cfg || !cfg.can_submit}>New application</Btn>}
+          renderRow={(r) => {
+            const st = STATUS[r.status] || { label: r.status, tone: "neutral" };
+            return (
+              <TableRow key={r.id}>
+                <TableCell>{r.ref_no || "-"}</TableCell>
+                <TableCell><span className="cell-main">{r.student}</span></TableCell>
+                <TableCell>{r.course || "-"}{r.campus ? <div className="cell-sub">{r.campus}</div> : null}</TableCell>
+                <TableCell>{r.commencement_date ? formatDate(r.commencement_date) : "-"}</TableCell>
+                <TableCell><Badge tone={st.tone} label={st.label} /></TableCell>
+                <TableCell><Btn onClick={() => navigate(`/agent/applications/${r.id}`)}>{r.status === "draft" || r.status === "info_requested" ? "Continue" : "Open"}</Btn></TableCell>
+              </TableRow>
+            );
+          }}
+        />
       )}
       <CustomSnackbar open={snackbar.open} message={snackbar.message} severity={snackbar.severity} onClose={() => setSnackbar((p) => ({ ...p, open: false }))} />
     </div>

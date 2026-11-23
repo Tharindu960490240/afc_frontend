@@ -10,7 +10,7 @@ import {
   publishPolicy, retireMaterial, updateInductionModule,
 } from "../../../services/comsService";
 import { getHomeRoute } from "../../../const/roles";
-import { Badge, Btn, Field, Notice, TabBar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
+import { Badge, Btn, Field, Notice, TabBar, TableCell, TableRow, DataTable } from "../../ui";
 
 const CATEGORIES = [
   { value: "brochure", label: "Brochure" }, { value: "fees", label: "Fees" }, { value: "policy", label: "Policy" },
@@ -107,10 +107,7 @@ const InductionContent = ({ role }) => {
             {canMaterials && <Btn kind="primary" onClick={() => open("material", { category: "brochure", version: "1.0", approve: false })}>Upload material</Btn>}
           </div>
           {materials.length === 0 ? <div className="admin-panel admin-empty">No materials yet.</div> : (
-            <TableContainer className="admin-table-wrap">
-              <Table className="admin-table">
-                <TableHead><TableRow><TableCell>Material</TableCell><TableCell>Type</TableCell><TableCell>Version</TableCell><TableCell>Status</TableCell><TableCell>Agents told</TableCell><TableCell /></TableRow></TableHead>
-                <TableBody>
+            <DataTable label="InductionContent" head={["Material", "Type", "Version", "Status", "Agents told", ""]}>
                   {materials.map((m) => (
                     <TableRow key={m.id}>
                       <TableCell data-label="Material"><strong>{m.title}</strong><div className="app-hint" style={{ margin: "2px 0 0" }}>{m.file_name} · uploaded by {m.uploaded_by_name || "-"}, {formatDate(m.created_at)}</div></TableCell>
@@ -125,9 +122,7 @@ const InductionContent = ({ role }) => {
                       </TableCell>
                     </TableRow>
                   ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                </DataTable>
           )}
         </>
       )}
@@ -135,10 +130,7 @@ const InductionContent = ({ role }) => {
       {!loading && tab === "modules" && (
         <>
           <Notice severity="info" sx={{ mb: 2 }}>These six topics are required. Editing a module raises its version. Agents who already finished it are not asked to redo it.</Notice>
-          <TableContainer className="admin-table-wrap">
-            <Table className="admin-table">
-              <TableHead><TableRow><TableCell>#</TableCell><TableCell>Module</TableCell><TableCell>Version</TableCell><TableCell>Last changed</TableCell><TableCell /></TableRow></TableHead>
-              <TableBody>
+          <DataTable label="InductionContent" head={["#", "Module", "Version", "Last changed", ""]}>
                 {modules.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell data-label="#">{m.position}</TableCell>
@@ -148,9 +140,7 @@ const InductionContent = ({ role }) => {
                     <TableCell data-label="">{canModules && <Btn size="small" onClick={() => open("module", { title: m.title, body: m.body }, m)}>Edit</Btn>}</TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </DataTable>
         </>
       )}
 
@@ -160,10 +150,7 @@ const InductionContent = ({ role }) => {
             <p className="app-hint" style={{ margin: 0 }}>Agents acknowledge the current version. Each acknowledgement is stored with the version, date, time and IP address and cannot be changed.</p>
             {canPolicy && <Btn kind="primary" onClick={() => { const cur = policies.find((p) => p.is_current); open("policy", { version: "", title: cur ? cur.title : "", body: cur ? cur.body : "", document_url: cur ? cur.document_url || "" : "" }); }}>Publish a new version</Btn>}
           </div>
-          <TableContainer className="admin-table-wrap">
-            <Table className="admin-table">
-              <TableHead><TableRow><TableCell>Version</TableCell><TableCell>Title</TableCell><TableCell>Published</TableCell><TableCell>Status</TableCell></TableRow></TableHead>
-              <TableBody>
+          <DataTable label="InductionContent" head={["Version", "Title", "Published", "Status"]}>
                 {policies.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell data-label="Version"><strong>{p.version}</strong></TableCell>
@@ -172,9 +159,7 @@ const InductionContent = ({ role }) => {
                     <TableCell data-label="Status">{p.is_current ? <Badge tone="success" label="Current" /> : <Badge tone="neutral" label="Earlier version" />}</TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </DataTable>
         </>
       )}
 

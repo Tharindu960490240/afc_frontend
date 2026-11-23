@@ -6,10 +6,11 @@ import "../../styles/adminPages.css";
 import "../../styles/coms.css";
 import LoadingSpinner from "../LoadingSpinner";
 import CustomSnackbar from "../CustomSnackbar";
-import { ConfirmDialog, ExportButton, formatDate } from "../admin/shared";
+import { ConfirmDialog, ExportButton, FormDialog, formatDate } from "../admin/shared";
+import { ListTable } from "../admin/ListKit";
 import { getHomeRoute, ROLES } from "../../../const/roles";
 import { addHoliday, exportHolidays, listHolidays, removeHoliday } from "../../../services/comsService";
-import { Btn, Field, Notice, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
+import { Btn, Field, Notice, TableCell, TableRow } from "../../ui";
 
 const STATE = { TAS: "Tasmania", VIC: "Victoria" };
 const EMPTY = { date: "", name: "", jurisdiction: "TAS" };
@@ -28,6 +29,7 @@ const Holidays = ({ role }) => {
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [toRemove, setToRemove] = useState(null);
+  const [adding, setAdding] = useState(false);
 
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const showMessage = (message, severity = "success") => setSnackbar({ open: true, message, severity });
@@ -57,6 +59,7 @@ const Holidays = ({ role }) => {
     setBusy(false);
     if (res.success) {
       setForm(EMPTY);
+      setAdding(false);
       showMessage("Holiday added.");
       load();
     } else {
@@ -98,10 +101,6 @@ const Holidays = ({ role }) => {
         </p>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-        <ExportButton run={exportHolidays} onError={(m) => showMessage(m, "error")} />
-      </div>
-
       {missingYears.length > 0 && !loading && (
         <Notice severity="warning" sx={{ mb: 2 }}>
           <strong>Holidays missing for {missingYears.join(" and ")}</strong>
@@ -109,90 +108,45 @@ const Holidays = ({ role }) => {
         </Notice>
       )}
 
-      {canEdit && (
-        <Panel>
-          <h2>Add a holiday</h2>
-          <p className="admin-hint" style={{ marginTop: 0 }}>
-            Add local days too, for example Launceston Show Day, or the Friday before the AFL Grand Final when it is announced.
-          </p>
-          <form
-            noValidate
-            className="field-grid"
-            onSubmit={(e) => {
-              e.preventDefault();
-              add();
-            }}
-          >
-            <Field
-              id="h-date"
-              label="Date"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-              error={errors.date}
-            />
-            <Field
-              id="h-name"
-              label="Name"
-              value={form.name}
-              inputProps={{ maxLength: 120 }}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              error={errors.name}
-            />
-            <Field
-              id="h-state"
-              label="State"
-              value={form.jurisdiction}
-              onChange={(e) => setForm({ ...form, jurisdiction: e.target.value })}
-              options={Object.entries(STATE).map(([k, v]) => ({ value: k, label: v }))}
-            />
-            <div>
-              <Btn kind="primary" size="medium" type="submit" disabled={busy}>Add holiday</Btn>
-            </div>
-          </form>
-        </Panel>
-      )}
+      <ListTable
+        label="Public holidays"
+        head={canEdit ? ["Date", "Holiday", "State", ""] : ["Date", "Holiday", "State"]}
+        rows={rows}
+        loading={loading}
+        emptyText="No holidays yet."
+        tabs={[{ value: "all", label: "All" }, ...Object.keys(byYear).sort().map((y) => ({ value: y, label: y, match: (h) => h.holiday_date.startsWith(y) }))]}
+        search={(h) => `${h.name} ${h.holiday_date}`}
+        searchPlaceholder="Holiday name"
+        filters={[{ key: "state", label: "State", anyLabel: "Any state", options: Object.entries(STATE).map(([value, label]) => ({ value, label })), match: (h, v) => h.jurisdiction === v }]}
+        pageSize={15}
+        actions={(
+          <>
+            <ExportButton run={exportHolidays} onError={(m) => showMessage(m, "error")} />
+            {canEdit && <Btn kind="primary" size="medium" onClick={() => { setForm(EMPTY); setErrors({}); setAdding(true); }}>Add a holiday</Btn>}
+          </>
+        )}
+        renderRow={(h) => (
+          <TableRow key={h.id}>
+            <TableCell>{formatDate(h.holiday_date)}<div className="cell-sub">{dayName(h.holiday_date)}</div></TableCell>
+            <TableCell>{h.name}</TableCell>
+            <TableCell>{STATE[h.jurisdiction]}</TableCell>
+            {canEdit && <TableCell><Btn kind="danger" onClick={() => setToRemove(h)}>Remove</Btn></TableCell>}
+          </TableRow>
+        )}
+      />
 
-      {Object.keys(byYear).sort().map((year) => (
-        <Panel key={year}>
-          <h2>{year}</h2>
-          <TableContainer className="admin-table-wrap">
-            <Table className="admin-table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Holiday</TableCell>
-                  <TableCell>State</TableCell>
-                  {canEdit && <TableCell aria-label="Actions" />}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {byYear[year].map((h) => (
-                  <TableRow key={h.id}>
-                    <TableCell data-label="Date">
-                      {formatDate(h.holiday_date)}
-                      <div className="cell-sub">{dayName(h.holiday_date)}</div>
-                    </TableCell>
-                    <TableCell data-label="Holiday">{h.name}</TableCell>
-                    <TableCell data-label="State">{STATE[h.jurisdiction]}</TableCell>
-                    {canEdit && (
-                      <TableCell data-label="">
-                        <div className="cell-actions">
-                          <Btn kind="danger"  onClick={() => setToRemove(h)}>
-                            Remove
-                          </Btn>
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Panel>
-      ))}
-      {!rows.length && <div className="admin-panel admin-empty">{loading ? "Loading..." : "No holidays yet."}</div>}
+      <FormDialog
+        open={adding}
+        title="Add a holiday"
+        intro="Add local days too, for example Launceston Show Day, or the Friday before the AFL Grand Final when it is announced."
+        submitLabel={busy ? "Adding..." : "Add holiday"}
+        onSubmit={add}
+        onCancel={() => setAdding(false)}
+      >
+        <Field id="h-date" label="Date" type="date" InputLabelProps={{ shrink: true }} value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} error={errors.date} />
+        <Field id="h-name" label="Name" value={form.name} inputProps={{ maxLength: 120 }} onChange={(e) => setForm({ ...form, name: e.target.value })} error={errors.name} />
+        <Field id="h-state" label="State" value={form.jurisdiction} onChange={(e) => setForm({ ...form, jurisdiction: e.target.value })} options={Object.entries(STATE).map(([k, v]) => ({ value: k, label: v }))} />
+      </FormDialog>
 
       <ConfirmDialog
         open={Boolean(toRemove)}

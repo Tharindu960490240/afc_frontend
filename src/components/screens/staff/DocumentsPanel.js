@@ -7,7 +7,7 @@ import {
   MAX_FILE_MB, downloadApplicationPdf, downloadDocument, fileToPayload, listDocuments, removeDocument, requestInformation,
   reviewDocument, uploadDocument,
 } from "../../../services/comsService";
-import { Badge, Btn, Field, Notice, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
+import { Badge, Btn, Field, Notice, Panel, TableCell, TableRow, DataTable } from "../../ui";
 
 export const DOC_STATUS = {
   missing: { tone: "warning", label: "Not received" },
@@ -99,12 +99,7 @@ const DocumentsPanel = ({ agent, onChanged, showMessage }) => {
           ? "The required documents are received and accepted."
           : "The business registration certificate and organisational profile must be received and accepted before the application can be approved. Review each document and, if something is wrong, ask the agent for an update."}
       </Notice>
-      <TableContainer className="admin-table-wrap">
-        <Table className="admin-table">
-          <TableHead>
-            <TableRow><TableCell>Document</TableCell><TableCell>File</TableCell><TableCell>Status</TableCell><TableCell /></TableRow>
-          </TableHead>
-          <TableBody>
+      <DataTable label="DocumentsPanel" head={["Document", "File", "Status", ""]}>
             {rows.map(({ kind, doc, optional }, i) => {
               const status = doc ? doc.status : optional ? "optional" : "missing";
               const st = DOC_STATUS[status] || { tone: "quiet", label: "If available" };
@@ -142,9 +137,7 @@ const DocumentsPanel = ({ agent, onChanged, showMessage }) => {
                 </TableRow>
               );
             })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </DataTable>
       <p className="dd-none" style={{ marginTop: 10 }}>
         Downloads are named like <em>{agent.legal_name} - Business registration - 2026-11-17.pdf</em>, so they can be saved straight into the agent folder.
       </p>

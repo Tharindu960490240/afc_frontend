@@ -12,7 +12,7 @@ import { getHomeRoute } from "../../../const/roles";
 import {
   assignTask, cancelTask, createTask, downloadTaskEvidence, exportTasks, getTaskMeta, listTasks,
 } from "../../../services/comsService";
-import { Btn, DataTable, Field, FilterField, Panel, TableCell, TableRow } from "../../ui";
+import { Btn, DataTable, Field, FilterField, Panel, TabBar, TableCell, TableRow } from "../../ui";
 
 const PAGE_SIZE = 20;
 const today = () => new Date().toLocaleDateString("en-CA");
@@ -120,21 +120,25 @@ const TaskBoard = ({ role, user }) => {
 
       <Panel>
         <div className="admin-toolbar">
-          <div className="filter-controls">
-            <FilterField id="tf-search" label="Search" value={filters.search} onChange={setFilter("search")} placeholder="Task or agent" />
-            <FilterField id="tf-status" label="Status" value={filters.status} onChange={setFilter("status")}
-              options={[{ value: "open", label: "Open" }, { value: "done", label: "Done" }, { value: "cancelled", label: "Cancelled" }, { value: "all", label: "All" }]} />
-            <FilterField id="tf-type" label="Type" value={filters.type} onChange={setFilter("type")}
-              options={[{ value: "", label: "All types" }, ...meta.types.map((t) => ({ value: t.key, label: t.label }))]} />
-            <FilterField id="tf-owner" label="Owner" value={filters.owner} onChange={setFilter("owner")}
-              options={[{ value: "", label: "Anyone" }, { value: "me", label: "Me" }, { value: "unassigned", label: "Unassigned" }, ...staffOptions]} />
-            <FilterField id="tf-over" label="Deadline" value={filters.overdue} onChange={setFilter("overdue")}
-              options={[{ value: "", label: "Any" }, { value: "yes", label: "Overdue only" }]} />
-          </div>
-          <div className="cell-actions" style={{ marginLeft: "auto" }}>
+          <TabBar
+            label="Task status"
+            value={filters.status}
+            onChange={(v) => setFilter("status")({ target: { value: v } })}
+            tabs={[{ value: "open", label: "Open" }, { value: "done", label: "Done" }, { value: "cancelled", label: "Cancelled" }, { value: "all", label: "All" }]}
+          />
+          <div className="action-row" style={{ marginTop: 0 }}>
             <ExportButton run={() => exportTasks(query)} onError={(m) => showMessage(m, "error")} />
             <Btn kind="primary" size="medium" onClick={() => open("new", null, { type: "GENERAL", title: "", description: "", due_date: "", owner_id: "" })}>New task</Btn>
           </div>
+        </div>
+        <div className="filter-controls" style={{ marginBottom: 14 }}>
+          <FilterField id="tf-search" type="search" label="Search" sx={{ minWidth: 240 }} value={filters.search} onChange={setFilter("search")} placeholder="Task or agent" />
+          <FilterField id="tf-type" label="Type" value={filters.type} onChange={setFilter("type")}
+            options={[{ value: "", label: "All types" }, ...meta.types.map((t) => ({ value: t.key, label: t.label }))]} />
+          <FilterField id="tf-owner" label="Owner" value={filters.owner} onChange={setFilter("owner")}
+            options={[{ value: "", label: "Anyone" }, { value: "me", label: "Me" }, { value: "unassigned", label: "Unassigned" }, ...staffOptions]} />
+          <FilterField id="tf-over" label="Deadline" value={filters.overdue} onChange={setFilter("overdue")}
+            options={[{ value: "", label: "Any" }, { value: "yes", label: "Overdue only" }]} />
         </div>
         {agentId && (
           <p className="admin-hint" style={{ marginTop: 0 }}>

@@ -5,6 +5,7 @@ import { ArrowBack } from "@mui/icons-material";
 import "../../styles/adminPages.css";
 import CustomSnackbar from "../CustomSnackbar";
 import { ExportButton, Pager, StatusBadge, formatDate } from "./shared";
+import { SearchBar, useDebounced } from "./ListKit";
 import { Btn, DataTable, Panel, TabBar, TableCell, TableRow } from "../../ui";
 import { exportAgreements, listAgreements, downloadAgreementPdf } from "../../../services/agreementService";
 import { getHomeRoute } from "../../../const/roles";
@@ -24,6 +25,8 @@ const TABS = [
 const Agreements = ({ role }) => {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
+  const [searchText, setSearchText] = useState("");
+  const search = useDebounced(searchText);
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [loadingList, setLoadingList] = useState(true);
@@ -34,7 +37,7 @@ const Agreements = ({ role }) => {
   const load = useCallback(async () => {
     const id = ++latest.current;
     setLoadingList(true);
-    const res = await listAgreements({ status, page, limit: PAGE_SIZE });
+    const res = await listAgreements({ status, search, page, limit: PAGE_SIZE });
     if (id !== latest.current) return;
     setLoadingList(false);
     if (res.success) {
@@ -43,7 +46,7 @@ const Agreements = ({ role }) => {
     } else {
       setSnackbar({ open: true, message: res.message || "Could not load agreements.", severity: "error" });
     }
-  }, [status, page]);
+  }, [status, search, page]);
 
   useEffect(() => {
     load();
@@ -76,11 +79,12 @@ const Agreements = ({ role }) => {
           />
           {role === "admin" && (
             <ExportButton
-              run={() => exportAgreements({ status })}
+              run={() => exportAgreements({ status, search })}
               onError={(m) => setSnackbar({ open: true, message: m, severity: "error" })}
             />
           )}
         </div>
+        <SearchBar value={searchText} onChange={(v) => { setSearchText(v); setPage(1); }} placeholder="Agent, agency or agreement" />
 
         <DataTable
           label="Agreements"

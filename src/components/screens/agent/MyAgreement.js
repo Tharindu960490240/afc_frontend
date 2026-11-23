@@ -28,7 +28,8 @@ import {
 } from "../../../services/agreementService";
 import { getMyCertificate, downloadMyCertificate } from "../../../services/comsService";
 import { getHomeRoute } from "../../../const/roles";
-import { Btn, Notice, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
+import { ListTable } from "../admin/ListKit";
+import { Btn, Notice, Panel, TableCell, TableRow } from "../../ui";
 
 const OPEN = ["sent", "submitted", "rejected"];
 
@@ -320,46 +321,33 @@ const MyAgreement = ({ role }) => {
       {!loading && all.length > 0 && (
         <Panel>
           <h2>All agreements</h2>
-          <TableContainer className="admin-table-wrap">
-            <Table className="admin-table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Agreement</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Sent</TableCell>
-                  <TableCell>Expires</TableCell>
-                  <TableCell aria-label="Download" />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {all.map((a) => (
-                  <TableRow key={a.id}>
-                    <TableCell data-label="Agreement">{a.title}</TableCell>
-                    <TableCell data-label="Status">
-                      <StatusBadge status={a.status} view="agent" />
-                    </TableCell>
-                    <TableCell data-label="Sent">{formatDate(a.sent_at)}</TableCell>
-                    <TableCell data-label="Expires">
-                      {a.expires_at ? formatDate(a.expires_at) : "-"}
-                    </TableCell>
-                    <TableCell data-label="">
-                      <div className="cell-actions">
-                        <Btn
-                          onClick={async () => {
-                            const signed = a.final_file_id || ["active", "expired"].includes(a.status);
-                            const r = await downloadAgreementPdf(a.id, `AGR-${String(a.id).padStart(5, "0")} ${signed ? "signed" : "unsigned copy"}.pdf`);
-                            if (!r.success && r.message) showMessage(r.message, "error");
-                          }}
-                        >
-                          {a.final_file_id || ["active", "expired"].includes(a.status) ? "Download PDF" : "Download unsigned PDF"}
-                        </Btn>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <ListTable
+            bare
+            label="All agreements"
+            head={["Agreement", "Status", "Sent", "Expires", ""]}
+            rows={all}
+            search={(a) => a.title}
+            searchAlways={false}
+            renderRow={(a) => (
+              <TableRow key={a.id}>
+                <TableCell>{a.title}</TableCell>
+                <TableCell><StatusBadge status={a.status} view="agent" /></TableCell>
+                <TableCell>{formatDate(a.sent_at)}</TableCell>
+                <TableCell>{a.expires_at ? formatDate(a.expires_at) : "-"}</TableCell>
+                <TableCell>
+                  <Btn
+                    onClick={async () => {
+                      const signed = a.final_file_id || ["active", "expired"].includes(a.status);
+                      const r = await downloadAgreementPdf(a.id, `AGR-${String(a.id).padStart(5, "0")} ${signed ? "signed" : "unsigned copy"}.pdf`);
+                      if (!r.success && r.message) showMessage(r.message, "error");
+                    }}
+                  >
+                    {a.final_file_id || ["active", "expired"].includes(a.status) ? "Download PDF" : "Download unsigned PDF"}
+                  </Btn>
+                </TableCell>
+              </TableRow>
+            )}
+          />
         </Panel>
       )}
 

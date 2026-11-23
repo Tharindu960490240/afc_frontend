@@ -167,17 +167,35 @@ export const TONE_BY_STATUS = {
 // head: column titles (a string, or { label, hidden: true } for the unlabelled actions column).
 // Pass the rows as children. isEmpty + emptyText show a message when there are no rows.
 // The "admin-table" class keeps the stacked-card layout on phones (it reads each cell's data-label).
+// Every list in the portal uses this: the header, a label on every cell for phones, and one Actions column.
+// A blank heading ("") marks the actions column; whatever is in it is laid out the same way everywhere.
+const labelled = (head, children) =>
+  React.Children.map(children, (row) => {
+    if (!React.isValidElement(row)) return row;
+    let i = -1;
+    return React.cloneElement(row, {}, React.Children.map(row.props.children, (cell) => {
+      if (!React.isValidElement(cell)) return cell;
+      i += 1;
+      const h = head[i];
+      const text = typeof h === "string" ? h : "";
+      const isActions = typeof h === "string" ? h === "" : Boolean(h && h.label);
+      const props = { "data-label": cell.props["data-label"] !== undefined ? cell.props["data-label"] : text };
+      const inner = cell.props.children;
+      const wrapped = React.isValidElement(inner) && /cell-actions/.test(inner.props.className || "");
+      return React.cloneElement(cell, props, isActions && !wrapped && inner ? <div className="cell-actions">{inner}</div> : inner);
+    }));
+  });
 export const DataTable = ({ head, children, isEmpty, emptyText, label = "Table" }) => (
   <TableContainer className="admin-table-wrap">
     <Table className="admin-table" aria-label={label}>
       <TableHead>
         <TableRow>
           {head.map((h, i) =>
-            typeof h === "string" ? <TableCell key={h}>{h}</TableCell> : <TableCell key={i} aria-label={h.label} />
+            typeof h === "string" ? <TableCell key={i}>{h}</TableCell> : <TableCell key={i} aria-label={h.label} />
           )}
         </TableRow>
       </TableHead>
-      <TableBody>{children}</TableBody>
+      <TableBody>{labelled(head, children)}</TableBody>
     </Table>
     {isEmpty && <div className="admin-empty">{emptyText}</div>}
   </TableContainer>

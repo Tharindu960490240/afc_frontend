@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { formatDate, formatDateTime, FormDialog } from "../admin/shared";
 import { cancelInduction, completeInduction, editInduction, markInductionMissed, recordInduction, rescheduleInduction, undoInduction } from "../../../services/comsService";
-import { Btn, Field, Notice, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
+import { Btn, Field, Notice, TableCell, TableRow, DataTable } from "../../ui";
 
 const MODES = [
   { value: "online", label: "Online" },
@@ -170,19 +170,7 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
       )}
 
       {list.length > 0 && (
-        <TableContainer className="admin-table-wrap">
-          <Table className="admin-table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Date</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Run by</TableCell>
-                <TableCell>How</TableCell>
-                <TableCell>Notes</TableCell>
-                {(canEdit || canUndo) && <TableCell />}
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        <DataTable label="InductionPanel" head={["Date", "Status", "Run by", "How", "Notes", ""]}>
               {list.map((i) => (
                 <TableRow key={i.id}>
                   <TableCell>{formatDate(i.held_on || i.scheduled_for)}{i.start_time ? ` ${i.start_time}` : ""}</TableCell>
@@ -203,9 +191,7 @@ const InductionPanel = ({ agent, staff, currentUserId, onChanged, showMessage })
                   )}
                 </TableRow>
               ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            </DataTable>
       )}
 
       <FormDialog

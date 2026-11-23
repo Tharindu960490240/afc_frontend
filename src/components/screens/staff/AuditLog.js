@@ -9,16 +9,21 @@ import { ExportButton, Pager, formatDateTime } from "../admin/shared";
 import { ChangeDetail, auditText } from "./comsShared";
 import { getHomeRoute } from "../../../const/roles";
 import { exportAudit, listAudit } from "../../../services/comsService";
-import { FilterField, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
+import { SearchBar, useDebounced } from "../admin/ListKit";
+import { DataTable, FilterField, Panel, TabBar, TableCell, TableRow } from "../../ui";
 
 const PAGE_SIZE = 25;
 const ENTITIES = [
   { key: "", label: "Everything" },
   { key: "agent", label: "Agent register" },
-  { key: "holiday", label: "Public holidays" },
-  { key: "invitation", label: "Invitations" },
-  { key: "user", label: "User accounts" },
+  { key: "student_application", label: "Student applications" },
   { key: "agreement", label: "Agreements" },
+  { key: "task", label: "Tasks" },
+  { key: "user", label: "User accounts" },
+  { key: "invitation", label: "Invitations" },
+  { key: "course", label: "Courses" },
+  { key: "holiday", label: "Public holidays" },
+  { key: "file", label: "File downloads" },
 ];
 
 const AuditLog = ({ role }) => {
@@ -26,6 +31,8 @@ const AuditLog = ({ role }) => {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [page, setPage] = useState(1);
+  const [searchText, setSearchText] = useState("");
+  const search = useDebounced(searchText);
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -37,14 +44,14 @@ const AuditLog = ({ role }) => {
   const load = useCallback(async () => {
     const id = ++latest.current;
     setLoading(true);
-    const res = await listAudit({ entity_type: entity, from, to, page, limit: PAGE_SIZE });
+    const res = await listAudit({ entity_type: entity, from, to, search, page, limit: PAGE_SIZE });
     if (id !== latest.current) return;
     setLoading(false);
     if (res.success) {
       setRows(res.data || []);
       setTotal(res.pagination?.total || 0);
     } else setSnackbar({ open: true, message: res.message || "Could not load the audit log.", severity: "error" });
-  }, [entity, from, to, page]);
+  }, [entity, from, to, search, page]);
 
   useEffect(() => {
     load();
@@ -62,65 +69,48 @@ const AuditLog = ({ role }) => {
       </div>
 
       <Panel>
-        <div className="filter-controls" style={{ marginBottom: 14 }}>
-          <FilterField
+        <div className="admin-toolbar">
+          <TabBar
             label="Area"
-            value={entity}
-            onChange={(e) => { setEntity(e.target.value); setPage(1); }}
-            options={ENTITIES.map((x) => ({ value: x.key, label: x.label }))}
-          />
-          <FilterField
-            label="From date"
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            value={from}
-            onChange={(e) => { setFrom(e.target.value); setPage(1); }}
-          />
-          <FilterField
-            label="To date"
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            value={to}
-            onChange={(e) => { setTo(e.target.value); setPage(1); }}
-          />
-          <ExportButton
-            run={() => exportAudit({ entity_type: entity, from, to })}
-            onError={(m) => setSnackbar({ open: true, message: m, severity: "error" })}
+            value={entity || "all"}
+            onChange={(v) => { setEntity(v === "all" ? "" : v); setPage(1); }}
+            tabs={ENTITIES.map((x) => ({ value: x.key || "all", label: x.label }))}
           />
         </div>
+        <SearchBar value={searchText} onChange={(v) => { setSearchText(v); setPage(1); }} placeholder="Action, person or record number">
+          <FilterField label="From date" type="date" InputLabelProps={{ shrink: true }} value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} />
+          <FilterField label="To date" type="date" InputLabelProps={{ shrink: true }} value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} />
+            <ExportButton
+              run={() => exportAudit({ entity_type: entity, from, to, search })}
+              onError={(m) => setSnackbar({ open: true, message: m, severity: "error" })}
+            />
+        </SearchBar>
 
-        <TableContainer className="admin-table-wrap">
-          <Table className="admin-table">
-            <TableHead>
-              <TableRow>
-                <TableCell>When</TableCell>
-                <TableCell>Who</TableCell>
-                <TableCell>What</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((r) => (
-                <TableRow key={r.id}>
-                  <TableCell data-label="When">{formatDateTime(r.created_at)}</TableCell>
-                  <TableCell data-label="Who">
-                    {r.actor_first_name ? `${r.actor_first_name} ${r.actor_last_name}` : "System"}
-                    {r.ip && <div className="cell-sub">{r.ip}</div>}
-                  </TableCell>
-                  <TableCell data-label="What">
-                    <span className="cell-main">{auditText(r.action)}</span>
-                    {r.entity_type === "agent" && r.entity_id && (
-                      <div className="cell-sub">
-                        <Link className="admin-link" to={`/coms/agents/${r.entity_id}`}>Open agent</Link>
-                      </div>
-                    )}
-                    <ChangeDetail before={r.before} after={r.after} metadata={r.metadata} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          {!rows.length && <div className="admin-empty">{loading ? "Loading..." : "Nothing recorded for this view."}</div>}
-        </TableContainer>
+        <DataTable label="Audit log" head={["When", "Who", "What"]} isEmpty={!rows.length} emptyText={loading ? "Loading..." : "Nothing recorded for this view."}>
+          {rows.map((r) => (
+            <TableRow key={r.id}>
+              <TableCell>{formatDateTime(r.created_at)}</TableCell>
+              <TableCell>
+                {r.actor_first_name ? `${r.actor_first_name} ${r.actor_last_name}` : "System"}
+                {r.ip && <div className="cell-sub">{r.ip}</div>}
+              </TableCell>
+              <TableCell>
+                <span className="cell-main">{auditText(r.action)}</span>
+                {r.entity_type === "agent" && r.entity_id && (
+                  <div className="cell-sub">
+                    <Link className="admin-link" to={`/coms/agents/${r.entity_id}`}>Open agent</Link>
+                  </div>
+                )}
+                {r.entity_type === "student_application" && r.entity_id && (
+                  <div className="cell-sub">
+                    <Link className="admin-link" to={`/coms/applications/${r.entity_id}`}>Open application</Link>
+                  </div>
+                )}
+                <ChangeDetail before={r.before} after={r.after} metadata={r.metadata} />
+              </TableCell>
+            </TableRow>
+          ))}
+        </DataTable>
         <Pager page={page} limit={PAGE_SIZE} total={total} disabled={loading} onChange={setPage} />
       </Panel>
       <CustomSnackbar {...snackbar} onClose={handleClose} />

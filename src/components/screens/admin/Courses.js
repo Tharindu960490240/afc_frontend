@@ -11,7 +11,8 @@ import LoadingSpinner from "../LoadingSpinner";
 import CustomSnackbar from "../CustomSnackbar";
 import { getHomeRoute } from "../../../const/roles";
 import { addCourse, listCourses, saveCourse } from "../../../services/courseService";
-import { Badge, Btn, CheckField, DataTable, Field, Notice, Panel, TableCell, TableRow } from "../../ui";
+import { ListTable } from "./ListKit";
+import { Badge, Btn, CheckField, Field, Notice, TableCell, TableRow } from "../../ui";
 
 const TYPES = [
   { value: "VET", label: "VET (nationally recognised course)" },
@@ -100,36 +101,37 @@ const Courses = ({ role }) => {
         </Notice>
       )}
 
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-        <Btn kind="primary" onClick={() => open(null)}>Add a course</Btn>
-      </div>
-
       {loading ? <LoadingSpinner /> : (
-        <Panel>
-          <DataTable
-            label="Courses"
-            head={["Code", "Course", "Campuses", "CRICOS", "Weeks", "Tuition", "Materials", "Status", ""]}
-            isEmpty={!data.courses.length}
-            emptyText="No courses yet."
-          >
-            {data.courses.map((c) => (
-              <TableRow key={c.id}>
-                <TableCell>{c.code || (c.course_type === "ELICOS" ? "ELICOS" : "")}</TableCell>
-                <TableCell>
-                  {c.name}
-                  {c.specialisation && <div className="admin-hint" style={{ margin: 0 }}>{c.specialisation}</div>}
-                </TableCell>
-                <TableCell>{(c.campus_ids || []).map(campusName).join(", ")}</TableCell>
-                <TableCell>{c.cricos_code || "-"}</TableCell>
-                <TableCell>{c.duration_weeks || "-"}</TableCell>
-                <TableCell>{money(c.tuition_fee)}</TableCell>
-                <TableCell>{money(c.material_fee)}</TableCell>
-                <TableCell><Badge tone={c.active ? "success" : "neutral"} label={c.active ? "On" : "Off"} /></TableCell>
-                <TableCell><Btn onClick={() => open(c)}>Edit</Btn></TableCell>
-              </TableRow>
-            ))}
-          </DataTable>
-        </Panel>
+        <ListTable
+          label="Courses"
+          head={["Code", "Course", "Campuses", "CRICOS", "Weeks", "Tuition", "Materials", "Status", ""]}
+          rows={data.courses}
+          emptyText="No courses yet."
+          tabs={[{ value: "all", label: "All" }, { value: "on", label: "On", match: (c) => c.active }, { value: "off", label: "Off", match: (c) => !c.active }]}
+          search={(c) => `${c.code || ""} ${c.name} ${c.specialisation || ""} ${c.cricos_code || ""}`}
+          searchPlaceholder="Code, course or CRICOS"
+          filters={[
+            { key: "campus", label: "Campus", anyLabel: "Any campus", options: data.campuses.map((c) => ({ value: String(c.id), label: c.name })), match: (c, v) => (c.campus_ids || []).map(String).includes(v) },
+            { key: "type", label: "Type", anyLabel: "Any type", options: TYPES.map((t) => ({ value: t.value, label: t.value })), match: (c, v) => c.course_type === v },
+          ]}
+          actions={<Btn kind="primary" size="medium" onClick={() => open(null)}>Add a course</Btn>}
+          renderRow={(c) => (
+            <TableRow key={c.id}>
+              <TableCell>{c.code || (c.course_type === "ELICOS" ? "ELICOS" : "")}</TableCell>
+              <TableCell>
+                <span className="cell-main">{c.name}</span>
+                {c.specialisation && <div className="cell-sub">{c.specialisation}</div>}
+              </TableCell>
+              <TableCell>{(c.campus_ids || []).map(campusName).join(", ")}</TableCell>
+              <TableCell>{c.cricos_code || "-"}</TableCell>
+              <TableCell>{c.duration_weeks || "-"}</TableCell>
+              <TableCell>{money(c.tuition_fee)}</TableCell>
+              <TableCell>{money(c.material_fee)}</TableCell>
+              <TableCell><Badge tone={c.active ? "success" : "neutral"} label={c.active ? "On" : "Off"} /></TableCell>
+              <TableCell><Btn onClick={() => open(c)}>Edit</Btn></TableCell>
+            </TableRow>
+          )}
+        />
       )}
 
       <Dialog open={Boolean(editing)} onClose={() => !busy && setEditing(null)} maxWidth="sm" fullWidth>

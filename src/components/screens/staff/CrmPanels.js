@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 
+import { ListTable } from "../admin/ListKit";
 import { ConfirmDialog, FormDialog, formatDate, formatDateTime } from "../admin/shared";
 import {
   addTraining, correctiveStep, createCorrectiveAction, editCommunication, getMonitoring, listAgentLeads, listCommunications, listTraining,
   logCommunication, saveMonitoringReview, updateCorrectiveAction,
 } from "../../../services/comsService";
-import { Badge, Btn, CheckField, Field, Notice, Panel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
+import { Badge, Btn, CheckField, Field, Notice, Panel, TableCell, TableRow, DataTable } from "../../ui";
 
 const today = () => new Date().toLocaleDateString("en-CA");
 const nowLocal = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
@@ -75,13 +76,9 @@ export const CommunicationsPanel = ({ agent, showMessage }) => {
       {p.data === null ? null : list.length === 0 ? (
         <div className="admin-empty">Nothing logged yet.</div>
       ) : (
-        <TableContainer className="admin-table-wrap">
-          <Table className="admin-table">
-            <TableHead>
-              <TableRow><TableCell>When</TableCell><TableCell>Type</TableCell><TableCell>Staff</TableCell><TableCell>Summary</TableCell><TableCell /></TableRow>
-            </TableHead>
-            <TableBody>
-              {list.map((c) => (
+        <ListTable bare label="Communications" head={["When", "Type", "Staff", "Summary", ""]} rows={list} searchAlways={false} pageSize={10}
+          search={(c) => `${c.type_label} ${c.staff_name || ""} ${c.subject || ""} ${c.summary}`} searchPlaceholder="Type, staff or words in the note"
+          renderRow={(c) => (
                 <TableRow key={c.id}>
                   <TableCell data-label="When">{formatDateTime(c.occurred_at)}</TableCell>
                   <TableCell data-label="Type">
@@ -98,10 +95,7 @@ export const CommunicationsPanel = ({ agent, showMessage }) => {
                   </TableCell>
                   <TableCell>{c.can_edit && <Btn size="small" onClick={() => p.open("comm", { type: c.type, direction: c.direction === "inbound" ? "inbound" : "outbound", occurred_at: toLocalInput(c.occurred_at), subject: c.subject || "", summary: c.summary }, c)}>Edit</Btn>}</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+          )} />
       )}
       <FormDialog open={p.dialog === "comm"} title={p.target ? "Edit communication" : "Log a communication"} intro="Record what was discussed. Who you are and the time are saved with it." submitLabel="Save" onSubmit={submit} onCancel={p.close}>
         <Field id="cm-type" label="Type" value={p.form.type || "phone"} onChange={p.setField("type")} options={COMM_TYPES} />
@@ -137,10 +131,7 @@ export const LeadsTrainingPanel = ({ agent, role, showMessage }) => {
         <h2>Student leads</h2>
         <p className="app-hint" style={{ margin: "8px 0 16px" }}>Logged by the agent in their portal. You can read these but not change them.</p>
         {leads === null ? null : leads.length === 0 ? <div className="admin-empty">The agent has not logged any leads.</div> : (
-          <TableContainer className="admin-table-wrap">
-            <Table className="admin-table">
-              <TableHead><TableRow><TableCell>Student</TableCell><TableCell>Country</TableCell><TableCell>Course</TableCell><TableCell>Contact date</TableCell><TableCell>Outcome</TableCell></TableRow></TableHead>
-              <TableBody>
+          <DataTable label="CrmPanels" head={["Student", "Country", "Course", "Contact date", "Outcome"]}>
                 {leads.map((l) => (
                   <TableRow key={l.id}>
                     <TableCell data-label="Student">{l.student_name}{l.notes && <div className="app-hint" style={{ margin: 0 }}>{l.notes}</div>}</TableCell>
@@ -150,9 +141,7 @@ export const LeadsTrainingPanel = ({ agent, role, showMessage }) => {
                     <TableCell data-label="Outcome"><Badge tone={OUTCOME_TONE[l.outcome]} label={OUTCOME_LABEL[l.outcome]} /></TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </DataTable>
         )}
       </Panel>
       <Panel>
@@ -162,10 +151,7 @@ export const LeadsTrainingPanel = ({ agent, role, showMessage }) => {
         </div>
         <p className="app-hint" style={{ margin: "8px 0 16px" }}>The induction is listed here automatically. Add any refresher or product training you give the agent.</p>
         {p.data === null ? null : training.length === 0 ? <div className="admin-empty">No training recorded yet.</div> : (
-          <TableContainer className="admin-table-wrap">
-            <Table className="admin-table">
-              <TableHead><TableRow><TableCell>Date</TableCell><TableCell>Training</TableCell><TableCell>Given by</TableCell><TableCell>Notes</TableCell></TableRow></TableHead>
-              <TableBody>
+          <DataTable label="CrmPanels" head={["Date", "Training", "Given by", "Notes"]}>
                 {training.map((t, i) => (
                   <TableRow key={t.id || `s${i}`}>
                     <TableCell data-label="Date">{formatDate(t.held_on)}</TableCell>
@@ -174,9 +160,7 @@ export const LeadsTrainingPanel = ({ agent, role, showMessage }) => {
                     <TableCell data-label="Notes">{t.notes || "-"}</TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </DataTable>
         )}
         <FormDialog open={p.dialog === "training"} title="Record training" intro="Training you gave this agent after the induction." submitLabel="Save" onSubmit={submit} onCancel={p.close}>
           <Field id="tr-title" label="Title" error={p.errors.title} value={p.form.title || ""} onChange={p.setField("title")} inputProps={{ maxLength: 200 }} />
@@ -272,10 +256,7 @@ export const MonitoringPanel = ({ agent, role, showMessage, onChanged }) => {
         </p>
         {agent.crm && agent.crm.monitoring_due && <Notice severity="info" sx={{ mb: 2 }}>The next monitoring form is due on {formatDate(agent.crm.monitoring_due)}.</Notice>}
         {reviews.length === 0 ? <div className="admin-empty">No monitoring review yet.</div> : (
-          <TableContainer className="admin-table-wrap">
-            <Table className="admin-table">
-              <TableHead><TableRow><TableCell>Period</TableCell><TableCell>Applications</TableCell><TableCell>Conversion</TableCell><TableCell>Outcome</TableCell><TableCell>Completed</TableCell><TableCell /></TableRow></TableHead>
-              <TableBody>
+          <DataTable label="CrmPanels" head={["Period", "Applications", "Conversion", "Outcome", "Completed", ""]}>
                 {reviews.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell data-label="Period">{formatDate(r.period_start)} to {formatDate(r.period_end)}</TableCell>
@@ -286,9 +267,7 @@ export const MonitoringPanel = ({ agent, role, showMessage, onChanged }) => {
                     <TableCell>{can && r.outcome === "issues_found" && <Btn size="small" onClick={() => openNotice(r)}>Corrective notice</Btn>}</TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </DataTable>
         )}
         {last && (
           <div style={{ marginTop: 16, fontSize: 14, lineHeight: 1.6 }}>
@@ -310,10 +289,7 @@ export const MonitoringPanel = ({ agent, role, showMessage, onChanged }) => {
           If monitoring finds a problem, the wording is drafted from your notes. Read and change it before you send it. After it is sent, record whether the agent carried it out. Not carrying it out is grounds for termination.
         </p>
         {notices.length === 0 ? <div className="admin-empty">No notices.</div> : (
-          <TableContainer className="admin-table-wrap">
-            <Table className="admin-table">
-              <TableHead><TableRow><TableCell>Notice</TableCell><TableCell>Status</TableCell><TableCell>Due</TableCell><TableCell /></TableRow></TableHead>
-              <TableBody>
+          <DataTable label="CrmPanels" head={["Notice", "Status", "Due", ""]}>
                 {notices.map((n) => (
                   <TableRow key={n.id}>
                     <TableCell data-label="Notice" style={{ whiteSpace: "pre-wrap", maxWidth: 480 }}>
@@ -341,9 +317,7 @@ export const MonitoringPanel = ({ agent, role, showMessage, onChanged }) => {
                     </TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </DataTable>
         )}
       </Panel>
 

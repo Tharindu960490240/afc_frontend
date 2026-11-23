@@ -6,7 +6,7 @@ import "../../styles/adminPages.css";
 import LoadingSpinner from "../LoadingSpinner";
 import CustomSnackbar from "../CustomSnackbar";
 import { ConfirmDialog, ExportButton, Pager, formatDate, formatDateTime } from "./shared";
-import { Badge, Btn, DataTable, FilterField, Panel, TONE_BY_STATUS, TableCell, TableRow } from "../../ui";
+import { Badge, Btn, DataTable, FilterField, Panel, TONE_BY_STATUS, TabBar, TableCell, TableRow } from "../../ui";
 import { exportUsers, listUsers, setUserAuthorised, setUserStatus } from "../../../services/adminService";
 import { ROLES, ROLE_LABELS, STAFF_ROLES, getHomeRoute } from "../../../const/roles";
 
@@ -116,47 +116,40 @@ const Users = ({ role, user }) => {
 
       <Panel>
         <div className="admin-toolbar">
-          <div className="filter-controls">
-            <FilterField
-              type="search"
-              label="Search"
-              placeholder="Name or email"
-              sx={{ minWidth: 220 }}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-            />
-            <FilterField
-              label="Role"
-              value={roleFilter}
-              onChange={(e) => {
-                setRoleFilter(e.target.value);
-                setPage(1);
-              }}
-              options={[
-                { value: "", label: "All roles" },
-                ...Object.values(ROLES).map((r) => ({ value: r, label: ROLE_LABELS[r] })),
-              ]}
-            />
-            <FilterField
-              label="Status"
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-              }}
-              options={[
-                { value: "", label: "All statuses" },
-                { value: "active", label: "Active" },
-                { value: "suspended", label: "Suspended" },
-                { value: "pending_approval", label: "Waiting for approval" },
-                { value: "unverified", label: "Email not confirmed" },
-                { value: "rejected", label: "Rejected" },
-              ]}
+          <TabBar
+            label="Status"
+            value={statusFilter || "all"}
+            onChange={(v) => { setStatusFilter(v === "all" ? "" : v); setPage(1); }}
+            tabs={[
+              { value: "all", label: "All" },
+              { value: "active", label: "Active" },
+              { value: "pending_approval", label: "Waiting for approval" },
+              { value: "suspended", label: "Suspended" },
+              { value: "unverified", label: "Email not confirmed" },
+              { value: "rejected", label: "Rejected" },
+            ]}
+          />
+          <div className="action-row" style={{ marginTop: 0 }}>
+            <ExportButton
+              run={() => exportUsers({ role: roleFilter, status: statusFilter, search })}
+              onError={(m) => showMessage(m, "error")}
             />
           </div>
-          <ExportButton
-            run={() => exportUsers({ role: roleFilter, status: statusFilter, search })}
-            onError={(m) => showMessage(m, "error")}
+        </div>
+        <div className="filter-controls" style={{ marginBottom: 14 }}>
+          <FilterField
+            type="search"
+            label="Search"
+            placeholder="Name or email"
+            sx={{ minWidth: 240 }}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+          <FilterField
+            label="Role"
+            value={roleFilter}
+            onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
+            options={[{ value: "", label: "All roles" }, ...Object.values(ROLES).map((r) => ({ value: r, label: ROLE_LABELS[r] }))]}
           />
         </div>
 

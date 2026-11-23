@@ -6,6 +6,7 @@ import "../../styles/adminPages.css";
 import LoadingSpinner from "../LoadingSpinner";
 import CustomSnackbar from "../CustomSnackbar";
 import { ConfirmDialog, Pager, formatDate } from "./shared";
+import { SearchBar, useDebounced } from "./ListKit";
 import { Badge, Btn, DataTable, Field, Panel, TONE_BY_STATUS, TabBar, TableCell, TableRow } from "../../ui";
 import {
   listInvitations,
@@ -46,6 +47,8 @@ const Invitations = ({ role }) => {
 
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
+  const [searchText, setSearchText] = useState("");
+  const search = useDebounced(searchText);
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [loadingList, setLoadingList] = useState(true);
@@ -66,7 +69,7 @@ const Invitations = ({ role }) => {
   const load = useCallback(async () => {
     const id = ++latest.current;
     setLoadingList(true);
-    const res = await listInvitations({ status, page, limit: PAGE_SIZE });
+    const res = await listInvitations({ status, search, page, limit: PAGE_SIZE });
     if (id !== latest.current) return;
     setLoadingList(false);
     if (res.success) {
@@ -75,7 +78,7 @@ const Invitations = ({ role }) => {
     } else {
       showMessage(res.message || "Could not load invitations.", "error");
     }
-  }, [status, page]);
+  }, [status, search, page]);
 
   useEffect(() => {
     load();
@@ -209,8 +212,8 @@ const Invitations = ({ role }) => {
 
       {/* ---------- list ---------- */}
       <Panel>
+        <h2 style={{ marginTop: 0 }}>Sent invitations</h2>
         <div className="admin-toolbar">
-          <h2 style={{ margin: 0 }}>Sent invitations</h2>
           <TabBar
             label="Invitation status"
             value={status || "all"}
@@ -221,6 +224,7 @@ const Invitations = ({ role }) => {
             tabs={TABS.map((t) => ({ value: t.key || "all", label: t.label }))}
           />
         </div>
+        <SearchBar value={searchText} onChange={(v) => { setSearchText(v); setPage(1); }} placeholder="Email or name" />
 
         <DataTable
           label="Invitations"

@@ -9,7 +9,8 @@ import { getHomeRoute } from "../../../const/roles";
 import CustomSnackbar from "../CustomSnackbar";
 import OnlineInduction from "./OnlineInduction";
 import MyMaterials from "./MyMaterials";
-import { Btn, Notice, TabBar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
+import { ListTable } from "../admin/ListKit";
+import { Btn, Notice, TabBar, TableCell, TableRow } from "../../ui";
 
 const MODE_LABEL = { online: "Online", in_person: "In person", phone: "By phone" };
 
@@ -84,16 +85,17 @@ const MyInduction = ({ role }) => {
           {data.history.length > 0 && (
             <>
               <h2>Past sessions</h2>
-              <TableContainer className="admin-table-wrap">
-                <Table className="admin-table">
-                  <TableHead><TableRow><TableCell>Date</TableCell><TableCell>How</TableCell><TableCell>Run by</TableCell></TableRow></TableHead>
-                  <TableBody>
-                    {data.history.map((h) => (
-                      <TableRow key={h.id}><TableCell>{formatDate(h.date)}</TableCell><TableCell>{MODE_LABEL[h.mode]}</TableCell><TableCell>{h.run_by || "-"}</TableCell></TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <ListTable
+                bare
+                label="Past sessions"
+                head={["Date", "How", "Run by"]}
+                rows={data.history}
+                search={(h) => `${MODE_LABEL[h.mode] || ""} ${h.run_by || ""}`}
+                searchAlways={false}
+                renderRow={(h) => (
+                  <TableRow key={h.id}><TableCell>{formatDate(h.date)}</TableCell><TableCell>{MODE_LABEL[h.mode]}</TableCell><TableCell>{h.run_by || "-"}</TableCell></TableRow>
+                )}
+              />
             </>
           )}
         </>

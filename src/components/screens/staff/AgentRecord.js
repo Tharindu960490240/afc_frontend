@@ -43,7 +43,7 @@ import {
   updateAgentPerson,
   updateAgentRecord,
 } from "../../../services/comsService";
-import { Badge, Btn, CheckField, Field, Notice, Panel, TONE_BY_STATUS, TabBar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "../../ui";
+import { Badge, Btn, CheckField, Field, Notice, Panel, TONE_BY_STATUS, TabBar, TableCell, TableRow, DataTable } from "../../ui";
 
 const TABS = [
   { key: "overview", label: "Overview" },
@@ -520,20 +520,13 @@ const AgentRecord = ({ role, user }) => {
             {(agent.referees || []).length === 0 ? (
               <div className="admin-empty" style={{ padding: 12 }}>No referees recorded. Two are needed before a decision.</div>
             ) : (
-              <TableContainer className="admin-table-wrap">
-                <Table className="admin-table">
-                  <TableHead>
-                    <TableRow><TableCell>Name</TableCell><TableCell>Organisation</TableCell><TableCell>Email</TableCell><TableCell>Phone</TableCell></TableRow>
-                  </TableHead>
-                  <TableBody>
+              <DataTable label="AgentRecord" head={["Name", "Organisation", "Email", "Phone"]}>
                     {agent.referees.map((r) => (
                       <TableRow key={r.id}>
                         <TableCell>{r.name}</TableCell><TableCell>{r.organisation}</TableCell><TableCell>{r.email}</TableCell><TableCell>{r.phone}</TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                  </DataTable>
             )}
           </Panel>
         </>
@@ -618,19 +611,7 @@ const AgentRecord = ({ role, user }) => {
                 : "No agreement yet. It can be sent once the agent is approved."}
             </div>
           ) : (
-            <TableContainer className="admin-table-wrap">
-              <Table className="admin-table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Agreement</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Sent</TableCell>
-                    <TableCell>Starts</TableCell>
-                    <TableCell>Ends</TableCell>
-                    {canDownloadAgreement && <TableCell />}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
+            <DataTable label="AgentRecord" head={["Agreement", "Status", "Sent", "Starts", "Ends", ""]}>
                   {agent.agreements.map((a) => (
                     <TableRow key={a.id}>
                       <TableCell data-label="Agreement">{a.title}</TableCell>
@@ -654,9 +635,7 @@ const AgentRecord = ({ role, user }) => {
                       )}
                     </TableRow>
                   ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                </DataTable>
           )}
           {["onboarding", "active"].includes(agent.status) && (
             <div className="record-head" style={{ marginTop: 16 }}>
