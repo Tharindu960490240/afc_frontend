@@ -17,11 +17,11 @@ const TYPES = [
   { value: "VET", label: "VET (nationally recognised course)" },
   { value: "ELICOS", label: "ELICOS (General English)" },
 ];
-const EMPTY = { code: "", name: "", specialisation: "", course_type: "VET", cricos_code: "", duration_weeks: "", tuition_fee: "", entry_requirements: "", campus_ids: [], active: true };
+const EMPTY = { code: "", name: "", specialisation: "", course_type: "VET", cricos_code: "", duration_weeks: "", tuition_fee: "", material_fee: "", enrolment_fee: "", entry_requirements: "", campus_ids: [], active: true };
 
 const toForm = (c) => ({
   code: c.code || "", name: c.name, specialisation: c.specialisation || "", course_type: c.course_type, cricos_code: c.cricos_code || "",
-  duration_weeks: c.duration_weeks ?? "", tuition_fee: c.tuition_fee ?? "", entry_requirements: c.entry_requirements || "",
+  duration_weeks: c.duration_weeks ?? "", tuition_fee: c.tuition_fee ?? "", material_fee: c.material_fee ?? "", enrolment_fee: c.enrolment_fee ?? "", entry_requirements: c.entry_requirements || "",
   campus_ids: (c.campus_ids || []).map(Number), active: c.active,
 });
 
@@ -29,9 +29,11 @@ const toForm = (c) => ({
 const toPayload = (f) => {
   const p = { name: f.name.trim(), course_type: f.course_type, campus_ids: f.campus_ids, active: f.active };
   ["code", "specialisation", "cricos_code", "entry_requirements"].forEach((k) => { if (String(f[k]).trim()) p[k] = String(f[k]).trim(); });
-  ["duration_weeks", "tuition_fee"].forEach((k) => { if (String(f[k]).trim() !== "") p[k] = Number(f[k]); });
+  ["duration_weeks", "tuition_fee", "material_fee", "enrolment_fee"].forEach((k) => { if (String(f[k]).trim() !== "") p[k] = Number(f[k]); });
   return p;
 };
+
+const money = (v) => (v == null ? "-" : `$${Number(v).toLocaleString("en-AU")}`);
 
 const Courses = ({ role }) => {
   const [data, setData] = useState({ campuses: [], courses: [] });
@@ -78,7 +80,7 @@ const Courses = ({ role }) => {
   };
 
   const f = editing ? editing.form : null;
-  const missing = data.courses.filter((c) => c.active && (!c.cricos_code || !c.duration_weeks || c.tuition_fee == null)).length;
+  const missing = data.courses.filter((c) => c.active && (!c.cricos_code || !c.duration_weeks || (c.course_type === "VET" && c.tuition_fee == null))).length;
 
   return (
     <div className="admin-page">
@@ -87,14 +89,14 @@ const Courses = ({ role }) => {
         <h1>Courses</h1>
         <p>
           The courses students can apply for, and the campus each one runs at. They are taken from the AFC Application for Enrolment Form
-          (International) V3.1. Agents choose from this list when they submit a student application. A course is switched off, never deleted.
+          (International) V3.1 and AFC's course list of 24 November 2026. Fees exclude the AUD 250 enrolment fee. Agents choose from this list when they submit a student application. A course is switched off, never deleted.
         </p>
       </div>
 
       {!loading && missing > 0 && (
         <Notice severity="info" sx={{ mb: 2 }}>
-          <strong>{missing} courses still need CRICOS code, duration or tuition fee</strong>
-          These are not on the enrolment form. Add them as AFC provides them; they are used on the Letter of Offer.
+          <strong>{missing} courses are missing a CRICOS code, duration or tuition fee</strong>
+          They are used on the Letter of Offer. General English fees are not published by AFC, so they stay empty.
         </Notice>
       )}
 
@@ -106,7 +108,7 @@ const Courses = ({ role }) => {
         <Panel>
           <DataTable
             label="Courses"
-            head={["Code", "Course", "Campuses", "CRICOS", "Weeks", "Fee", "Status", ""]}
+            head={["Code", "Course", "Campuses", "CRICOS", "Weeks", "Tuition", "Materials", "Status", ""]}
             isEmpty={!data.courses.length}
             emptyText="No courses yet."
           >
@@ -120,7 +122,8 @@ const Courses = ({ role }) => {
                 <TableCell>{(c.campus_ids || []).map(campusName).join(", ")}</TableCell>
                 <TableCell>{c.cricos_code || "-"}</TableCell>
                 <TableCell>{c.duration_weeks || "-"}</TableCell>
-                <TableCell>{c.tuition_fee == null ? "-" : `$${Number(c.tuition_fee).toLocaleString("en-AU")}`}</TableCell>
+                <TableCell>{money(c.tuition_fee)}</TableCell>
+                <TableCell>{money(c.material_fee)}</TableCell>
                 <TableCell><Badge tone={c.active ? "success" : "neutral"} label={c.active ? "On" : "Off"} /></TableCell>
                 <TableCell><Btn onClick={() => open(c)}>Edit</Btn></TableCell>
               </TableRow>
@@ -141,6 +144,8 @@ const Courses = ({ role }) => {
               <Field label="CRICOS course code" value={f.cricos_code} inputProps={{ maxLength: 20 }} onChange={(e) => set({ cricos_code: e.target.value })} />
               <Field label="Duration (weeks)" type="number" value={f.duration_weeks} error={errors.duration_weeks} onChange={(e) => set({ duration_weeks: e.target.value })} />
               <Field label="Tuition fee (AUD)" type="number" value={f.tuition_fee} error={errors.tuition_fee} onChange={(e) => set({ tuition_fee: e.target.value })} />
+              <Field label="Material fee (AUD)" type="number" value={f.material_fee} error={errors.material_fee} onChange={(e) => set({ material_fee: e.target.value })} />
+              <Field label="Enrolment fee (AUD)" type="number" value={f.enrolment_fee} error={errors.enrolment_fee} onChange={(e) => set({ enrolment_fee: e.target.value })} helper="AUD 250, non-refundable, for every qualification" />
               <Field label="Entry requirements" wide multiline rows={3} value={f.entry_requirements} inputProps={{ maxLength: 4000 }} onChange={(e) => set({ entry_requirements: e.target.value })} />
               <div className="is-wide">
                 <strong style={{ display: "block", marginBottom: 4 }}>Runs at</strong>
