@@ -57,6 +57,26 @@ export const API_ENDPOINTS = {
     PREVIEW: `${API_BASE_URL}/agreement-template/preview`,
   },
 
+  STUDENT_APPS: {
+    BASE: `${API_BASE_URL}/student-applications`,
+    CONFIG: `${API_BASE_URL}/student-applications/config`,
+    ONE: (id) => `${API_BASE_URL}/student-applications/${id}`,
+    DISCARD: (id) => `${API_BASE_URL}/student-applications/${id}/discard`,
+    SUBMIT: (id) => `${API_BASE_URL}/student-applications/${id}/submit`,
+    DOCS: (id) => `${API_BASE_URL}/student-applications/${id}/documents`,
+    DOC_REMOVE: (id, docId) => `${API_BASE_URL}/student-applications/${id}/documents/${docId}/delete`,
+    DOC_DOWNLOAD: (id, docId) => `${API_BASE_URL}/student-applications/${id}/documents/${docId}/download`,
+    FORM_DOWNLOAD: (formId) => `${API_BASE_URL}/student-applications/forms/${formId}/download`,
+    STAFF: `${API_BASE_URL}/student-applications/staff`,
+    STAFF_ONE: (id) => `${API_BASE_URL}/student-applications/staff/${id}`,
+    STAFF_ACTION: (id, action) => `${API_BASE_URL}/student-applications/staff/${id}/${action}`,
+    FILE: (id, kind) => `${API_BASE_URL}/student-applications/${id}/files/${kind}`,
+    SETTINGS: `${API_BASE_URL}/student-applications/settings`,
+    SETTINGS_TYPES: `${API_BASE_URL}/student-applications/settings/document-types`,
+    SETTINGS_FORMS: `${API_BASE_URL}/student-applications/settings/forms`,
+    SETTINGS_FORM: (formId) => `${API_BASE_URL}/student-applications/settings/forms/${formId}`,
+  },
+
   COURSES: {
     BASE: `${API_BASE_URL}/courses`,
     ONE: (id) => `${API_BASE_URL}/courses/${id}`,

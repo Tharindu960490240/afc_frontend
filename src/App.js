@@ -32,6 +32,11 @@ import AgreementDetail from "./components/screens/admin/AgreementDetail";
 import AgreementTemplate from "./components/screens/admin/AgreementTemplate";
 import Settings from "./components/screens/admin/Settings";
 import Courses from "./components/screens/admin/Courses";
+import ApplicationSettings from "./components/screens/admin/ApplicationSettings";
+import StudentApplicationQueue from "./components/screens/staff/StudentApplicationQueue";
+import StudentApplicationDetail from "./components/screens/staff/StudentApplicationDetail";
+import StudentApplications from "./components/screens/agent/StudentApplications";
+import StudentApplicationForm from "./components/screens/agent/StudentApplicationForm";
 import MyAgreement from "./components/screens/agent/MyAgreement";
 import MyInduction from "./components/screens/agent/MyInduction";
 import MyApplication from "./components/screens/agent/MyApplication";
@@ -272,6 +277,22 @@ const App = () => {
             }
           />
           <Route
+            path="/coms/applications"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={STAFF_ROLES}>
+                <StudentApplicationQueue role={role} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/coms/applications/:id"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={STAFF_ROLES}>
+                <StudentApplicationDetail role={role} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/coms/induction"
             element={
               <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={STAFF_ROLES}>
@@ -359,6 +380,14 @@ const App = () => {
             }
           />
           <Route
+            path="/admin/application-settings"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={[ROLES.ADMIN]}>
+                <ApplicationSettings role={role} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/admin/settings"
             element={
               <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={[ROLES.ADMIN]}>
@@ -416,6 +445,22 @@ const App = () => {
                 allowedRoles={[ROLES.AGENT]}
               >
                 <MyAgreement role={role} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agent/applications"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={[ROLES.AGENT]}>
+                <StudentApplications role={role} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agent/applications/:id"
+            element={
+              <ProtectedRoute isSignedIn={isSignedIn} token={token} role={role} allowedRoles={[ROLES.AGENT]}>
+                <StudentApplicationForm role={role} />
               </ProtectedRoute>
             }
           />
