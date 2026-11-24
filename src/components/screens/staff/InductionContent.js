@@ -10,7 +10,7 @@ import {
   publishPolicy, retireMaterial, updateInductionModule,
 } from "../../../services/comsService";
 import { getHomeRoute } from "../../../const/roles";
-import { Badge, Btn, Field, Notice, TabBar, TableCell, TableRow, DataTable } from "../../ui";
+import { Badge, Btn, Field, Notice, TabbedPanel, TableCell, TableRow, DataTable } from "../../ui";
 
 const CATEGORIES = [
   { value: "brochure", label: "Brochure" }, { value: "fees", label: "Fees" }, { value: "policy", label: "Policy" },
@@ -94,10 +94,9 @@ const InductionContent = ({ role }) => {
         <h1>Induction and materials</h1>
         <p>The marketing materials agents download, the six induction modules, and the policies and procedures agents acknowledge.</p>
       </div>
-      <TabBar label="Induction sections" value={tab} onChange={setTab} tabs={[
+      <TabbedPanel label="Induction sections" value={tab} onChange={setTab} tabs={[
         { value: "materials", label: "Marketing materials" }, { value: "modules", label: "Modules" }, { value: "policies", label: "Policies and procedures" },
-      ]} />
-      <div style={{ height: 20 }} />
+      ]}>
       {loading && <div className="admin-panel admin-empty">Loading...</div>}
 
       {!loading && tab === "materials" && (
@@ -162,6 +161,7 @@ const InductionContent = ({ role }) => {
               </DataTable>
         </>
       )}
+      </TabbedPanel>
 
       <FormDialog open={dialog === "material"} title="Upload marketing material" intro="Draft materials are not visible to agents until you approve them." submitLabel="Upload" onSubmit={submitMaterial} onCancel={close}>
         <Field id="mm-title" label="Title" error={errors.title} value={form.title || ""} onChange={setField("title")} inputProps={{ maxLength: 200 }} />

@@ -10,7 +10,7 @@ import { ROLE_LABELS } from "../../../const/roles";
 import {
   getSettings, removeSignature, saveCollege, saveDocumentTypes, saveOnboardingTasks, saveQuestions, saveSignature, saveTimers,
 } from "../../../services/settingsService";
-import { Btn, CheckField, Field, Notice, Panel, TabBar } from "../../ui";
+import { Btn, CheckField, Field, Notice, Panel, TabbedPanel } from "../../ui";
 
 const TABS = [
   { value: "questions", label: "Reference questions" },
@@ -291,14 +291,15 @@ const Settings = () => {
       </div>
       {!data ? <LoadingSpinner /> : (
         <>
-          <TabBar value={tab} onChange={(v) => { setTab(v); setErrors({}); }} tabs={TABS} label="Settings sections" />
-          <div style={{ marginTop: 16 }}>
+          <TabbedPanel value={tab} onChange={(v) => { setTab(v); setErrors({}); }} tabs={TABS} label="Settings sections">
+          <div>
             {tab === "questions" && <Questions data={data} save={save} busy={busy} errors={errors} />}
             {tab === "documents" && <Documents data={data} save={save} busy={busy} errors={errors} />}
             {tab === "timers" && <Timers data={data} save={save} busy={busy} errors={errors} />}
             {tab === "tasks" && <Tasks data={data} save={save} busy={busy} errors={errors} />}
             {tab === "college" && <College data={data} save={save} busy={busy} errors={errors} showMessage={showMessage} />}
           </div>
+          </TabbedPanel>
         </>
       )}
       <CustomSnackbar open={snackbar.open} message={snackbar.message} severity={snackbar.severity} onClose={() => setSnackbar((p) => ({ ...p, open: false }))} />

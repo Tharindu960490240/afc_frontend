@@ -10,7 +10,7 @@ import CustomSnackbar from "../CustomSnackbar";
 import OnlineInduction from "./OnlineInduction";
 import MyMaterials from "./MyMaterials";
 import { ListTable } from "../admin/ListKit";
-import { Btn, Notice, TabBar, TableCell, TableRow } from "../../ui";
+import { Btn, Notice, TabbedPanel, TableCell, TableRow } from "../../ui";
 
 const MODE_LABEL = { online: "Online", in_person: "In person", phone: "By phone" };
 
@@ -35,12 +35,11 @@ const MyInduction = ({ role }) => {
         <h1>My induction</h1>
         <p>Your induction covers how we work with agents and how to submit student applications.</p>
       </div>
-      <TabBar label="Induction sections" value={tab} onChange={setTab} tabs={[
+      <TabbedPanel label="Induction sections" value={tab} onChange={setTab} tabs={[
         { value: "online", label: "Online induction" },
         { value: "materials", label: "Marketing materials" },
         { value: "session", label: "Induction session" },
-      ]} />
-      <div style={{ height: 20 }} />
+      ]}>
       {tab === "online" && <OnlineInduction showMessage={showMessage} />}
       {tab === "materials" && <MyMaterials showMessage={showMessage} />}
       <CustomSnackbar {...snackbar} onClose={() => setSnackbar((p) => ({ ...p, open: false }))} />
@@ -100,6 +99,7 @@ const MyInduction = ({ role }) => {
           )}
         </>
       )}
+      </TabbedPanel>
     </div>
   );
 };

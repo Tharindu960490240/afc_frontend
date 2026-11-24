@@ -1031,3 +1031,8 @@
 .pw-toggle:hover {
   opacity: 1;
 }
+
+/* Tabs and their content in one card (TabbedPanel): inner panels are flattened. */
+.tabbed-panel .admin-panel { border: 0; box-shadow: none; padding: 0; margin-bottom: 20px; background: transparent; border-radius: 0; }
+.tabbed-panel .admin-panel + .admin-panel { border-top: 1px solid var(--border-color); padding-top: 20px; }
+.tabbed-panel .admin-panel:last-child { margin-bottom: 0; }

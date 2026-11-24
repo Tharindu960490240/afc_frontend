@@ -406,9 +406,9 @@ const AgentRecord = ({ role, user }) => {
       </Panel>
 
       {/* ---------- tabs ---------- */}
-      <div className="record-tabs">
+      <Panel className="record-tabs" style={{ paddingBottom: 0 }}>
         <TabBar label="Agent record sections" value={tab} onChange={setTab} tabs={TABS.map((t) => ({ value: t.key, label: t.label }))} />
-      </div>
+      </Panel>
 
       {tab === "overview" && (
         <>

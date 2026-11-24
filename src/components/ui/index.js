@@ -101,6 +101,18 @@ export const Panel = ({ className = "", children, ...rest }) => (
   </Paper>
 );
 
+// One white card with the tabs on top (left) and optional buttons (right), and the tab's content inside.
+// Panels nested inside lose their own border so the page looks the same on every screen.
+export const TabbedPanel = ({ label, value, onChange, tabs, actions, children }) => (
+  <Panel className="tabbed-panel">
+    <div className="admin-toolbar">
+      <TabBar label={label} value={value} onChange={onChange} tabs={tabs} />
+      {actions ? <div className="action-row" style={{ marginTop: 0 }}>{actions}</div> : null}
+    </div>
+    {children}
+  </Panel>
+);
+
 // A message block. severity: info | success | warning | error
 export const Notice = ({ severity = "info", title, children, ...rest }) => (
   <Alert severity={severity} variant="outlined" {...rest}

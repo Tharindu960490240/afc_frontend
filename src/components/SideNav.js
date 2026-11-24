@@ -26,6 +26,15 @@ const readCollapsed = () => {
   }
 };
 
+const GROUPS_KEY = "sideNavClosedGroups";
+const readClosed = () => {
+  try {
+    return JSON.parse(localStorage.getItem(GROUPS_KEY) || "[]");
+  } catch (e) {
+    return [];
+  }
+};
+
 const SideNav = ({ role, user, onSignOut }) => {
   const key = normalizeRole(role);
   const items = NAV_ITEMS[key] || [];
@@ -34,6 +43,28 @@ const SideNav = ({ role, user, onSignOut }) => {
 
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [closed, setClosed] = useState(readClosed);
+
+  const toggleGroup = (g) => {
+    setClosed((c) => {
+      const next = c.includes(g) ? c.filter((x) => x !== g) : [...c, g];
+      try {
+        localStorage.setItem(GROUPS_KEY, JSON.stringify(next));
+      } catch (e) {
+        /* remembering which groups are closed is optional */
+      }
+      return next;
+    });
+  };
+
+  // each item belongs to the heading above it; the group holding the open page is never hidden
+  let current = null;
+  const grouped = items.map((it) => {
+    if (it.group) current = it.group;
+    return { ...it, inGroup: it.home ? null : current };
+  });
+  const activeGroup = (grouped.find((it) => it.ready && it.path !== "/" && !it.home && location.pathname.startsWith(it.path)) || {}).inGroup;
+  const isClosed = (g) => !collapsed && g && g !== activeGroup && closed.includes(g);
 
   const toggleCollapsed = () => {
     const next = !collapsed;
@@ -98,11 +129,21 @@ const SideNav = ({ role, user, onSignOut }) => {
         </div>
 
         <nav className="sidenav-list">
-          {items.map(({ icon: Icon, label, path, ready, home, group }) => (
+          {grouped.map(({ icon: Icon, label, path, ready, home, group, inGroup }) => (
             <React.Fragment key={path}>
-              {group && <div className="sidenav-group">{group}</div>}
+              {group && (
+                <button
+                  type="button"
+                  className={`sidenav-group${isClosed(group) ? " is-closed" : ""}`}
+                  aria-expanded={!isClosed(group)}
+                  onClick={() => toggleGroup(group)}
+                >
+                  <span>{group}</span>
+                  <ChevronRight fontSize="inherit" className="sidenav-group-arrow" />
+                </button>
+              )}
 
-              {ready ? (
+              {isClosed(inGroup) ? null : ready ? (
                 <NavLink
                   to={path}
                   end={Boolean(home)}
