@@ -54,7 +54,12 @@ const RoleDashboard = ({ role, user }) => {
   const config = INTROS[key];
   if (!config) return null;
 
-  const cards = (NAV_ITEMS[key] || []).filter((item) => !item.home);
+  // cards sit under the same headings as the side menu
+  const sections = [];
+  (NAV_ITEMS[key] || []).filter((item) => !item.home).forEach((item) => {
+    if (item.group || !sections.length) sections.push({ title: item.group || "", cards: [] });
+    sections[sections.length - 1].cards.push(item);
+  });
 
   return (
     <div className="dashboard">
@@ -74,34 +79,35 @@ const RoleDashboard = ({ role, user }) => {
         </Link>
       )}
 
-      <div className="dashboard-grid">
-        {cards.map(({ icon: Icon, label, text, path, ready }) => {
-          const body = (
-            <>
-              <span className="dashboard-icon">
-                <Icon />
-              </span>
-              <h3>{label}</h3>
-              <p>{text}</p>
-              {!ready && <span className="dashboard-soon">Coming soon</span>}
-            </>
-          );
+      {sections.map((sec) => (
+        <section key={sec.title || "main"} className="dashboard-section">
+          {sec.title && <h2 className="dashboard-section-title">{sec.title}</h2>}
+          <div className="dashboard-grid">
+            {sec.cards.map(({ icon: Icon, label, text, path, ready }) => {
+              const body = (
+                <>
+                  <span className="dashboard-icon">
+                    <Icon />
+                  </span>
+                  <h3>{label}</h3>
+                  <p>{text}</p>
+                  {!ready && <span className="dashboard-soon">Coming soon</span>}
+                </>
+              );
 
-          return ready ? (
-            <Link key={path} to={path} className="dashboard-card">
-              {body}
-            </Link>
-          ) : (
-            <div
-              key={path}
-              className="dashboard-card is-disabled"
-              aria-disabled="true"
-            >
-              {body}
-            </div>
-          );
-        })}
-      </div>
+              return ready ? (
+                <Link key={path} to={path} className="dashboard-card">
+                  {body}
+                </Link>
+              ) : (
+                <div key={path} className="dashboard-card is-disabled" aria-disabled="true">
+                  {body}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ))}
     </div>
   );
 };

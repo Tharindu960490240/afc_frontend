@@ -87,7 +87,7 @@ const MyProfile = ({ role }) => {
         <ArrowBack fontSize="small" /> Dashboard
       </Link>
 
-      <div className="admin-head pw-head">
+      <div className="admin-head">
         <h1>My profile</h1>
         <p>{u ? `${ROLE_LABELS[normalizeRole(u.role)] || u.role} account` : " "}</p>
       </div>
@@ -95,7 +95,7 @@ const MyProfile = ({ role }) => {
       {!u ? (
         <div className="admin-panel admin-empty">{loading ? "Loading your details..." : "Your details could not be loaded."}</div>
       ) : (
-        <div style={{ maxWidth: 720, margin: "0 auto" }}>
+        <div>
           <Panel>
             <h2>Account</h2>
             <div className="summary-grid">
@@ -135,7 +135,7 @@ const MyProfile = ({ role }) => {
                 inputProps={{ maxLength: 50 }} onChange={set("last_name")} error={errors.last_name} />
               <Field id="pf-phone" label="Phone" type="tel" autoComplete="tel" value={form.phone}
                 onChange={set("phone")} error={errors.phone} />
-              <div className="action-row" style={{ justifyContent: "center" }}>
+              <div className="action-row">
                 <Btn kind="primary" size="medium" type="submit"  disabled={busy || !changed}>Save changes</Btn>
               </div>
             </form>

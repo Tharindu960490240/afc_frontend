@@ -406,7 +406,7 @@ const AgentRecord = ({ role, user }) => {
       </Panel>
 
       {/* ---------- tabs ---------- */}
-      <Panel className="record-tabs" style={{ paddingBottom: 0 }}>
+      <Panel className="record-tabs">
         <TabBar label="Agent record sections" value={tab} onChange={setTab} tabs={TABS.map((t) => ({ value: t.key, label: t.label }))} />
       </Panel>
 
